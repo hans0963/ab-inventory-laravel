@@ -17,57 +17,62 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <body class="font-poppins antialiased bg-cream text-sienna">
+        <div class="min-h-screen">
             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
+                <header class="bg-terracotta shadow-md border-b border-sienna">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                        <h1 class="font-pacifico text-3xl text-cream">
+                            {{ $header }}
+                        </h1>
                     </div>
                 </header>
             @endisset
-    <div x-data="{ openSidebar: false }">
-        <!-- Sidebar Toggle Button -->
-        <button @click="openSidebar = !openSidebar" 
-            class="p-2 bg-gray-800 text-white rounded-md fixed top-4 left-4 z-50">
-            ☰
-        </button>
 
-        <!-- Overlay (Click outside to close) -->
-        <div x-show="openSidebar" 
-             x-cloak 
-             @click="openSidebar = false"
-             class="fixed inset-0 bg-black bg-opacity-50 z-30">
-        </div>
+            <!-- Sidebar + Content -->
+            <div x-data="{ openSidebar: false }">
+                <!-- Sidebar Toggle Button -->
+                <button @click="openSidebar = !openSidebar" 
+                    class="p-2 bg-sienna text-cream rounded-md fixed top-4 left-4 z-50 shadow-md">
+                    ☰
+                </button>
 
-        <!-- Sidebar -->
-        <div x-show="openSidebar" 
-             x-cloak 
-             @keydown.escape.window="openSidebar = false" 
-             x-transition:enter="transition ease-out duration-200 transform"
-             x-transition:enter-start="-translate-x-full opacity-0"
-             x-transition:enter-end="translate-x-0 opacity-100"
-             x-transition:leave="transition ease-in duration-150 transform"
-             x-transition:leave-start="translate-x-0 opacity-100"
-             x-transition:leave-end="-translate-x-full opacity-0"
-             class="fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-900 shadow-lg z-40">
-            <x-sidebar>
+                <!-- Overlay -->
+                <div x-show="openSidebar" 
+                     x-cloak 
+                     @click="openSidebar = false"
+                     class="fixed inset-0 bg-black bg-opacity-40 z-30">
+                </div>
+
+                <!-- Sidebar -->
+                <div x-show="openSidebar" 
+                     x-cloak 
+                     @keydown.escape.window="openSidebar = false" 
+                     x-transition:enter="transition ease-out duration-200 transform"
+                     x-transition:enter-start="-translate-x-full opacity-0"
+                     x-transition:enter-end="translate-x-0 opacity-100"
+                     x-transition:leave="transition ease-in duration-150 transform"
+                     x-transition:leave-start="translate-x-0 opacity-100"
+                     x-transition:leave-end="-translate-x-full opacity-0"
+                     class="fixed left-0 top-0 h-screen w-64 bg-cream shadow-lg z-40 border-r border-sienna">
+                    <x-sidebar>
+                        {{ $slot }}
+                    </x-sidebar>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="min-h-screen p-6">
                 {{ $slot }}
-            </x-sidebar>
-        </div>
-    </div>
-
-    <div class="min-h-screen">
-        {{ $slot }} <!-- Your Page Content -->
-    </div>
+            </main>
         </div>
     </body>
 </html>

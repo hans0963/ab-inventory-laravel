@@ -16,6 +16,7 @@ use App\Http\Controllers\InventoryMovementsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
+use App\Http\Controllers\FinancialOverviewController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -49,6 +50,6 @@ Route::get('/inventory', [InventoryStatusController::class, 'index'])->name('inv
 Route::delete('/inventory-movements/{id}', [InventoryMovementsController::class, 'destroy'])->name('inventory_movements.destroy');
 
 Route::get('/sales-report', [InventoryStatusController::class, 'salesReport'])->name('inventory.sales');
-
+Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->name('financial.overview');
 
 require __DIR__.'/auth.php';

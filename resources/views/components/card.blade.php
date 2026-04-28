@@ -2,23 +2,29 @@
     'title' => 'Default Title', 
     'description' => 'Default Description', 
     'link' => '#', 
-    'color' => 'blue' // Default to blue if no color is provided
+    'color' => 'terracotta' // Default artisan color
 ])
 
 @php
-    $bgColor = "bg-{$color}-500";
-    $hoverColor = "hover:bg-{$color}-600";
-    $textColor = "text-white";
+    // Map artisan palette to Tailwind classes
+    $palette = [
+        'terracotta' => 'bg-terracotta text-cream',
+        'sage' => 'bg-sage text-cream',
+        'sienna' => 'bg-sienna text-cream',
+        'cream' => 'bg-cream text-sienna',
+    ];
+
+    $classes = $palette[$color] ?? $palette['terracotta'];
 @endphp
 
-<a href="{{ $link }}" {{ $attributes->merge(['class' => "block max-w-sm p-6 border border-gray-200 rounded-lg shadow-sm $bgColor $hoverColor dark:border-gray-700"]) }}>
+<a href="{{ $link }}" 
+   {{ $attributes->merge(['class' => "block max-w-sm p-6 border border-sienna rounded-lg shadow-md $classes hover:opacity-90 transition"]) }}>
     
-    <h5 class="mb-2 text-2xl font-bold tracking-tight {{ $textColor }}">
+    <h5 class="mb-2 text-2xl font-pacifico tracking-tight">
         {{ $title }}
     </h5>
     
-    <p class="font-normal text-white opacity-90">
+    <p class="font-poppins opacity-90">
         {{ $description }}
     </p>
-
 </a>
