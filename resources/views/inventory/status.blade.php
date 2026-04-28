@@ -114,7 +114,7 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($inventoryMovements as $movement) 
+                                @forelse($inventoryMovements as $movement) 
                                     <tr class="hover:bg-gray-100 transition">
                                         <td class="px-4 py-3">{{ $movement->product->product_name }}</td>
                                         <td class="px-4 py-3">{{ $movement->date }}</td>
@@ -139,7 +139,11 @@
                                             </form>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center text-gray-500">No inventory movements recorded yet.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

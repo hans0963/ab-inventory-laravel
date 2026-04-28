@@ -109,15 +109,19 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($salesQuery as $sale)
+                        @forelse($salesQuery as $sale)
                             <tr class="hover:bg-gray-100 transition">
-                                <td class="px-4 py-3">{{ $sale->order_date }}</td>
                                 <td class="px-4 py-3">{{ $sale->customer_name }}</td>
                                 <td class="px-4 py-3">{{ $sale->sold_by }}</td>
-                                <td class="px-4 py-3">{{ $sale->total_quantity_sold }}</td>
+                                <td class="px-4 py-3">{{ $sale->order_date }}</td>
+                                <td class="px-4 py-3 font-semibold text-red-600">{{ $sale->total_quantity_sold }}</td>
                                 <td class="px-4 py-3 font-semibold text-green-600">{{ number_format($sale->total_sales_value, 2) }}</td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-gray-500">No sales data available yet.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

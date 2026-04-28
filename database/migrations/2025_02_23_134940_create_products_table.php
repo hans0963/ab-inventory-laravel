@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up() {
         Schema::create('products', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id();
             $table->string('product_name', 50);
             $table->unsignedBigInteger('category_id')->nullable();
             $table->integer('buying_price')->default(0);
