@@ -12,12 +12,12 @@ class FinancialOverviewController extends Controller
     public function index()
     {
         // Calculate revenue from orders
-        $totalRevenue = Order::sum('total_amount') ?? 0;
+        $totalRevenue = Order::sum('total') ?? 0;
         $orderCount = Order::count();
         
         // Calculate expenses from purchases
         $totalExpenses = Purchase::join('purchase_details', 'purchases.id', '=', 'purchase_details.purchase_id')
-            ->selectRaw('SUM(purchase_details.quantity * purchase_details.unit_price) as total')
+            ->selectRaw('SUM(purchase_details.quantity * purchase_details.price) as total')
             ->first()
             ->total ?? 0;
         
@@ -28,7 +28,7 @@ class FinancialOverviewController extends Controller
         $profitMargin = $totalRevenue > 0 ? ($profit / $totalRevenue) * 100 : 0;
         
         // Monthly data for chart
-        $monthlyData = Order::selectRaw('MONTH(created_at) as month, SUM(total_amount) as revenue')
+        $monthlyData = Order::selectRaw('MONTH(created_at) as month, SUM(total) as revenue')
             ->groupBy('month')
             ->orderBy('month')
             ->get();

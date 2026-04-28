@@ -84,7 +84,7 @@
                                 @foreach($recentOrders as $order)
                                     <tr class="border-b hover:bg-gray-50">
                                         <td class="px-4 py-2 text-gray-900 font-semibold">#{{ $order->id }}</td>
-                                        <td class="px-4 py-2 text-green-600 font-semibold">₱{{ number_format($order->total_amount, 2) }}</td>
+                                        <td class="px-4 py-2 text-green-600 font-semibold">₱{{ number_format($order->total, 2) }}</td>
                                         <td class="px-4 py-2 text-gray-500">{{ $order->created_at->format('M d, Y') }}</td>
                                     </tr>
                                 @endforeach
