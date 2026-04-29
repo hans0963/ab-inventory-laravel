@@ -13,11 +13,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create role-based users
+        User::firstOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+            ]
+        );
 
         User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User']
+            ['email' => 'manager@example.com'],
+            [
+                'name' => 'Manager User',
+                'password' => bcrypt('password'),
+                'role' => 'manager',
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'cashier@example.com'],
+            [
+                'name' => 'Cashier User',
+                'password' => bcrypt('password'),
+                'role' => 'cashier',
+            ]
         );
         
         // Run seeders for test data

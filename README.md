@@ -14,3 +14,9 @@ A simple inventory system with CRUD functionalities made with Laravel (this proj
 
 ## License
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+Seeders:
+1. admin@example.com	password
+2. manager@example.com	password
+3. cashier@example.com	password
