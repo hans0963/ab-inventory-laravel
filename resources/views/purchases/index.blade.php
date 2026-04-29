@@ -11,7 +11,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold">Purchase List</h2>
                     <a href="{{ route('purchases.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">
-                        + Add Purchase
+                        Create New Purchase
                     </a>
                 </div>
 
@@ -36,7 +36,7 @@
                                 <td class="py-2 px-4 border flex space-x-2">
                                     <a href="{{ route('purchases.show', $purchase->id) }}" class="text-blue-500">View Details</a>
                                     {{-- <a href="{{ route('purchases.edit', $purchase->id) }}" class="text-yellow-500">Edit</a> --}}
-                                    <form action="{{ route('purchases.destroy', $purchase->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                    <form action="{{ route('purchases.destroy', $purchase->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this purchase?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-500">Delete</button>

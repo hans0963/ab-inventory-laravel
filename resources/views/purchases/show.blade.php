@@ -1,18 +1,18 @@
 <x-app-layout>
     <div class="max-w-3xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
-        <h2 class="text-2xl font-bold text-gray-700 mb-4">📜 Purchase Details</h2>
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">Purchase Details</h2>
 
         <div class="bg-gray-50 p-4 rounded-lg shadow-sm mb-6">
             <div class="grid grid-cols-2 gap-4">
-                <p class="text-gray-600"><span class="font-semibold">📅 Date:</span> {{ $purchase->purchase_date }}</p>
-                <p class="text-gray-600"><span class="font-semibold">🏢 Supplier:</span> {{ $purchase->supplier->suppliers_name }}</p>
-                <p class="text-gray-600"><span class="font-semibold">👤 Recorded By:</span> {{ $purchase->employee->employee_name ?? 'N/A' }}</p>
-                <p class="text-gray-600"><span class="font-semibold">🔖 Reference:</span> {{ $purchase->reference ?? 'N/A' }}</p>
+                <p class="text-gray-600"><span class="font-semibold">Date:</span> {{ $purchase->purchase_date }}</p>
+                <p class="text-gray-600"><span class="font-semibold">Supplier:</span> {{ $purchase->supplier->suppliers_name }}</p>
+                <p class="text-gray-600"><span class="font-semibold">Recorded By:</span> {{ $purchase->employee->employee_name ?? 'N/A' }}</p>
+                <p class="text-gray-600"><span class="font-semibold">Reference:</span> {{ $purchase->reference ?? 'N/A' }}</p>
             </div>
         </div>
 
         <div class="bg-white p-4 rounded-lg shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">🛒 Purchased Products</h3>
+            <h3 class="text-lg font-semibold text-gray-700 mb-2">Purchased Products</h3>
 
             <div class="overflow-x-auto">
                 <table class="w-full border border-gray-300 rounded-lg">

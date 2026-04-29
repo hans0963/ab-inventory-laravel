@@ -3,10 +3,10 @@
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
                 <div class="text-center p-6 bg-white dark:bg-gray-800 overflow-hidden sm:rounded-lg text-gray-800 dark:text-gray-200 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold">{{ __('No products found') }}</h3>
-                    <p class="text-sm mt-2">{{ __('Don\'t have one? Create one!') }}</p>
+                    <h3 class="text-lg font-semibold">{{ __('No Products Available') }}</h3>
+                    <p class="text-sm mt-2">{{ __('Please create a new product to proceed.') }}</p>
                     <a href="{{ route('products.create') }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-                        {{ __('Add your first product') }}
+                        {{ __('Create Product') }}
                     </a>
                 </div>
             </div>
@@ -24,7 +24,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-xl font-semibold">Product List</h2>
                             <a href="{{ route('products.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">
-                                + Add Product
+                                Create New Product
                             </a>
                         </div>
                         <table class="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg">

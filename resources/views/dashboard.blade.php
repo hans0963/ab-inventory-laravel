@@ -7,11 +7,11 @@
             <div class="flex space-x-4 ml-auto">
                 <a href="{{ route('orders.create') }}" 
                    class="bg-terracotta hover:opacity-90 text-cream font-poppins px-6 py-2 rounded-lg shadow-md transition">
-                    🛍️ Order
+                    Create Order
                 </a>
                 <a href="{{ route('purchases.create') }}" 
                    class="bg-sage hover:opacity-90 text-cream font-poppins px-6 py-2 rounded-lg shadow-md transition">
-                    📥 Purchase
+                    Create Purchase
                 </a>
             </div>
         </div>
@@ -49,7 +49,7 @@
         <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-1">
             @if($lowStockAlerts->isNotEmpty())
                 <div class="bg-terracotta bg-opacity-20 border-l-4 border-terracotta text-sienna p-4 rounded-lg shadow-lg">
-                    <h2 class="text-lg font-pacifico mb-4 text-sienna">⚠️ Low Stock Alerts</h2>
+                    <h2 class="text-lg font-pacifico mb-4 text-sienna">Low Stock Alerts</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full border border-sienna rounded-lg overflow-hidden">
                             <thead>

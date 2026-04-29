@@ -2,7 +2,7 @@
     <div class="bg-gray-100 p-6">
         {{-- Sales Report Header --}}
         <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
-            <h2 class="text-2xl font-semibold text-gray-700">📈 Sales Report Overview</h2>
+            <h2 class="text-2xl font-semibold text-gray-700">Sales Report Overview</h2>
         </div>
 
         {{-- Filters Section --}}
@@ -28,7 +28,7 @@
          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             {{-- Best-Selling Products --}}
             <div class="bg-white shadow-lg rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-700">🏆 Best-Selling Products</h3>
+                <h3 class="text-lg font-semibold text-gray-700">Best-Selling Products</h3>
                 <p class="text-gray-500">Top products based on sales volume.</p>
                 <table class="min-w-full border border-gray-300 mt-4">
                     <thead>
@@ -55,17 +55,17 @@
                 </div>
             </div>           
 
-            {{-- 📊 Sales Summary --}}
+            {{-- Sales Summary --}}
             <div class="bg-gradient-to-r from-purple-500 to-indigo-600 shadow-lg rounded-lg p-6 text-white">
                 <h3 class="text-lg font-semibold flex items-center gap-2">
-                    📊 Sales Summary
+                    Sales Summary
                 </h3>
                 <p class="text-sm opacity-80">Overview of sales performance.</p>
 
                 <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white bg-opacity-20 p-4 rounded-lg flex items-center gap-4">
                         <div class="bg-green-600 p-3 rounded-full">
-                            💰
+                            �
                         </div>
                         <div>
                             <p class="text-sm opacity-80">Total Revenue</p>

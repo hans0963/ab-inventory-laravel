@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
     <div class="max-w-6xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">📋 Orders List</h2>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Orders List</h2>
 
         <table class="min-w-full border border-gray-300 bg-white shadow-lg rounded-lg">
             <thead>

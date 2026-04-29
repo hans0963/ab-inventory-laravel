@@ -12,7 +12,7 @@
                 {{-- Low Stock Alerts Section --}}
                 @if($lowStockAlerts->isNotEmpty())
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-lg">
-                    <h2 class="text-lg font-semibold mb-4 text-red-800">⚠️ Low Stock Alerts</h2>
+                    <h2 class="text-lg font-semibold mb-4 text-red-800">Low Stock Alerts</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full border border-gray-300 rounded-lg overflow-hidden">
                             <thead>
@@ -43,7 +43,7 @@
                 {{-- Products Section --}}
                 <div class="bg-white shadow-lg rounded-lg p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-700">📦 Product Inventory</h2>
+                        <h2 class="text-lg font-semibold text-gray-700">Product Inventory</h2>
                         <form method="GET" action="{{ route('inventory.status') }}" class="flex gap-4">
                             <select name="product" class="border rounded-lg p-2 w-48">
                                 <option value="">All Products</option>
@@ -83,7 +83,7 @@
                 {{-- Inventory Movements Section --}}
                 <div class="bg-white shadow-lg rounded-lg p-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-700">📊 Recent Inventory Movements</h2>
+                        <h2 class="text-lg font-semibold text-gray-700">Recent Inventory Movements</h2>
                         {{-- Filters --}}
                         <form method="GET" action="{{ route('inventory.status') }}" class="flex gap-4">
                             <input type="date" name="date" value="{{ request('date') }}" class="border rounded-lg p-2">
@@ -130,7 +130,7 @@
                                         <td class="px-4 py-3 font-semibold text-green-600">{{ $movement->new_luto }}</td>
                                         <td class="px-4 py-3">{{ $movement->total_inventory }}</td>
                                         <td class="px-4 py-3">
-                                            <form action="{{ route('inventory_movements.destroy', $movement->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
+                                            <form action="{{ route('inventory_movements.destroy', $movement->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this inventory movement?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded-lg shadow-md hover:bg-red-600">

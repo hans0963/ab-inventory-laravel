@@ -10,7 +10,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">Supplier List</h3>
                 <a href="{{ route('suppliers.create') }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    + Add New Supplier
+                    Create New Supplier
                 </a>
             </div>
 

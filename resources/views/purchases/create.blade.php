@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-        <h2 class="text-2xl font-semibold text-gray-700 mb-4">🛒 Create Purchase</h2>
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Create New Purchase</h2>
 
         <form id="purchase-form" action="{{ route('purchases.store') }}" method="POST">
             @csrf
@@ -75,13 +75,13 @@
                                        class="total-input w-full px-2 py-1 border rounded bg-gray-200">
                             </td>
                             <td class="px-4 py-2 text-center">
-                                <button type="button" class="remove-item px-2 py-1 bg-red-500 text-white rounded">🗑</button>
+                                <button type="button" class="remove-item px-2 py-1 bg-red-500 text-white rounded">Remove</button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
 
-                <button type="button" id="add-item" class="mt-3 px-4 py-2 bg-green-500 text-white rounded">➕ Add Product</button>
+                <button type="button" id="add-item" class="mt-3 px-4 py-2 bg-green-500 text-white rounded">Add Product</button>
             </div>
 
             <div class="text-right text-lg font-semibold text-gray-700 mb-4">
@@ -89,7 +89,7 @@
             </div>
 
             <div class="text-right">
-                <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg">💰 Purchase</button>
+                <button type="submit" class="px-6 py-2 bg-blue-500 text-white rounded-lg">Complete Purchase</button>
             </div>
         </form>
     </div>

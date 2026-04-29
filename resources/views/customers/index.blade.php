@@ -12,7 +12,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold">Customer List</h3>
                         <a href="{{ route('customers.create') }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                            + Add Customer
+                            Create New Customer
                         </a>
                     </div>
 
@@ -37,7 +37,7 @@
                                         <a href="{{ route('customers.edit', $customer) }}" class="px-2 py-1 bg-yellow-500 text-white rounded">Edit</a>
                                         <form action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded" onclick="return confirm('Delete customer?')">Delete</button>
+                                            <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded" onclick="return confirm('Are you sure you want to delete this customer?')">Delete</button>
                                         </form>
                                     </td>
                                 </tr>

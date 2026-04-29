@@ -3,10 +3,10 @@
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
                 <div class="text-center p-6 bg-white dark:bg-gray-800 overflow-hidden sm:rounded-lg text-gray-800 dark:text-gray-200 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold">{{ __('No employee found') }}</h3>
-                    <p class="text-sm mt-2">{{ __('Try adjusting your search or filter to find what you\'re looking for.') }}</p>
+                    <h3 class="text-lg font-semibold">{{ __('No Employees Available') }}</h3>
+                    <p class="text-sm mt-2">{{ __('Please adjust your search criteria or create a new employee.') }}</p>
                     <a href="{{ route('employees.create') }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-                        {{ __('Add employee') }}
+                        {{ __('Create Employee') }}
                     </a>
                 </div>
             </div>
@@ -22,7 +22,7 @@
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="mb-4">
                         <div class="flex justify-between items-center">
-                            <a href="{{ route('employees.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Add Employee</a>
+                            <a href="{{ route('employees.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">Create New Employee</a>
                         
                             <form action="{{ route('employees.index') }}" method="GET" class="flex items-center">
                                 <input type="text" name="search" placeholder="Search Employee..." value="{{ request('search') }}"

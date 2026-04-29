@@ -3,10 +3,10 @@
         <div class="py-12">
             <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
                 <div class="text-center p-6 bg-white dark:bg-gray-800 overflow-hidden sm:rounded-lg text-gray-800 dark:text-gray-200 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold">{{ __('No categories found') }}</h3>
-                    <p class="text-sm mt-2">{{ __('Don\'t have one? Create one!') }}</p>
+                    <h3 class="text-lg font-semibold">{{ __('No Categories Available') }}</h3>
+                    <p class="text-sm mt-2">{{ __('Please create a new category to proceed.') }}</p>
                     <a href="{{ route('categories.create') }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
-                        {{ __('Add your first category') }}
+                        {{ __('Create Category') }}
                     </a>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <div class="mb-4">
                         <a href="{{ route('categories.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            {{ __('Add Category') }}
+                            {{ __('Create New Category') }}
                         </a>
                     </div>
                     
