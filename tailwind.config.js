@@ -5,18 +5,21 @@ import forms from '@tailwindcss/forms';
 export default {
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './vendor/livewire/livewire/resources/views/**/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        './app/View/Components/**/*.php',
+        './app/Livewire/**/*.php',
     ],
 
     darkMode: 'class',
-    
+
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Poppins', ...defaultTheme.fontFamily.sans],
-                pacifico: ['Pacifico', 'cursive'],
-                poppins: ['Poppins', 'sans-serif'],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                lora: ['Lora', 'serif'],
+                inter: ['Inter', 'sans-serif'],
             },
             colors: {
                 terracotta: '#E07856',
@@ -25,11 +28,32 @@ export default {
                 sienna: '#A0522D',
             },
             borderRadius: {
-                'lg': '1rem', // softer rounded corners
+                'lg': '1rem',
                 'xl': '1.5rem',
             },
             boxShadow: {
-                rustic: '0 4px 6px rgba(160, 82, 45, 0.3)', // sienna shadow
+                rustic: '0 4px 6px rgba(160, 82, 45, 0.3)',
+            },
+            spacing: {
+                sidebar: '18rem',
+                card: '1.25rem',
+            },
+            backgroundImage: {
+                grain: "url('/images/grain-texture.png')",
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: 0 },
+                    '100%': { opacity: 1 },
+                },
+                slideUp: {
+                    '0%': { transform: 'translateY(20px)', opacity: 0 },
+                    '100%': { transform: 'translateY(0)', opacity: 1 },
+                },
+            },
+            animation: {
+                fadeIn: 'fadeIn 0.5s ease-in-out',
+                slideUp: 'slideUp 0.4s ease-out',
             },
         },
     },

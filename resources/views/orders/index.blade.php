@@ -13,6 +13,7 @@
                     <th class="px-4 py-3 text-left">Order ID</th>
                     <th class="px-4 py-3 text-left">Customer</th>
                     <th class="px-4 py-3 text-left">Total</th>
+                    <th class="px-4 py-3 text-left">Status</th>
                     <th class="px-4 py-3 text-left">Date</th>
                     <th class="px-4 py-3 text-center">Action</th>
                 </tr>
@@ -23,6 +24,11 @@
                         <td class="px-4 py-3">#{{ $order->id }}</td>
                         <td class="px-4 py-3">{{ $order->customer->name }}</td>
                         <td class="px-4 py-3 font-semibold text-green-600">₱{{ number_format($order->total, 2) }}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-white text-xs {{ $order->order_status == 'Pending' ? 'bg-yellow-500' : 'bg-green-500' }}">
+                                {{ $order->order_status }}
+                            </span>
+                        </td>
                         <td class="px-4 py-3">{{ $order->order_date }}</td>
                         <td class="px-4 py-3 text-center">
                             <a href="{{ route('orders.show', $order->id) }}" 

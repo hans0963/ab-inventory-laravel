@@ -8,6 +8,11 @@
                 <p class="text-gray-600"><span class="font-semibold">Customer:</span> {{ $order->customer->customer_name }}</p>
                 <p class="text-gray-600"><span class="font-semibold">Processed By:</span> {{ $order->employee->employee_name ?? 'N/A' }}</p>
                 <p class="text-gray-600"><span class="font-semibold">Payment Type:</span> {{ $order->payment_type }}</p>
+                <p class="text-gray-600"><span class="font-semibold">Status:</span> 
+                    <span class="px-2 py-1 rounded text-white text-xs {{ $order->order_status == 'Pending' ? 'bg-yellow-500' : 'bg-green-500' }}">
+                        {{ $order->order_status }}
+                    </span>
+                </p>
             </div>
         </div>
 

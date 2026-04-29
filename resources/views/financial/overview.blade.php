@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-pacifico text-3xl text-sienna leading-tight">
+        <h2 class="font-lora font-semibold text-3xl text-sienna leading-tight">
             {{ __('Financial Overview') }}
         </h2>
     </x-slot>

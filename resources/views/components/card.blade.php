@@ -20,11 +20,11 @@
 <a href="{{ $link }}" 
    {{ $attributes->merge(['class' => "block max-w-sm p-6 border border-sienna rounded-lg shadow-md $classes hover:opacity-90 transition"]) }}>
     
-    <h5 class="mb-2 text-2xl font-pacifico tracking-tight">
+    <h5 class="mb-2 text-2xl font-lora font-semibold tracking-tight">
         {{ $title }}
     </h5>
     
-    <p class="font-poppins opacity-90">
+    <p class="font-inter opacity-90">
         {{ $description }}
     </p>
 </a>

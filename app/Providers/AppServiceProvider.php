@@ -56,8 +56,20 @@ class AppServiceProvider extends ServiceProvider
             return $user->isManager() || $user->isAdmin();
         });
 
-        Gate::define('view-sales-orders', function (User $user) {
+        Gate::define('view-employees', function (User $user) {
             return $user->isManager() || $user->isAdmin();
+        });
+
+        Gate::define('view-suppliers', function (User $user) {
+            return $user->isManager() || $user->isAdmin();
+        });
+
+        Gate::define('view-inventory', function (User $user) {
+            return $user->isManager() || $user->isAdmin();
+        });
+
+        Gate::define('view-sales-orders', function (User $user) {
+            return $user->isCashier() || $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-manager-sales-report', function (User $user) {
@@ -65,7 +77,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-customers', function (User $user) {
-            return $user->isManager() || $user->isAdmin();
+            return $user->isCashier() || $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-raw-materials', function (User $user) {

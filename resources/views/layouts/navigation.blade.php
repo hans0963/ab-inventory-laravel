@@ -1,36 +1,18 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-sienna shadow-md border-b border-cream">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+        <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                        <x-application-logo class="block h-9 w-auto fill-current text-cream" />
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('inventory.status')" :active="request()->routeIs('inventory.status')">
-                        {{ __('Inventory') }}
-                    </x-nav-link>    
-
-                    <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
-                        {{ __('Categories') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
-                        {{ __('Orders') }}
-                    </x-nav-link>  
-
-                    <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.index')">
-                        {{ __('Customers') }}
-                    </x-nav-link>  
+                <!-- Welcome Message -->
+                <div class="ms-10">
+                    <h2 class="text-2xl font-lora font-semibold text-cream">Welcome back, Shop Owner</h2>
                 </div>
             </div>
 
@@ -38,8 +20,8 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
-                            <span>{{ Auth::user()->name }}</span>
+                        <button class="flex items-center px-4 py-2 text-sm font-medium text-cream bg-terracotta hover:bg-terracotta-dark focus:outline-none rounded-md">
+                            <span>{{ Auth::user()->name }} ({{ Auth::user()->role }})</span>
                         </button>
                     </x-slot>
 
