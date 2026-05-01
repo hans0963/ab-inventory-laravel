@@ -1,18 +1,118 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
-            <h2 class="font-pacifico text-3xl text-sienna leading-tight">
-                {{ __('Production In') }}
-            </h2>
-            <p class="font-inter text-sage">Record freshly baked products entering inventory</p>
+        <div class="flex justify-between items-center w-full">
+            <div>
+                <h2 class="font-semibold text-2xl text-amber-900 leading-tight">
+                    {{ __('Production In') }}
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Record finished products from production</p>
+            </div>
+            <a href="{{ route('production-in.create') }}"
+               class="inline-flex items-center gap-2 px-5 py-3 rounded-full text-white text-sm font-semibold shadow-sm transition hover:opacity-90"
+               style="background-color: #E2725B;">
+                <span class="text-lg leading-none">+</span>
+                Add Production Batch
+            </a>
         </div>
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white rounded-lg shadow-md p-12 border-l-4 border-sage text-center">
-            <div class="text-6xl mb-4">🥖</div>
-            <h3 class="text-xl font-lora font-semibold text-sienna mb-2">Production In Module</h3>
-            <p class="text-gray-600">This module is currently under development. Here you will record products as they come fresh out of the oven.</p>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+            {{-- Search Bar --}}
+            <div class="p-5 border-b border-gray-100">
+                <div class="relative">
+                    <div class="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                        </svg>
+                    </div>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search production batches..."
+                        class="w-full rounded-full border border-gray-200 bg-gray-50 py-3 pl-11 pr-5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
+                        style="focus:ring-color: #E2725B;"
+                        oninput="filterTable(this.value)"
+                    />
+                </div>
+            </div>
+
+            {{-- Table --}}
+            <table class="min-w-full text-sm" id="productionTable">
+                <thead>
+                    <tr class="border-b border-gray-100">
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Batch Number</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Product</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Quantity</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Production Date</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Expiration Date</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100" id="tableBody">
+                    @forelse($batches ?? [] as $batch)
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 font-semibold" style="color: #E2725B;">
+                                {{ $batch->batch_number }}
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-gray-800">
+                                {{ $batch->product->name ?? $batch->product_name }}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                {{ $batch->quantity }}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                {{ \Carbon\Carbon::parse($batch->production_date)->format('Y-m-d') }}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600">
+                                {{ \Carbon\Carbon::parse($batch->expiration_date)->format('Y-m-d') }}
+                            </td>
+                            <td class="px-6 py-4">
+                                @php
+                                    $today = \Carbon\Carbon::today();
+                                    $expiry = \Carbon\Carbon::parse($batch->expiration_date);
+                                    $daysLeft = $today->diffInDays($expiry, false);
+
+                                    if ($daysLeft < 0) {
+                                        $statusLabel = 'Expired';
+                                        $statusStyle = 'background-color: #fde8e8; color: #a33a2a;';
+                                    } elseif ($daysLeft <= 2) {
+                                        $statusLabel = 'Near Expiry';
+                                        $statusStyle = 'background-color: #fef3cd; color: #8a6000;';
+                                    } else {
+                                        $statusLabel = 'Fresh';
+                                        $statusStyle = 'background-color: #f0f0f0; color: #666;';
+                                    }
+                                @endphp
+                                <span class="px-3 py-1 rounded-full text-xs font-medium" style="{{ $statusStyle }}">
+                                    {{ $statusLabel }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">
+                                No production batches found.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function filterTable(query) {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const q = query.toLowerCase();
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+    @endpush
 </x-app-layout>

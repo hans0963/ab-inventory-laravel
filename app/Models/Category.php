@@ -14,11 +14,11 @@ class Category extends Model
     use HasFactory;
 
     protected $primaryKey = 'id';
-    protected $fillable = ['category_name'];
+    protected $fillable = ['category_name', 'description'];
 
     public function products()
     {
-        return $this->hasMany(Products::class, 'product_category');
+        return $this->hasMany(Products::class, 'category_id');
     }
 }
 

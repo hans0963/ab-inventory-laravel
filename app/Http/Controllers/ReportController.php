@@ -175,13 +175,24 @@ class ReportController extends Controller
             ->limit(5)
             ->get();
 
+        // 7. Production Metrics
+        $todaysProduction = DB::table('inventory_movements')
+            ->whereDate('date', now())
+            ->sum('new_luto');
+            
+        $todaysPullOuts = DB::table('inventory_movements')
+            ->whereDate('date', now())
+            ->sum('pull_out');
+
         return view('manager-reports.index', compact(
             'totalProducts',
             'lowStockCount',
             'totalCategories',
             'totalStock',
             'topSelling',
-            'recentMovements'
+            'recentMovements',
+            'todaysProduction',
+            'todaysPullOuts'
         ));
     }
 }

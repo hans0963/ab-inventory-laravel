@@ -18,6 +18,9 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderDetailController;
 use App\Http\Controllers\FinancialOverviewController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RawMaterialController;
+use App\Http\Controllers\ProductionInController;
+use App\Http\Controllers\ProductionOutController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -82,21 +85,14 @@ Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])
 Route::get('/sales-orders', [OrderController::class, 'index'])->middleware(['auth', 'role:cashier'])->name('sales-orders.index');
 
 // Manager Module Routes
-Route::get('/raw-materials', function () {
-    return view('raw-materials.index');
-})->middleware(['auth', 'role:manager'])->name('raw-materials.index');
-
-Route::get('/production-in', function () {
-    return view('production-in.index');
-})->middleware(['auth', 'role:manager'])->name('production-in.index');
-
-Route::get('/production-out', function () {
-    return view('production-out.index');
-})->middleware(['auth', 'role:manager'])->name('production-out.index');
-
-Route::get('/manager-sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'role:manager'])->name('manager-sales-report.index');
-
-Route::get('/manager-reports', [ReportController::class, 'managerReports'])->middleware(['auth', 'role:manager'])->name('manager-reports.index');
+Route::middleware(['auth', 'role:manager'])->group(function () {
+    Route::resource('raw-materials', RawMaterialController::class);
+    Route::resource('production-in', ProductionInController::class);
+    Route::resource('production-out', ProductionOutController::class);
+    
+    Route::get('/manager-sales-report', [ReportController::class, 'salesReport'])->name('manager-sales-report.index');
+    Route::get('/manager-reports', [ReportController::class, 'managerReports'])->name('manager-reports.index');
+});
 
 // Admin Module Routes
 Route::get('/admin-sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'role:admin'])->name('sales-report.index');

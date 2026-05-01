@@ -30,9 +30,21 @@
 
         <!-- Manager Modules Only -->
         @if(auth()->user()->isManager())
+            <a href="{{ route('products.index') }}" 
+               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
+                📦 Products
+            </a>
             <a href="{{ route('categories.index') }}" 
                class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
                 📂 Categories
+            </a>
+            <a href="{{ route('orders.index') }}" 
+               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
+                🛒 Sales Orders
+            </a>
+            <a href="{{ route('customers.index') }}" 
+               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
+                👥 Customers
             </a>
             <a href="{{ route('raw-materials.index') }}" 
                class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
@@ -56,7 +68,7 @@
             </a>
             <a href="{{ route('manager-reports.index') }}" 
                class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                📈 Reports
+                📈 Inventory & Production Reports
             </a>
         @endif
 
