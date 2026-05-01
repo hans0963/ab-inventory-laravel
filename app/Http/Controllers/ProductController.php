@@ -8,9 +8,19 @@ use App\Models\Category;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Products::with('category')->paginate(10);
+        $query = Products::with('category');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('product_name', 'LIKE', "%{$search}%")
+                  ->orWhereHas('category', function($q) use ($search) {
+                      $q->where('category_name', 'LIKE', "%{$search}%");
+                  });
+        }
+
+        $products = $query->latest()->paginate(10);
         return view('products.index', compact('products'));
     }
 

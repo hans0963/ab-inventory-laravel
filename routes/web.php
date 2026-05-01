@@ -79,9 +79,7 @@ Route::get('/sales-report', [InventoryStatusController::class, 'salesReport'])->
 Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth'])->name('financial.overview');
 
 // Cashier Module Routes
-Route::get('/sales-orders', function () {
-    return view('sales-orders.index');
-})->middleware(['auth', 'role:cashier'])->name('sales-orders.index');
+Route::get('/sales-orders', [OrderController::class, 'index'])->middleware(['auth', 'role:cashier'])->name('sales-orders.index');
 
 // Manager Module Routes
 Route::get('/raw-materials', function () {

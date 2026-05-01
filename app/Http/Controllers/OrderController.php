@@ -26,7 +26,6 @@ class OrderController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'employee_id' => 'required|exists:employees,id',
-            'order_date' => NOW(),
             'payment_type' => 'required|in:Cash,Card,Online',
             'product_id' => 'required|array',
             'product_id.*' => 'required|exists:products,id',
@@ -52,7 +51,9 @@ class OrderController extends Controller
                 'employee_id' => $request->employee_id,
                 'order_date' => now(),
                 'total' => $totalPrice,
+                'payment_type' => $request->payment_type,
                 'total_products' => $totalProducts,
+                'order_status' => 'Completed', // Defaulting to Completed as it's a direct sale
             ]);
 
             foreach ($request->product_id as $index => $productId) {
@@ -78,7 +79,13 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::with('customer')->latest()->paginate(10);
-        return view('orders.index', compact('orders'));
+        
+        // Metrics for the index view
+        $todaysSales = Order::whereDate('order_date', now())->sum('total');
+        $totalOrders = Order::count();
+        $discounts = 0; // Placeholder for now as there's no discount column in orders table yet
+        
+        return view('orders.index', compact('orders', 'todaysSales', 'totalOrders', 'discounts'));
     }
 
     public function show($id)

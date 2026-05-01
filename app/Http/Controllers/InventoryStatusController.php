@@ -52,7 +52,7 @@ class InventoryStatusController extends Controller
 
     public function salesReport(Request $request)
     {
-        $salesQuery = DB::table('vw_recent_sales') //recent sales
+        $salesQuery = DB::table('vw_recent_sales')
             ->when($request->start_date, function ($q) use ($request) {
                 return $q->whereDate('order_date', '>=', $request->start_date);
             })
@@ -72,13 +72,26 @@ class InventoryStatusController extends Controller
 
         $products = Products::all(); 
 
-        $bestSellingProducts = DB::table('vw_best_selling_products') // best selling view
+        $bestSellingProducts = DB::table('vw_best_selling_products')
             ->orderByDesc('total_sold')
             ->paginate(5); 
 
         $salesSummary = DB::table('vw_sales_summary')->first();
 
-        return view('inventory.sales', compact('salesQuery', 'products', 'bestSellingProducts', 'salesSummary'));
+        // Metrics for the stat cards
+        $totalSales = $salesSummary->total_revenue ?? 0;
+        $totalOrders = $salesSummary->total_orders ?? 0;
+        $totalProductsSold = $salesSummary->total_products_sold ?? 0;
+
+        return view('inventory.sales', compact(
+            'salesQuery', 
+            'products', 
+            'bestSellingProducts', 
+            'salesSummary',
+            'totalSales',
+            'totalOrders',
+            'totalProductsSold'
+        ));
     }
 
 }

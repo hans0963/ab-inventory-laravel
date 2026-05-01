@@ -13,44 +13,81 @@ class DashboardController extends Controller
         $user = Auth::user();
         $userRole = $user->role;
 
-        // Common data
+        // Common data for all dashboards
         $lowStockAlerts = DB::table('vw_low_stock_alerts')->get();
+        $totalSalesCount = DB::table('orders')->count();
+        $totalRevenue = DB::table('orders')->sum('total');
+        $totalProducts = DB::table('products')->count();
+        $totalCustomers = DB::table('customers')->count();
+        $totalEmployees = DB::table('employees')->count();
 
         // Role-specific data
         switch($userRole) {
             case 'admin':
-                $totalSales = DB::table('sales')->count();
-                // Calculate total revenue from sales (quantity * selling_price from products)
-                $totalRevenue = DB::table('sales')
-                    ->join('products', 'sales.product_id', '=', 'products.id')
-                    ->sum(DB::raw('sales.sold * products.selling_price'));
-                $totalEmployees = DB::table('employees')->count();
-                $totalProducts = DB::table('products')->count();
+                $recentOrders = DB::table('orders')
+                    ->join('customers', 'orders.customer_id', '=', 'customers.id')
+                    ->select('orders.*', 'customers.name as customer_name')
+                    ->latest()
+                    ->limit(5)
+                    ->get();
                 
-                return view('dashboards.dashboard-admin', compact('lowStockAlerts', 'totalSales', 'totalRevenue', 'totalEmployees', 'totalProducts'));
+                return view('dashboards.dashboard-admin', compact(
+                    'lowStockAlerts', 
+                    'totalSalesCount', 
+                    'totalRevenue', 
+                    'totalEmployees', 
+                    'totalProducts',
+                    'recentOrders'
+                ));
 
             case 'manager':
-                // Calculate monthly sales revenue
-                $monthlySales = DB::table('sales')
-                    ->join('products', 'sales.product_id', '=', 'products.id')
-                    ->whereMonth('sales.date', now()->month)
-                    ->sum(DB::raw('sales.sold * products.selling_price'));
-                $totalOrders = DB::table('orders')->count();
+                $todaySales = DB::table('orders')
+                    ->whereDate('order_date', now())
+                    ->sum('total');
+                $totalOrders = $totalSalesCount;
                 $pendingOrders = DB::table('orders')->where('order_status', 'Pending')->count();
+                $recentOrders = DB::table('orders')
+                    ->join('customers', 'orders.customer_id', '=', 'customers.id')
+                    ->select('orders.*', 'customers.name as customer_name')
+                    ->latest()
+                    ->limit(5)
+                    ->get();
                 
-                return view('dashboards.dashboard-manager', compact('lowStockAlerts', 'monthlySales', 'totalOrders', 'pendingOrders'));
+                return view('dashboards.dashboard-manager', compact(
+                    'lowStockAlerts', 
+                    'todaySales', 
+                    'totalOrders', 
+                    'pendingOrders',
+                    'totalProducts',
+                    'totalCustomers',
+                    'recentOrders'
+                ));
 
             case 'cashier':
-                // Calculate today's sales revenue
-                $todaysSales = DB::table('sales')
-                    ->join('products', 'sales.product_id', '=', 'products.id')
-                    ->whereDate('sales.date', now())
-                    ->sum(DB::raw('sales.sold * products.selling_price'));
-                $transactionsCount = DB::table('sales')
-                    ->whereDate('sales.date', now())
+                $todaysSales = DB::table('orders')
+                    ->whereDate('order_date', now())
+                    ->sum('total');
+                $transactionsCount = DB::table('orders')
+                    ->whereDate('order_date', now())
                     ->count();
+                $recentOrders = DB::table('orders')
+                    ->join('customers', 'orders.customer_id', '=', 'customers.id')
+                    ->select('orders.*', 'customers.name as customer_name')
+                    ->whereDate('order_date', now())
+                    ->latest()
+                    ->limit(5)
+                    ->get();
                 
-                return view('dashboards.dashboard-cashier', compact('lowStockAlerts', 'todaysSales', 'transactionsCount'));
+                return view('dashboards.dashboard-cashier', compact(
+                    'lowStockAlerts', 
+                    'todaysSales', 
+                    'transactionsCount',
+                    'totalSalesCount', 
+                    'totalRevenue', 
+                    'totalProducts',
+                    'totalEmployees',
+                    'recentOrders'
+                ));
 
             default:
                 return redirect()->route('login')->with('error', 'Unauthorized role.');

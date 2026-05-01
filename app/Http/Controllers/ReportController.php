@@ -11,6 +11,8 @@ class ReportController extends Controller
 {
     public function salesReport()
     {
+        $user = auth()->user();
+        
         // Summary Metrics
         $totalSales = DB::table('orders')->sum('total');
         $totalOrders = DB::table('orders')->count();
@@ -32,22 +34,38 @@ class ReportController extends Controller
             ];
         });
 
-        // Add variables expected by inventory.sales view if needed
-        $salesQuery = DB::table('vw_recent_sales')->paginate(10);
-        $products = DB::table('products')->get();
-        $bestSellingProducts = DB::table('vw_best_selling_products')->paginate(5);
-        $salesSummary = DB::table('vw_sales_summary')->first();
+        // Chart Data: Daily Sales (Last 7 Days)
+        $dailySales = DB::table('orders')
+            ->select(DB::raw('DATE(order_date) as date'), DB::raw('SUM(total) as total'))
+            ->where('order_date', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
-        return view('inventory.sales', compact(
+        $dailySalesLabels = $dailySales->pluck('date');
+        $dailySalesData = $dailySales->pluck('total');
+
+        // Chart Data: Sales by Category
+        $salesByCategory = DB::table('vw_best_selling_products')
+            ->select('category_name', DB::raw('SUM(total_revenue) as revenue'))
+            ->groupBy('category_name')
+            ->get();
+
+        $categoryLabels = $salesByCategory->pluck('category_name');
+        $categorySalesData = $salesByCategory->pluck('revenue');
+
+        $view = $user->role === 'admin' ? 'sales-report.index' : 'manager-sales-report.index';
+
+        return view($view, compact(
             'totalSales', 
             'averageOrder', 
             'totalOrders', 
             'discounts', 
             'topProducts',
-            'salesQuery',
-            'products',
-            'bestSellingProducts',
-            'salesSummary'
+            'dailySalesLabels',
+            'dailySalesData',
+            'categoryLabels',
+            'categorySalesData'
         ));
     }
 

@@ -21,6 +21,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @stack('scripts')
     </head>
     <body class="font-inter antialiased bg-cream text-sienna">
         <div class="min-h-screen" x-data="{ openSidebar: false }">
@@ -51,7 +52,7 @@
             <!-- Main Content -->
             <main class="min-h-screen">
                 {{ $header ?? '' }}
-                <div class="p-6">
+                <div class="max-w-7xl mx-auto">
                     {{ $slot }}
                 </div>
             </main>

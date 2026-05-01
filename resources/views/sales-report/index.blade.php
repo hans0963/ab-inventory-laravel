@@ -58,4 +58,63 @@
             </table>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Daily Sales Chart
+            const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
+            new Chart(dailySalesCtx, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($dailySalesLabels) !!},
+                    datasets: [{
+                        label: 'Daily Sales (₱)',
+                        data: {!! json_encode($dailySalesData) !!},
+                        borderColor: '#E2725B', // terracotta
+                        backgroundColor: 'rgba(226, 114, 91, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Sales by Category Chart
+            const categoryCtx = document.getElementById('salesByCategoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($categoryLabels) !!},
+                    datasets: [{
+                        data: {!! json_encode($categorySalesData) !!},
+                        backgroundColor: [
+                            '#E2725B', // terracotta
+                            '#8A9A5B', // sage
+                            '#A0522D', // sienna
+                            '#D2B48C', // tan
+                            '#F5F5DC'  // beige
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

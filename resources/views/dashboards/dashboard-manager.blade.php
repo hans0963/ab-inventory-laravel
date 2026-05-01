@@ -64,11 +64,11 @@
                     @forelse($recentOrders ?? [] as $order)
                         <div class="flex justify-between items-center py-3 hover:bg-cream transition">
                             <div>
-                                <p class="font-semibold text-sienna">{{ $order->order_number }} — {{ $order->customer->name }}</p>
-                                <p class="text-sm text-gray-600">{{ $order->items_summary }}</p>
-                                <p class="text-xs text-sage">{{ $order->created_at->diffForHumans() }}</p>
+                                <p class="font-semibold text-sienna">#{{ $order->id }} — {{ $order->customer_name ?? 'Walk-in' }}</p>
+                                <p class="text-sm text-gray-600">{{ $order->total_products }} item(s)</p>
+                                <p class="text-xs text-sage">{{ \Carbon\Carbon::parse($order->order_date)->diffForHumans() }}</p>
                             </div>
-                            <div class="font-semibold text-terracotta">₱{{ number_format($order->total_amount, 0) }}</div>
+                            <div class="font-semibold text-terracotta">₱{{ number_format($order->total, 2) }}</div>
                         </div>
                     @empty
                         <div class="flex justify-between items-center py-3">

@@ -1,15 +1,18 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
+            <h2 class="font-pacifico text-3xl text-sienna leading-tight">
+                {{ __('Production In') }}
+            </h2>
+            <p class="font-inter text-sage">Record freshly baked products entering inventory</p>
+        </div>
+    </x-slot>
 
-@section('content')
-<div class="container mx-auto px-4">
-    <div class="mb-6">
-        <h1 class="text-4xl font-lora font-semibold text-sienna">Production In</h1>
-        <p class="text-sage mt-2">Track incoming production items here</p>
+    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-md p-12 border-l-4 border-sage text-center">
+            <div class="text-6xl mb-4">🥖</div>
+            <h3 class="text-xl font-lora font-semibold text-sienna mb-2">Production In Module</h3>
+            <p class="text-gray-600">This module is currently under development. Here you will record products as they come fresh out of the oven.</p>
+        </div>
     </div>
-
-    <!-- Content goes here -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <p class="text-gray-600">Production In module is under development.</p>
-    </div>
-</div>
-@endsection
+</x-app-layout>

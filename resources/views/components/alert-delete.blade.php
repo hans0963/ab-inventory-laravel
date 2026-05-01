@@ -25,9 +25,9 @@
                 <form method="POST" action="{{ $route }}" class="inline">
                     @csrf
                     @method('DELETE')
-                    <x-primary-button  type="submit" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm">
+                    <x-primary-button type="submit" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm">
                         {{ __('Delete') }}
-                    </x-primary-button >
+                    </x-primary-button>
                 </form>
             </div>
         </div>
