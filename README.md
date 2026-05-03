@@ -20,3 +20,12 @@ Seeders:
 1. admin@example.com	password
 2. manager@example.com	password
 3. cashier@example.com	password
+
+Installers needed:
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+npm run dev
+php artisan serve

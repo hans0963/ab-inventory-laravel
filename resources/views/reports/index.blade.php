@@ -1,47 +1,49 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
-            <h2 class="font-pacifico text-3xl text-sienna leading-tight">
-                {{ __('Admin Reports') }}
-            </h2>
-            <p class="font-inter text-sage">System-wide business intelligence overview</p>
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
+            <div>
+                <h2 class="font-pacifico text-4xl text-sienna">
+                    {{ __('Business Intelligence') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Comprehensive bakeshop performance overview</p>
+            </div>
         </div>
     </x-slot>
 
-    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+    <div class="space-y-10">
         <!-- Summary Metrics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <x-stat-card title="Inventory Value" :value="'₱' . number_format($totalInventoryValue ?? 0, 2)" icon="📦" border="terracotta" />
             <x-stat-card title="Monthly Sales" :value="'₱' . number_format($monthlySales ?? 0, 2)" icon="💰" border="sage" />
             <x-stat-card title="Total Customers" :value="$totalCustomers ?? 0" icon="👥" border="sienna" />
-            <x-stat-card title="Total Employees" :value="$totalEmployees ?? 0" icon="👥" border="tan" />
+            <x-stat-card title="Total Employees" :value="$totalEmployees ?? 0" icon="👥" border="cream" />
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Top Customers -->
-            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sage">
-                <h3 class="text-xl font-lora font-semibold text-sienna mb-4 flex items-center">
-                    <span class="mr-2">🏆</span> Top Customers
+            <div class="card-rustic border-sage">
+                <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
+                    <span class="mr-2 text-2xl">🏆</span> Top Customers
                 </h3>
-                <div class="overflow-x-auto">
+                <div class="overflow-hidden rounded-xl border border-sienna border-opacity-10">
                     <table class="min-w-full text-sm">
                         <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
-                                <th class="px-4 py-3 text-left">Customer</th>
-                                <th class="px-4 py-3 text-center">Orders</th>
-                                <th class="px-4 py-3 text-right">Total Spent</th>
+                            <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Customer</th>
+                                <th class="px-6 py-4 text-center">Orders</th>
+                                <th class="px-6 py-4 text-right">Total Spent</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
                             @forelse($topCustomers ?? [] as $customer)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-4 py-4 font-semibold text-sienna">{{ $customer->name }}</td>
-                                    <td class="px-4 py-4 text-center text-gray-600">{{ $customer->order_count }}</td>
-                                    <td class="px-4 py-4 text-right font-bold text-terracotta">₱{{ number_format($customer->total_spent, 2) }}</td>
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $customer->name }}</td>
+                                    <td class="px-6 py-4 text-center text-sage font-black">{{ $customer->order_count }}</td>
+                                    <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($customer->total_spent, 2) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-8 text-center text-gray-500">No customers yet</td>
+                                    <td colspan="3" class="px-6 py-12 text-center text-sage italic">No customer data available.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -50,57 +52,57 @@
             </div>
 
             <!-- Recent Orders -->
-            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-terracotta">
-                <h3 class="text-xl font-lora font-semibold text-sienna mb-4 flex items-center">
-                    <span class="mr-2">📜</span> Recent System Orders
+            <div class="card-rustic border-terracotta">
+                <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
+                    <span class="mr-2 text-2xl">📜</span> System Transactions
                 </h3>
-                <div class="space-y-4 max-h-96 overflow-y-auto">
+                <div class="space-y-4 max-h-[28rem] overflow-y-auto pr-2 custom-scrollbar">
                     @forelse($recentOrders ?? [] as $order)
-                        <div class="flex items-center justify-between p-3 bg-cream bg-opacity-30 rounded-lg hover:bg-opacity-50 transition border border-tan border-opacity-20">
+                        <div class="flex items-center justify-between p-4 bg-cream bg-opacity-30 rounded-xl hover:bg-opacity-60 transition border border-sienna border-opacity-10">
                             <div>
-                                <p class="font-semibold text-sienna">#{{ $order->id }} — {{ $order->customer_name }}</p>
-                                <p class="text-xs text-sage">{{ \Carbon\Carbon::parse($order->order_date)->format('M d, Y h:i A') }}</p>
+                                <p class="font-bold text-sienna">#{{ $order->id }} — {{ $order->customer_name }}</p>
+                                <p class="text-xs text-sage font-medium">{{ \Carbon\Carbon::parse($order->order_date)->format('M d, Y h:i A') }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="font-bold text-terracotta">₱{{ number_format($order->total, 2) }}</p>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-sage bg-opacity-20 text-sage uppercase font-bold tracking-tighter">
+                                <p class="font-black text-terracotta text-lg">₱{{ number_format($order->total, 2) }}</p>
+                                <span class="text-[9px] px-2 py-0.5 rounded-full bg-sage bg-opacity-20 text-sage-dark uppercase font-black tracking-widest">
                                     {{ $order->order_status ?? 'Completed' }}
                                 </span>
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-8 text-gray-500">No recent orders</div>
+                        <div class="text-center py-12 text-sage italic">No recent orders processed.</div>
                     @endforelse
                 </div>
             </div>
         </div>
 
-        <!-- NEW: Top Selling Products & Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Analytics & Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Top Selling Products -->
-            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sienna">
-                <h3 class="text-xl font-lora font-semibold text-sienna mb-4 flex items-center">
-                    <span class="mr-2">🔥</span> Top Selling Products
+            <div class="card-rustic border-sienna lg:col-span-2">
+                <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
+                    <span class="mr-2 text-2xl">🔥</span> Best Selling Products
                 </h3>
-                <div class="overflow-x-auto">
+                <div class="overflow-hidden rounded-xl border border-sienna border-opacity-10">
                     <table class="min-w-full text-sm">
                         <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
-                                <th class="px-4 py-3 text-left">Product</th>
-                                <th class="px-4 py-3 text-center">Units Sold</th>
-                                <th class="px-4 py-3 text-right">Revenue</th>
+                            <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-center">Units Sold</th>
+                                <th class="px-6 py-4 text-right">Revenue Generated</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
                             @forelse($topProducts ?? [] as $product)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-4 py-4 font-semibold text-sienna max-w-48 truncate">{{ $product->name }}</td>
-                                    <td class="px-4 py-4 text-center text-gray-600 font-medium">{{ $product->quantity_sold }}</td>
-                                    <td class="px-4 py-4 text-right font-bold text-terracotta">₱{{ number_format($product->revenue, 2) }}</td>
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $product->name }}</td>
+                                    <td class="px-6 py-4 text-center text-sage font-black">{{ $product->quantity_sold }}</td>
+                                    <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($product->revenue, 2) }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="px-4 py-8 text-center text-gray-500">No products sold yet</td>
+                                    <td colspan="3" class="px-6 py-12 text-center text-sage italic">No product sales recorded.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -109,22 +111,22 @@
             </div>
 
             <!-- Sales Charts -->
-            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-tan space-y-6">
-                <h3 class="text-xl font-lora font-semibold text-sienna flex items-center">
-                    <span class="mr-2">📊</span> Sales Analytics
+            <div class="card-rustic border-sage space-y-8">
+                <h3 class="text-xl font-lora font-bold text-sienna flex items-center">
+                    <span class="mr-2 text-2xl">📊</span> Sales Analytics
                 </h3>
                 
                 <!-- Bar Chart - Monthly Sales -->
-                <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <p class="text-sm font-medium text-sage mb-3">Monthly Sales Trend</p>
-                    <div class="h-48 w-full">
+                <div class="space-y-3">
+                    <p class="text-xs font-black text-sage uppercase tracking-widest">Monthly Trend</p>
+                    <div class="h-40 w-full">
                         <canvas id="salesBarChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Pie Chart - Sales by Category -->
-                <div class="border border-gray-200 rounded-lg p-4 bg-cream bg-opacity-50">
-                    <p class="text-sm font-medium text-sage mb-3">Revenue by Category</p>
+                <div class="space-y-3">
+                    <p class="text-xs font-black text-sage uppercase tracking-widest">Category Share</p>
                     <div class="h-40 w-full">
                         <canvas id="categoryPieChart"></canvas>
                     </div>
