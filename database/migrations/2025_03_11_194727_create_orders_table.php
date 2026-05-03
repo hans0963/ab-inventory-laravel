@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('order_status', 10)->default('Completed');
             $table->integer('total_products');
             $table->integer('total');
-            $table->enum('payment_type', ['Cash', 'Card', 'Online']);
+            $table->enum('payment_type', ['Cash', 'Credit Card', 'Bank Transfer', 'Online Payment']);
             $table->timestamps();
         });
     }

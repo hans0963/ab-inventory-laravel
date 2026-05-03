@@ -78,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::get('/sales-report', [InventoryStatusController::class, 'salesReport'])->middleware(['auth', 'can:view-sales-report'])->name('inventory.sales');
+Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth'])->name('inventory.sales');
 Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth'])->name('financial.overview');
 
 // Cashier Module Routes

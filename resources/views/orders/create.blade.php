@@ -30,8 +30,9 @@
                         <select name="payment_type" required 
                                 class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
                             <option value="Cash">Cash</option>
-                            <option value="Card">Card</option>
-                            <option value="Online">Online</option>
+                            <option value="Credit Card">Credit Card</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Online Payment">Online Payment</option>
                         </select>
                     </div>
                 </div>

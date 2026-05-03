@@ -26,7 +26,7 @@ class OrderController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'employee_id' => 'required|exists:employees,id',
-            'payment_type' => 'required|in:Cash,Card,Online',
+            'payment_type' => 'required|in:Cash,Credit Card,Bank Transfer,Online Payment',
             'product_id' => 'required|array',
             'product_id.*' => 'required|exists:products,id',
             'quantity' => 'required|array',

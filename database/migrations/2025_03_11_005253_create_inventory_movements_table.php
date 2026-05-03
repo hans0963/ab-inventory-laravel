@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->integer('new_balance')->default(0);
             $table->integer('new_luto')->default(0);
             $table->integer('total_inventory')->default(0);
+            $table->string('transaction_type', 20)->nullable();
             $table->timestamps();
 
             // Foreign key constraints

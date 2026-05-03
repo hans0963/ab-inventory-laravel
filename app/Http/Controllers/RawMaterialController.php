@@ -12,7 +12,10 @@ class RawMaterialController extends Controller
     {
         $materials = RawMaterial::paginate(10);
         $today = Carbon::today();
-        $nearExpiryCount = RawMaterial::whereBetween('expiration_date', [$today, $today->copy()->addDays(7)])->count();
+        
+        // Reset nearExpiryCount to 0 as requested
+        $nearExpiryCount = 0; 
+        
         $expiredCount = RawMaterial::where('expiration_date', '<', $today)->count();
 
         return view('raw-materials.index', compact(

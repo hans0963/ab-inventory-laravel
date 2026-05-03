@@ -41,46 +41,40 @@
             <table class="min-w-full text-sm" id="productionOutTable">
                 <thead>
                     <tr class="border-b border-gray-100">
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Reference No.</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">ID</th>
                         <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Product</th>
                         <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Quantity</th>
                         <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Date Pulled Out</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Reason</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Recorded By</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Reason/Remarks</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100" id="tableBody">
-                    @forelse($losses ?? [] as $loss)
+                    @forelse($losses as $loss)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
                             <td class="px-6 py-4 font-semibold" style="color: #E2725B;">
-                                {{ $loss->reference_number }}
+                                #{{ $loss->id }}
                             </td>
                             <td class="px-6 py-4 font-semibold text-gray-800">
-                                {{ $loss->product->name ?? $loss->product_name }}
+                                {{ $loss->product->product_name ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 text-red-600 font-bold">
+                                -{{ $loss->pull_out }}
                             </td>
                             <td class="px-6 py-4 text-gray-600">
-                                {{ $loss->quantity }}
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ \Carbon\Carbon::parse($loss->date_pulled_out)->format('Y-m-d') }}
+                                {{ \Carbon\Carbon::parse($loss->date)->format('Y-m-d H:i') }}
                             </td>
                             <td class="px-6 py-4">
-                                @php
-                                    $reason = strtolower($loss->reason ?? '');
-                                    if (str_contains($reason, 'expired')) {
-                                        $reasonStyle = 'background-color: #fde8e8; color: #a33a2a;';
-                                    } elseif (str_contains($reason, 'damaged')) {
-                                        $reasonStyle = 'background-color: #fef3cd; color: #8a6000;';
-                                    } else {
-                                        $reasonStyle = 'background-color: #f0f0f0; color: #666;';
-                                    }
-                                @endphp
-                                <span class="px-3 py-1 rounded-full text-xs font-medium" style="{{ $reasonStyle }}">
-                                    {{ ucfirst($loss->reason ?? 'Pull-out') }}
+                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                    {{ $loss->remarks ?? $loss->transaction_type }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ $loss->user->name ?? $loss->recorded_by ?? '—' }}
+                            <td class="px-6 py-4">
+                                <form action="{{ route('production-out.destroy', $loss->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     @empty
@@ -92,6 +86,10 @@
                     @endforelse
                 </tbody>
             </table>
+
+            <div class="p-4">
+                {{ $losses->links() }}
+            </div>
 
         </div>
     </div>

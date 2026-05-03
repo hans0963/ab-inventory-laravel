@@ -50,9 +50,13 @@
             </div>
 
             <!-- Main Content -->
-            <main class="min-h-screen">
-                {{ $header ?? '' }}
-                <div class="max-w-7xl mx-auto">
+            <main class="min-h-screen pt-20 pb-12">
+                @if(isset($header))
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                        {{ $header }}
+                    </div>
+                @endif
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {{ $slot }}
                 </div>
             </main>

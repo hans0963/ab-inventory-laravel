@@ -9,6 +9,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        // Drop existing views if they exist
+        DB::unprepared("DROP VIEW IF EXISTS vw_recent_sales");
+        DB::unprepared("DROP VIEW IF EXISTS vw_best_selling_products");
+        DB::unprepared("DROP VIEW IF EXISTS vw_low_stock_alerts");
+
         // Create the vw_recent_sales view
         DB::unprepared("
             CREATE VIEW vw_recent_sales AS

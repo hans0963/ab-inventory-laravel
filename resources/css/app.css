@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply font-inter leading-relaxed tracking-tight text-sienna bg-cream selection:bg-terracotta selection:text-cream;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-lora font-semibold tracking-tight;
+    }
+
+    .font-pacifico {
+        @apply tracking-normal;
+    }
+}
+
+@layer components {
+    .card-rustic {
+        @apply bg-white rounded-xl shadow-rustic p-6 border-l-4 border-sienna transition-all duration-300 hover:shadow-rustic-lg;
+    }
+
+    .btn-artisan {
+        @apply inline-flex items-center px-6 py-2.5 rounded-lg font-inter font-medium shadow-md transition-all duration-200 active:scale-95;
+    }
+
+    .btn-terracotta {
+        @apply btn-artisan bg-terracotta text-cream hover:bg-terracotta-dark;
+    }
+
+    .btn-sage {
+        @apply btn-artisan bg-sage text-cream hover:bg-sage-dark;
+    }
+
+    .btn-sienna {
+        @apply btn-artisan bg-sienna text-cream hover:bg-sienna-dark;
+    }
+
+    .input-artisan {
+        @apply w-full rounded-lg border-sienna border-opacity-30 bg-cream bg-opacity-10 py-2.5 px-4 focus:ring-2 focus:ring-terracotta focus:ring-opacity-50 focus:border-terracotta transition-all duration-200;
+    }
+}
+
+@layer utilities {
+    .spacing-section {
+        @apply py-10;
+    }
+}

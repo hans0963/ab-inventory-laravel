@@ -17,7 +17,9 @@ class InventoryMovement extends Model
         'pull_out',
         'new_balance',
         'new_luto',
-        'total_inventory'
+        'total_inventory',
+        'transaction_type',
+        'date'
     ];
 
     // Define relationships

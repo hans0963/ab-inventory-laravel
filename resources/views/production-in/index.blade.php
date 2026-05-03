@@ -42,63 +42,49 @@
             <table class="min-w-full text-sm" id="productionTable">
                 <thead>
                     <tr class="border-b border-gray-100">
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Batch Number</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">ID</th>
                         <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Product</th>
                         <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Quantity</th>
                         <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Production Date</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Expiration Date</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Status</th>
+                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100" id="tableBody">
-                    @forelse($batches ?? [] as $batch)
+                    @forelse($batches as $batch)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
                             <td class="px-6 py-4 font-semibold" style="color: #E2725B;">
-                                {{ $batch->batch_number }}
+                                #{{ $batch->id }}
                             </td>
                             <td class="px-6 py-4 font-semibold text-gray-800">
-                                {{ $batch->product->name ?? $batch->product_name }}
+                                {{ $batch->product->product_name ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 text-gray-600 font-bold">
+                                +{{ $batch->new_luto }}
                             </td>
                             <td class="px-6 py-4 text-gray-600">
-                                {{ $batch->quantity }}
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ \Carbon\Carbon::parse($batch->production_date)->format('Y-m-d') }}
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ \Carbon\Carbon::parse($batch->expiration_date)->format('Y-m-d') }}
+                                {{ \Carbon\Carbon::parse($batch->date)->format('Y-m-d H:i') }}
                             </td>
                             <td class="px-6 py-4">
-                                @php
-                                    $today = \Carbon\Carbon::today();
-                                    $expiry = \Carbon\Carbon::parse($batch->expiration_date);
-                                    $daysLeft = $today->diffInDays($expiry, false);
-
-                                    if ($daysLeft < 0) {
-                                        $statusLabel = 'Expired';
-                                        $statusStyle = 'background-color: #fde8e8; color: #a33a2a;';
-                                    } elseif ($daysLeft <= 2) {
-                                        $statusLabel = 'Near Expiry';
-                                        $statusStyle = 'background-color: #fef3cd; color: #8a6000;';
-                                    } else {
-                                        $statusLabel = 'Fresh';
-                                        $statusStyle = 'background-color: #f0f0f0; color: #666;';
-                                    }
-                                @endphp
-                                <span class="px-3 py-1 rounded-full text-xs font-medium" style="{{ $statusStyle }}">
-                                    {{ $statusLabel }}
-                                </span>
+                                <form action="{{ route('production-in.destroy', $batch->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
+                                </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
                                 No production batches found.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+
+            <div class="p-4">
+                {{ $batches->links() }}
+            </div>
 
         </div>
     </div>

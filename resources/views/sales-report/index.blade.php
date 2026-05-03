@@ -23,10 +23,14 @@
             <canvas id="dailySalesChart"></canvas>
         </div>
 
-        <!-- Sales by Category -->
+        <!-- Sales by Category Chart -->
         <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sage">
             <h2 class="text-lg font-lora font-semibold mb-4 text-sienna">Sales by Category</h2>
-            <canvas id="salesByCategoryChart"></canvas>
+            <div class="flex justify-center">
+                <div class="w-full max-w-[300px]">
+                    <canvas id="salesByCategoryChart"></canvas>
+                </div>
+            </div>
         </div>
 
         <!-- Top Selling Products -->
