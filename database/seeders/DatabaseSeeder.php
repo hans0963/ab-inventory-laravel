@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             ->count(7)
             ->create()
             ->each(function ($category) {
-                \App\Models\Products::factory()
+                \App\Models\Product::factory()
                     ->count(rand(3, 8))
                     ->create(['category_id' => $category->id]);
             });
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\RawMaterial::factory()->count(15)->create();
 
         $this->command->info('Seeding sales and inventory movements...');
-        $products = \App\Models\Products::all();
+        $products = \App\Models\Product::all();
         $employees = \App\Models\Employee::all();
         $suppliers = \App\Models\Supplier::all();
 

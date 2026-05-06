@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\InventoryMovement;
 use App\Models\Employee;
-use App\Models\Products;
+use App\Models\Product;
 
 class InventoryMovementsController extends Controller
 {
@@ -13,7 +13,7 @@ class InventoryMovementsController extends Controller
     {
         $movements = InventoryMovement::with(['product', 'employee', 'supplier'])->latest()->get(); 
         $employees = Employee::all();
-        $products = Products::all();
+        $products = Product::all();
 
         return view('inventory_movements.index', compact('movements', 'employees', 'products'));
     }

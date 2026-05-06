@@ -21,7 +21,7 @@ class InventoryMovementFactory extends Factory
         $totalInventory = $newBalance + $newLuto;
 
         return [
-            'product_id' => Products::factory(),
+            'product_id' => Product::factory(),
             'employee_id' => Employee::factory(),
             'supplier_id' => Supplier::factory(),
             'date' => $this->faker->dateTimeBetween('-30 days', 'now'),

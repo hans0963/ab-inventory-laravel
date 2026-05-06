@@ -15,7 +15,7 @@ class PurchaseSeeder extends Seeder
     {
         $suppliers = \App\Models\Supplier::all();
         $employees = \App\Models\Employee::all();
-        $products = \App\Models\Products::all();
+        $products = \App\Models\Product::all();
         
         if ($suppliers->isEmpty() || $employees->isEmpty() || $products->isEmpty()) {
             $this->command->warn('Skipping PurchaseSeeder: Dependencies not found.');

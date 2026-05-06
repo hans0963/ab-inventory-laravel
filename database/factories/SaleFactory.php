@@ -14,7 +14,7 @@ class SaleFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Products::factory(),
+            'product_id' => Product::factory(),
             'employee_id' => Employee::factory(),
             'date' => $this->faker->dateTimeBetween('-30 days', 'now'),
             'sold' => $this->faker->numberBetween(10, 50),

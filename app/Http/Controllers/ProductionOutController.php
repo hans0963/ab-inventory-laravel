@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\InventoryMovement;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,7 +24,7 @@ class ProductionOutController extends Controller
 
     public function create()
     {
-        $products = Products::all();
+        $products = Product::all();
         return view('production-out.create', compact('products'));
     }
 
@@ -36,7 +36,7 @@ class ProductionOutController extends Controller
             'reason' => 'required|string',
         ]);
 
-        $product = Products::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->product_id);
         $oldBalance = $product->quantity;
         
         // Update product quantity (decrement for pull out)

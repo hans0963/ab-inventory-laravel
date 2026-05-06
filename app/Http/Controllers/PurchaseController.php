@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\Purchase;
 use App\Models\InventoryMovement;
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Employee;
 use App\Models\PurchaseDetail;
@@ -24,7 +24,7 @@ class PurchaseController extends Controller
     public function create()
     {
         $suppliers = Supplier::all(); 
-        $products = Products::all(); 
+        $products = Product::all(); 
         $employees = Employee::all(); 
         return view('purchases.create', compact('suppliers', 'products', 'employees'));
     }
@@ -70,7 +70,7 @@ class PurchaseController extends Controller
                     'total' => $quantity * $price
                 ]);
 
-                $product = Products::find($productId);
+                $product = Product::find($productId);
                 if ($product) {
                     $product->increment('quantity', $quantity);
                 }
@@ -103,7 +103,7 @@ class PurchaseController extends Controller
     {
         $purchase = Purchase::with('details')->findOrFail($id);
         $suppliers = Supplier::all();
-        $products = Products::all();
+        $products = Product::all();
         return view('purchases.edit', compact('purchase', 'suppliers', 'products'));
     }
 

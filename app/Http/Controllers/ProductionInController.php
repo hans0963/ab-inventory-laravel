@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\InventoryMovement;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,7 +23,7 @@ class ProductionInController extends Controller
 
     public function create()
     {
-        $products = Products::all();
+        $products = Product::all();
         return view('production-in.create', compact('products'));
     }
 
@@ -34,7 +34,7 @@ class ProductionInController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $product = Products::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->product_id);
         $oldBalance = $product->quantity;
         
         // Update product quantity

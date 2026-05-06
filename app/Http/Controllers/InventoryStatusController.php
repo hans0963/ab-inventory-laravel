@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\InventoryMovement;
 use App\Models\Sale;
 use DB;
@@ -12,7 +12,7 @@ class InventoryStatusController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Products::with('category');
+        $query = Product::with('category');
 
         if ($request->has('product') && $request->product != '') {
             $query->where('id', $request->product);
@@ -70,7 +70,7 @@ class InventoryStatusController extends Controller
             ->orderByDesc('order_date')
             ->paginate(10); 
 
-        $products = Products::all(); 
+        $products = Product::all(); 
 
         $bestSellingProducts = DB::table('vw_best_selling_products')
             ->orderByDesc('total_sold')

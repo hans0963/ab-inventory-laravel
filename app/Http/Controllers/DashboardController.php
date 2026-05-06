@@ -2,95 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Product;
+use App\Models\Employee;
+use App\Models\Customer;
+use App\Models\Order;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $userRole = $user->role;
+        $user = auth()->user();
 
-        // Common data for all dashboards
-        $lowStockAlerts = DB::table('vw_low_stock_alerts')->get();
-        $totalSalesCount = DB::table('orders')->count();
-        $totalRevenue = DB::table('orders')->sum('total');
-        $totalProducts = DB::table('products')->count();
-        $totalCustomers = DB::table('customers')->count();
-        $totalEmployees = DB::table('employees')->count();
+        // Admin Dashboard
+        if ($user->role === 'admin') {
+            $totalSalesCount = Order::count();
+            $totalRevenue = Order::sum('total');
+            $totalEmployees = Employee::count();
+            $totalProducts = Product::count();
+            
+            $recentOrders = Order::latest()->limit(5)->get();
+            $lowStockAlerts = DB::table('vw_low_stock_alerts')->get();
 
-        // Role-specific data
-        switch($userRole) {
-            case 'admin':
-                $recentOrders = DB::table('orders')
-                    ->join('customers', 'orders.customer_id', '=', 'customers.id')
-                    ->select('orders.*', 'customers.name as customer_name')
-                    ->latest()
-                    ->limit(5)
-                    ->get();
-                
-                return view('dashboards.dashboard-admin', compact(
-                    'lowStockAlerts', 
-                    'totalSalesCount', 
-                    'totalRevenue', 
-                    'totalEmployees', 
-                    'totalProducts',
-                    'recentOrders'
-                ));
-
-            case 'manager':
-                $todaySales = DB::table('orders')
-                    ->whereDate('order_date', now())
-                    ->sum('total');
-                $totalOrders = $totalSalesCount;
-                $pendingOrders = DB::table('orders')->where('order_status', 'Pending')->count();
-                $recentOrders = DB::table('orders')
-                    ->join('customers', 'orders.customer_id', '=', 'customers.id')
-                    ->select('orders.*', 'customers.name as customer_name')
-                    ->latest()
-                    ->limit(5)
-                    ->get();
-                
-                return view('dashboards.dashboard-manager', compact(
-                    'lowStockAlerts', 
-                    'todaySales', 
-                    'totalOrders', 
-                    'pendingOrders',
-                    'totalProducts',
-                    'totalCustomers',
-                    'recentOrders'
-                ));
-
-            case 'cashier':
-                $todaysSales = DB::table('orders')
-                    ->whereDate('order_date', now())
-                    ->sum('total');
-                $transactionsCount = DB::table('orders')
-                    ->whereDate('order_date', now())
-                    ->count();
-                $recentOrders = DB::table('orders')
-                    ->join('customers', 'orders.customer_id', '=', 'customers.id')
-                    ->select('orders.*', 'customers.name as customer_name')
-                    ->whereDate('order_date', now())
-                    ->latest()
-                    ->limit(5)
-                    ->get();
-                
-                return view('dashboards.dashboard-cashier', compact(
-                    'lowStockAlerts', 
-                    'todaysSales', 
-                    'transactionsCount',
-                    'totalSalesCount', 
-                    'totalRevenue', 
-                    'totalProducts',
-                    'totalEmployees',
-                    'recentOrders'
-                ));
-
-            default:
-                return redirect()->route('login')->with('error', 'Unauthorized role.');
+            return view('dashboards.dashboard-admin', compact(
+                'totalSalesCount', 'totalRevenue', 'totalEmployees', 'totalProducts', 'recentOrders', 'lowStockAlerts'
+            ));
         }
+
+        // Manager Dashboard
+        if ($user->role === 'manager') {
+            $todaySales = Order::whereDate('order_date', today())->sum('total');
+            $totalOrders = Order::count();
+            $totalProducts = Product::count();
+            $totalCustomers = Customer::count();
+            
+            $recentOrders = Order::latest()->limit(5)->get();
+            $lowStockAlerts = DB::table('vw_low_stock_alerts')->get();
+
+            return view('dashboards.dashboard-manager', compact(
+                'todaySales', 'totalOrders', 'totalProducts', 'totalCustomers', 'recentOrders', 'lowStockAlerts'
+            ));
+        }
+
+        // Cashier Dashboard
+        if ($user->role === 'cashier') {
+            $todaysSales = Order::whereDate('order_date', today())->sum('total');
+            $transactionsCount = Order::whereDate('order_date', today())->count();
+            $recentOrders = Order::whereDate('order_date', today())->latest()->limit(5)->get();
+            $lowStockAlerts = DB::table('vw_low_stock_alerts')->get();
+
+            return view('dashboards.dashboard-cashier', compact(
+                'todaysSales', 'transactionsCount', 'recentOrders', 'lowStockAlerts'
+            ));
+        }
+
+        return view('dashboard');
     }
 }

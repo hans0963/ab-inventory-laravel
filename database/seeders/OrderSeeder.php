@@ -13,7 +13,7 @@ class OrderSeeder extends Seeder
     {
         $customers = \App\Models\Customer::all();
         $employees = \App\Models\Employee::all();
-        $products = \App\Models\Products::all();
+        $products = \App\Models\Product::all();
         
         if ($customers->isEmpty() || $employees->isEmpty() || $products->isEmpty()) {
             $this->command->warn('Skipping OrderSeeder: Dependencies not found.');

@@ -6,7 +6,7 @@ use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\Order;
 use App\Models\OrderDetail;
-use App\Models\Products;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -17,7 +17,7 @@ class OrderController extends Controller
         return view('orders.create', [
             'customers' => Customer::all(),
             'employees' => Employee::all(),
-            'products' => Products::all()
+            'products' => Product::all()
         ]);
     }
 

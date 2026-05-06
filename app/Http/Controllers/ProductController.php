@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Products;
+use App\Models\Product;
 use App\Models\Category;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Products::with('category');
+        $query = Product::with('category');
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -41,18 +41,18 @@ class ProductController extends Controller
             'stock_alert_threshold' => 'required|integer|min:0',
         ]);
 
-        Products::create($validated);
+        Product::create($validated);
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
-    public function edit(Products $product)
+    public function edit(Product $product)
     {
         $categories = Category::all();
         return view('products.edit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, Products $product)
+    public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
             'product_name' => 'required|string|max:255',
@@ -69,7 +69,7 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
-    public function destroy(Products $product)
+    public function destroy(Product $product)
     {
         $product->delete();
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
