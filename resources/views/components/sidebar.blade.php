@@ -1,7 +1,7 @@
 <div class="h-full flex flex-col bg-cream font-inter">
     <!-- Logo -->
     <div class="p-4 text-center border-b border-sienna bg-terracotta">
-        <h1 class="text-xl font-lora font-semibold text-white">{{ ucfirst(auth()->user()->role) }}</h1>
+        <h1 class="text-xl font-formal font-semibold text-white">{{ ucfirst(auth()->user()->role) }}</h1>
     </div>
 
     <!-- Navigation -->

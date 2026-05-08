@@ -43,14 +43,22 @@ class DatabaseSeeder extends Seeder
 
         // Seed Core Entities
         $this->command->info('Seeding categories and products...');
-        \App\Models\Category::factory()
-            ->count(7)
-            ->create()
-            ->each(function ($category) {
-                \App\Models\Product::factory()
-                    ->count(rand(3, 8))
-                    ->create(['category_id' => $category->id]);
-            });
+        
+        $categories = [
+            ['category_name' => 'Breads & Rolls', 'description' => 'Freshly baked daily breads, from classic pandesal to artisan rolls.'],
+            ['category_name' => 'Cakes & Pastries', 'description' => 'Sweet treats, celebration cakes, and delicate pastries for every occasion.'],
+            ['category_name' => 'Savory Bites', 'description' => 'Savory snacks, meat-filled buns, and quick salty cravings.'],
+            ['category_name' => 'Cookies & Biscuits', 'description' => 'Crunchy, chewy, and perfectly baked cookies and traditional biscuits.'],
+            ['category_name' => 'Beverages', 'description' => 'Refreshments to pair perfectly with your favorite bakeshop treats.'],
+        ];
+
+        foreach ($categories as $catData) {
+            $category = \App\Models\Category::create($catData);
+            
+            \App\Models\Product::factory()
+                ->count(rand(5, 10))
+                ->create(['category_id' => $category->id]);
+        }
 
         $this->command->info('Seeding suppliers and employees...');
         \App\Models\Supplier::factory()->count(10)->create();
@@ -67,12 +75,6 @@ class DatabaseSeeder extends Seeder
             \App\Models\Sale::factory()->count(rand(2, 5))->create([
                 'product_id' => $product->id,
                 'employee_id' => $employees->random()->id
-            ]);
-
-            \App\Models\InventoryMovement::factory()->count(rand(1, 3))->create([
-                'product_id' => $product->id,
-                'employee_id' => $employees->random()->id,
-                'supplier_id' => $suppliers->random()->id
             ]);
         }
         

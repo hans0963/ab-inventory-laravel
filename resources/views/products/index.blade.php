@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h2 class="font-pacifico text-4xl text-sienna">
+                <h2 class="font-formal text-4xl text-sienna">
                     {{ __('Products') }}
                 </h2>
                 <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Manage bakeshop product inventory</p>
@@ -15,19 +15,40 @@
             
             {{-- Header with search + add product --}}
             <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div class="w-full md:w-1/3">
-                    <form action="{{ route('products.index') }}" method="GET">
-                        <div class="relative">
-                            <input type="text" name="search" value="{{ request('search') }}" 
-                                   placeholder="Search products..." 
-                                   class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 pl-12 pr-4 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all shadow-inner">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-sienna opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                <div class="w-full md:w-2/3 flex flex-col md:flex-row gap-4">
+                    {{-- Search Form --}}
+                    <div class="flex-1">
+                        <form action="{{ route('products.index') }}" method="GET">
+                            <div class="relative">
+                                <input type="text" name="search" value="{{ request('search') }}" 
+                                       placeholder="Search products..." 
+                                       class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 pl-12 pr-4 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all shadow-inner">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-sienna opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
+
+                    {{-- Category Filter --}}
+                    <div class="w-full md:w-48">
+                        <form action="{{ route('products.index') }}" method="GET" id="category-filter-form">
+                            @if(request('search'))
+                                <input type="hidden" name="search" value="{{ request('search') }}">
+                            @endif
+                            <select name="category" onchange="document.getElementById('category-filter-form').submit()"
+                                    class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all shadow-sm text-sienna font-medium">
+                                <option value="">All Categories</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->category_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </form>
+                    </div>
                 </div>
                 @if(auth()->user()->hasRole(['admin', 'manager']))
                 <a href="{{ route('products.create') }}" 

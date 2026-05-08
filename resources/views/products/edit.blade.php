@@ -16,11 +16,10 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="col-span-2">
-                        <label class="block text-sm font-semibold text-sienna mb-2">Product Name *</label>
-                        <input type="text" name="product_name" value="{{ old('product_name', $product->product_name) }}" required 
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="e.g. Pandesal, Ensaymada">
-                        @error('product_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        <label class="block text-sm font-semibold text-sienna mb-2">Product Name (Non-editable)</label>
+                        <input type="text" value="{{ $product->product_name }}" readonly 
+                               class="w-full border-sienna bg-gray-100 rounded-md shadow-sm text-gray-600 cursor-not-allowed">
+                        <p class="text-[10px] text-sage mt-1 italic">Product name cannot be changed once created.</p>
                     </div>
 
                     <div>
@@ -43,14 +42,6 @@
                                class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
                                placeholder="0">
                         @error('quantity') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Buying Price (₱) *</label>
-                        <input type="number" step="0.01" name="buying_price" value="{{ old('buying_price', $product->buying_price) }}" required min="0"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="0.00">
-                        @error('buying_price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>

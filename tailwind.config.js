@@ -18,6 +18,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                formal: ['Georgia', 'Arial', 'serif'],
                 lora: ['Lora', 'serif'],
                 inter: ['Inter', 'sans-serif'],
                 pacifico: ['Pacifico', 'cursive'],

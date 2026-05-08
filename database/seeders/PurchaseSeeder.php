@@ -6,7 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseDetail;
 use App\Models\Supplier;
 use App\Models\Employee;
-use App\Models\Products;
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 
 class PurchaseSeeder extends Seeder
@@ -24,11 +24,12 @@ class PurchaseSeeder extends Seeder
 
         // Create 15 formal procurement records
         for ($i = 1; $i <= 15; $i++) {
+            $reference = 'PO-' . now()->year . '-' . str_pad($i, 4, '0', STR_PAD_LEFT) . '-' . rand(1000, 9999);
             $purchase = \App\Models\Purchase::create([
                 'purchase_date' => now()->subDays(rand(1, 45)),
                 'supplier_id' => $suppliers->random()->id,
                 'employee_id' => $employees->random()->id,
-                'reference' => 'PO-' . now()->year . '-' . str_pad($i, 4, '0', STR_PAD_LEFT)
+                'reference' => $reference
             ]);
             
             // Add purchase details

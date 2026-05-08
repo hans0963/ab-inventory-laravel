@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center w-full">
             <div>
-                <h2 class="font-semibold text-2xl text-amber-900 leading-tight">
+                <h2 class="font-formal font-semibold text-2xl text-amber-900 leading-tight">
                     {{ __('Production In') }}
                 </h2>
                 <p class="text-sm text-gray-500 mt-1">Record finished products from production</p>

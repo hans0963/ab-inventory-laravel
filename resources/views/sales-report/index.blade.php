@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
-            <h2 class="font-pacifico text-3xl text-sienna leading-tight">
+            <h2 class="font-formal text-3xl text-sienna leading-tight">
                 {{ __('Sales Report') }}
             </h2>
             <p class="font-inter text-sage">Comprehensive sales analytics and insights</p>

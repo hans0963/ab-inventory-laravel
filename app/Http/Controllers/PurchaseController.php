@@ -69,16 +69,6 @@ class PurchaseController extends Controller
                     'price' => $price,
                     'total' => $quantity * $price
                 ]);
-
-                $product = Product::find($productId);
-                if ($product) {
-                    $product->increment('quantity', $quantity);
-                }
-
-                InventoryMovement::updateOrCreate(
-                    ['product_id' => $productId],
-                    ['date' => now(), 'pull_out' => 0]
-                );
             }
 
             DB::commit();

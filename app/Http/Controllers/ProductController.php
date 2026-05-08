@@ -20,8 +20,13 @@ class ProductController extends Controller
                   });
         }
 
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category_id', $request->category);
+        }
+
         $products = $query->latest()->paginate(10);
-        return view('products.index', compact('products'));
+        $categories = Category::all();
+        return view('products.index', compact('products', 'categories'));
     }
 
     public function create()
@@ -35,11 +40,12 @@ class ProductController extends Controller
         $validated = $request->validate([
             'product_name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'buying_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'stock_alert_threshold' => 'required|integer|min:0',
         ]);
+
+        $validated['buying_price'] = 0; // Defaulting to 0 since it's removed from UI
 
         Product::create($validated);
 
@@ -55,13 +61,10 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'buying_price' => 'required|numeric|min:0',
             'selling_price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
             'stock_alert_threshold' => 'required|integer|min:0',
-
         ]);
 
         $product->update($validated);
@@ -71,8 +74,14 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        // Check if product has sales history in order_details
+        if ($product->orderDetails()->exists()) {
+            return redirect()->route('products.index')->with('error', 'Cannot delete "' . $product->product_name . '" because it has existing sales records. You should keep it for historical reporting.');
+        }
+
+        $product_name = $product->product_name;
         $product->delete();
-        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('products.index')->with('success', 'Product "' . $product_name . '" deleted successfully.');
     }
 }
 

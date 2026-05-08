@@ -4,7 +4,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h2 class="font-pacifico text-4xl text-sienna">
+                <h2 class="font-formal text-4xl text-sienna">
                     {{ __('Baking Ingredients') }}
                 </h2>
                 <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Monitor raw materials and expiration</p>

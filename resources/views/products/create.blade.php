@@ -43,14 +43,6 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Buying Price (₱) *</label>
-                        <input type="number" step="0.01" name="buying_price" required min="0"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="0.00">
-                        @error('buying_price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
                         <label class="block text-sm font-semibold text-sienna mb-2">Selling Price (₱) *</label>
                         <input type="number" step="0.01" name="selling_price" required min="0"
                                class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"

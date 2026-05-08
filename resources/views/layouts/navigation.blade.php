@@ -19,7 +19,7 @@
 
                 <!-- Welcome Message -->
                 <div class="ms-10">
-                    <h2 class="text-2xl font-lora font-semibold text-cream">Welcome back, Shop Owner</h2>
+                    <h2 class="text-2xl font-formal font-semibold text-cream">Welcome back, Shop Owner</h2>
                 </div>
             </div>
 

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="mb-4">
-            <h1 class="text-3xl font-bold text-[#5a3e2b]">Inventory & Production Reports</h1>
+            <h1 class="text-3xl font-formal font-bold text-[#5a3e2b]">Inventory & Production Reports</h1>
             <p class="text-gray-500">Comprehensive analytics for operations</p>
         </div>
     </x-slot>
