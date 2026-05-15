@@ -75,15 +75,16 @@ class Purchase extends Model
     /**
      * Generate unique PO number with format PO-YYYYMMDD-XXX
      */
-    public function generatePONumber(): string
+    public static function generatePONumber(?string $date = null): string
     {
-        $date = now()->format('Ymd');
+        $dateObj = $date ? \Carbon\Carbon::parse($date) : now();
+        $dateStr = $dateObj->format('Ymd');
         
-        // Count POs created today to generate sequence
-        $count = self::whereDate('created_date', now()->toDateString())->count() + 1;
+        // Count POs created on that date to generate sequence
+        $count = self::whereDate('created_date', $dateObj->toDateString())->count() + 1;
         $sequence = str_pad($count, 3, '0', STR_PAD_LEFT);
         
-        return "PO-{$date}-{$sequence}";
+        return "PO-{$dateStr}-{$sequence}";
     }
 
     /**

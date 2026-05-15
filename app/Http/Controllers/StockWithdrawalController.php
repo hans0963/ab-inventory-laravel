@@ -39,6 +39,7 @@ class StockWithdrawalController extends Controller
     public function create()
     {
         $products = Product::where('status', 'Active')
+                          ->where('inventory_type', 'Raw Material')
                           ->where('quantity', '>', 0)
                           ->get();
         return view('stock-withdrawal.create', compact('products'));

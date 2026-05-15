@@ -1,10 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
-            <h2 class="font-formal text-3xl text-sienna leading-tight">
-                {{ __('Sales Report') }}
-            </h2>
-            <p class="font-inter text-sage">Comprehensive sales analytics and insights</p>
+            <div>
+                <h2 class="font-formal text-3xl text-sienna leading-tight">
+                    {{ __('Sales Report') }}
+                </h2>
+                <p class="font-inter text-sage">Comprehensive sales analytics and insights</p>
+            </div>
+            <div class="flex space-x-2">
+                <a href="{{ route('inventory.sales', ['period' => 'today']) }}" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition {{ $period === 'today' ? 'bg-sienna text-cream' : 'bg-white text-sienna border border-sienna hover:bg-cream' }}">Today</a>
+                <a href="{{ route('inventory.sales', ['period' => 'month']) }}" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition {{ $period === 'month' ? 'bg-sienna text-cream' : 'bg-white text-sienna border border-sienna hover:bg-cream' }}">This Month</a>
+                <a href="{{ route('inventory.sales', ['period' => 'year']) }}" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition {{ $period === 'year' ? 'bg-sienna text-cream' : 'bg-white text-sienna border border-sienna hover:bg-cream' }}">This Year</a>
+                <a href="{{ route('inventory.sales', ['period' => 'all']) }}" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition {{ $period === 'all' ? 'bg-sienna text-cream' : 'bg-white text-sienna border border-sienna hover:bg-cream' }}">All Time</a>
+            </div>
         </div>
     </x-slot>    
 
@@ -19,7 +27,13 @@
 
         <!-- Daily Sales Chart -->
         <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-terracotta">
-            <h2 class="text-lg font-lora font-semibold mb-4 text-sienna">Daily Sales (Last 7 Days)</h2>
+            <h2 class="text-lg font-lora font-semibold mb-4 text-sienna">
+                @if($period === 'today') Sales Performance (Today)
+                @elseif($period === 'month') Sales Performance (This Month)
+                @elseif($period === 'year') Sales Performance (This Year)
+                @else Sales Performance (Last 7 Days)
+                @endif
+            </h2>
             <canvas id="dailySalesChart"></canvas>
         </div>
 
@@ -34,30 +48,39 @@
         </div>
 
         <!-- Top Selling Products -->
-        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sienna">
-            <h2 class="text-lg font-lora font-semibold mb-4 text-sienna">Top Selling Products</h2>
-            <table class="min-w-full border border-sienna rounded-lg overflow-hidden">
+        <div class="card-rustic border-sienna overflow-hidden p-0">
+            <div class="p-6 border-b border-sienna border-opacity-10">
+                <h2 class="text-xl font-lora font-bold text-sienna">Top Selling Products</h2>
+            </div>
+            <table class="min-w-full text-sm">
                 <thead>
-                    <tr class="bg-sienna text-cream">
-                        <th class="px-4 py-2 text-left">Product</th>
-                        <th class="px-4 py-2 text-left">Units Sold</th>
-                        <th class="px-4 py-2 text-left">Revenue</th>
-                        <th class="px-4 py-2 text-left">Performance</th>
+                    <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                        <th class="px-6 py-4 text-left">Product</th>
+                        <th class="px-6 py-4 text-center">Units Sold</th>
+                        <th class="px-6 py-4 text-right">Revenue</th>
+                        <th class="px-6 py-4 text-left">Performance</th>
                     </tr>
                 </thead>
-                <tbody class="bg-cream divide-y divide-sienna">
-                    @foreach($topProducts ?? [] as $product)
-                        <tr>
-                            <td class="px-4 py-3 font-semibold text-sienna">{{ $product->name }}</td>
-                            <td class="px-4 py-3 text-sienna">{{ $product->units_sold }}</td>
-                            <td class="px-4 py-3 font-semibold text-terracotta">₱{{ number_format($product->revenue, 2) }}</td>
-                            <td class="px-4 py-3">
-                                <div class="bg-terracotta bg-opacity-30 h-2 rounded-full">
-                                    <div class="bg-terracotta h-2 rounded-full" style="width: {{ $product->performance }}%"></div>
+                <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                    @forelse($topProducts ?? [] as $product)
+                        <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                            <td class="px-6 py-4 font-bold text-sienna">{{ $product->name }}</td>
+                            <td class="px-6 py-4 text-center font-black text-sage">{{ $product->units_sold }}</td>
+                            <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($product->revenue, 2) }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex-1 bg-cream bg-opacity-50 h-2 rounded-full overflow-hidden border border-sienna border-opacity-10">
+                                        <div class="bg-terracotta h-full rounded-full" style="width: {{ $product->performance }}%"></div>
+                                    </div>
+                                    <span class="text-[10px] font-black text-sienna">{{ round($product->performance) }}%</span>
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-sage italic">No product data available for this period.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -72,10 +95,10 @@
             new Chart(dailySalesCtx, {
                 type: 'line',
                 data: {
-                    labels: {!! json_encode($dailySalesLabels) !!},
+                    labels: {!! json_encode($chartLabels) !!},
                     datasets: [{
-                        label: 'Daily Sales (₱)',
-                        data: {!! json_encode($dailySalesData) !!},
+                        label: 'Sales (₱)',
+                        data: {!! json_encode($chartValues) !!},
                         borderColor: '#E2725B', // terracotta
                         backgroundColor: 'rgba(226, 114, 91, 0.1)',
                         borderWidth: 3,

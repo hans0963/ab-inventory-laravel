@@ -22,9 +22,10 @@
                     <thead>
                         <tr class="bg-sienna text-cream uppercase text-xs tracking-widest font-bold">
                             <th class="px-6 py-4 text-left">Date</th>
+                            <th class="px-6 py-4 text-left">PO Number</th>
                             <th class="px-6 py-4 text-left">Supplier</th>
-                            <th class="px-6 py-4 text-left">Company</th>
-                            <th class="px-6 py-4 text-left">Reference</th>
+                            <th class="px-6 py-4 text-left">Total Amount</th>
+                            <th class="px-6 py-4 text-left">Status</th>
                             <th class="px-6 py-4 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -32,11 +33,23 @@
                         @foreach ($purchases as $purchase)
                             <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
                                 <td class="px-6 py-5 font-medium text-sienna opacity-80">{{ \Carbon\Carbon::parse($purchase->purchase_date)->format('M d, Y') }}</td>
-                                <td class="px-6 py-5 font-bold text-sienna text-base">{{ $purchase->supplier->suppliers_name }}</td>
-                                <td class="px-6 py-5 text-sage font-medium">{{ $purchase->supplier->suppliers_company }}</td>
+                                <td class="px-6 py-5 font-bold text-sienna text-base">{{ $purchase->po_number ?? $purchase->reference }}</td>
                                 <td class="px-6 py-5">
-                                    <span class="bg-terracotta bg-opacity-10 text-terracotta px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider">
-                                        {{ $purchase->reference }}
+                                    <div class="font-bold text-sienna">{{ $purchase->supplier->suppliers_name }}</div>
+                                    <div class="text-xs text-sage font-medium">{{ $purchase->supplier->suppliers_company }}</div>
+                                </td>
+                                <td class="px-6 py-5 font-black text-terracotta">₱{{ number_format($purchase->total_amount, 2) }}</td>
+                                <td class="px-6 py-5">
+                                    @php
+                                        $statusClass = match($purchase->status) {
+                                            'Pending' => 'bg-yellow-100 text-yellow-800',
+                                            'Partial' => 'bg-blue-100 text-blue-800',
+                                            'Complete' => 'bg-green-100 text-green-800',
+                                            default => 'bg-gray-100 text-gray-800'
+                                        };
+                                    @endphp
+                                    <span class="{{ $statusClass }} px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                        {{ $purchase->status }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-5 text-center">

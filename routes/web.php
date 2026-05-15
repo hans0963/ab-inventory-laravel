@@ -97,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth'])->name('inventory.sales');
+Route::get('/inventory-report', [ReportController::class, 'inventoryReport'])->middleware(['auth'])->name('reports.inventory');
+Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth'])->name('reports.production');
 Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth'])->name('financial.overview');
 
 // Cashier Module Routes

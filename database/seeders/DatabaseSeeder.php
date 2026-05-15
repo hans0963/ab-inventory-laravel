@@ -13,31 +13,61 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create role-based users
-        User::firstOrCreate(
+        // Create role-based users and link them to employees
+        $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Administrator',
-                'password' => bcrypt('password'),
+                'password' => 'password',
                 'role' => 'admin',
+                'email_verified_at' => now(),
+            ]
+        );
+        \App\Models\Employee::firstOrCreate(
+            ['employee_email' => $admin->email],
+            [
+                'user_id' => $admin->id,
+                'employee_name' => $admin->name,
+                'employee_phone' => '09123456789',
+                'position' => 'Administrator'
             ]
         );
 
-        User::firstOrCreate(
+        $manager = User::firstOrCreate(
             ['email' => 'manager@example.com'],
             [
                 'name' => 'Operations Manager',
-                'password' => bcrypt('password'),
+                'password' => 'password',
                 'role' => 'manager',
+                'email_verified_at' => now(),
+            ]
+        );
+        \App\Models\Employee::firstOrCreate(
+            ['employee_email' => $manager->email],
+            [
+                'user_id' => $manager->id,
+                'employee_name' => $manager->name,
+                'employee_phone' => '09123456790',
+                'position' => 'Operations Manager'
             ]
         );
 
-        User::firstOrCreate(
+        $cashier = User::firstOrCreate(
             ['email' => 'cashier@example.com'],
             [
                 'name' => 'Front Desk Cashier',
-                'password' => bcrypt('password'),
+                'password' => 'password',
                 'role' => 'cashier',
+                'email_verified_at' => now(),
+            ]
+        );
+        \App\Models\Employee::firstOrCreate(
+            ['employee_email' => $cashier->email],
+            [
+                'user_id' => $cashier->id,
+                'employee_name' => $cashier->name,
+                'employee_phone' => '09123456791',
+                'position' => 'Cashier'
             ]
         );
 
@@ -95,6 +125,40 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->command->info('Seeding suppliers and employees...');
+        
+        // Seed Raw Materials as Products
+        $rawMaterialsCategory = \App\Models\Category::create([
+            'category_name' => 'Raw Materials',
+            'description' => 'Ingredients and supplies used in production.'
+        ]);
+
+        $rawMaterialsData = [
+            'Bread Flour' => '25kg bag',
+            'All-Purpose Flour' => '25kg bag',
+            'White Sugar' => '50kg bag',
+            'Brown Sugar' => '50kg bag',
+            'Unsalted Butter' => '1kg block',
+            'Instant Dry Yeast' => '500g pack',
+            'Fresh Whole Milk' => '1L carton',
+            'Large Grade A Eggs' => 'Tray of 30',
+            'Salt' => '1kg pack',
+            'Vanilla Extract' => '500ml bottle',
+            'Dark Chocolate Chips' => '1kg pack',
+            'Cocoa Powder' => '1kg pack'
+        ];
+
+        foreach ($rawMaterialsData as $name => $unit) {
+            \App\Models\Product::create([
+                'product_name' => $name,
+                'category_id' => $rawMaterialsCategory->id,
+                'inventory_type' => 'Raw Material',
+                'selling_price' => 0, // Raw materials usually don't have a selling price
+                'quantity' => rand(50, 200),
+                'status' => 'Active',
+                'stock_alert_threshold' => 10
+            ]);
+        }
+
         \App\Models\Supplier::factory()->count(10)->create();
         \App\Models\Employee::factory()->count(8)->create();
         
@@ -121,6 +185,7 @@ class DatabaseSeeder extends Seeder
         // Run seeders for complex transactions
         $this->command->info('Running transaction seeders...');
         $this->call([
+            DiscountTypeSeeder::class,
             OrderSeeder::class,
             PurchaseSeeder::class,
             ProductionInSeeder::class,

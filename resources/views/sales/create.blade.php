@@ -51,11 +51,11 @@
                         <label class="block text-sm font-semibold text-sienna mb-2">Cashier/Employee *</label>
                         <select name="employee_id" required class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
                             @if($currentEmployee)
-                                <option value="{{ $currentEmployee->id }}" selected>{{ $currentEmployee->user->name }} (Current)</option>
+                                <option value="{{ $currentEmployee->id }}" selected>{{ $currentEmployee->user->name ?? $currentEmployee->employee_name }} (Current)</option>
                             @endif
                             @foreach($employees as $employee)
                                 @if(!$currentEmployee || $employee->id != $currentEmployee->id)
-                                    <option value="{{ $employee->id }}">{{ $employee->user->name }}</option>
+                                    <option value="{{ $employee->id }}">{{ $employee->user->name ?? $employee->employee_name }}</option>
                                 @endif
                             @endforeach
                         </select>

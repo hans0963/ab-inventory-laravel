@@ -1,103 +1,89 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
-            <h2 class="font-pacifico text-3xl text-sienna leading-tight">
-                {{ __('Edit Product') }}
-            </h2>
-            <p class="font-inter text-sage">Update details for {{ $product->product_name }}</p>
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
+            <div>
+                <h2 class="font-formal text-4xl text-sienna">
+                    {{ __('Edit Product') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Update details for {{ $product->product_name }}</p>
+            </div>
         </div>
     </x-slot>
 
-    <div class="py-6 max-w-4xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white rounded-lg shadow-md p-8 border-l-4 border-sienna">
-            <form method="POST" action="{{ route('products.update', $product->id) }}" class="space-y-6">
-                @csrf
-                @method('PUT')
+    <div class="card-rustic border-sienna max-w-4xl mx-auto mt-8">
+        <form method="POST" action="{{ route('products.update', $product->id) }}" class="space-y-8">
+            @csrf
+            @method('PUT')
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="col-span-2">
-                        <label class="block text-sm font-semibold text-sienna mb-2">Product Name (Non-editable)</label>
-                        <input type="text" value="{{ $product->product_name }}" readonly 
-                               class="w-full border-sienna bg-gray-100 rounded-md shadow-sm text-gray-600 cursor-not-allowed">
-                        <p class="text-[10px] text-sage mt-1 italic">Product name cannot be changed once created.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Inventory Type *</label>
-                        <input type="text" value="{{ $product->inventory_type }}" readonly 
-                               class="w-full border-sienna bg-gray-100 rounded-md shadow-sm text-gray-600 cursor-not-allowed">
-                        <p class="text-[10px] text-sage mt-1 italic">Type cannot be changed after creation</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Category *</label>
-                        <select name="category_id" required 
-                                class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                            <option value="">Select Category</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                    {{ $category->category_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('category_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Status *</label>
-                        <select name="status" required 
-                                class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                            <option value="Active" {{ old('status', $product->status) === 'Active' ? 'selected' : '' }}>Active</option>
-                            <option value="Inactive" {{ old('status', $product->status) === 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                        </select>
-                        @error('status') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Current Stock *</label>
-                        <input type="number" name="quantity" value="{{ old('quantity', $product->quantity) }}" required min="0"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="0">
-                        @error('quantity') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Selling Price (₱) *</label>
-                        <input type="number" step="0.01" name="selling_price" value="{{ old('selling_price', $product->selling_price) }}" required min="0"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="0.00">
-                        @error('selling_price') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Expiration Date</label>
-                        <input type="date" name="expiration_date" value="{{ old('expiration_date', $product->expiration_date?->format('Y-m-d')) }}"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                        <p class="text-[10px] text-sage mt-1 italic">Optional: Set for perishable items</p>
-                        @error('expiration_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Stock Alert Threshold *</label>
-                        <input type="number" name="stock_alert_threshold" value="{{ old('stock_alert_threshold', $product->stock_alert_threshold) }}" required min="0"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="e.g. 10">
-                        <p class="text-[10px] text-sage mt-1 italic">Notify when stock falls below this level</p>
-                        @error('stock_alert_threshold') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="col-span-2">
+                    <x-input-label for="product_name" value="Product Name (Non-editable)" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input id="product_name" type="text" value="{{ $product->product_name }}" readonly class="mt-1 block w-full bg-gray-100 !text-sm cursor-not-allowed opacity-60" />
+                    <p class="text-[10px] text-sage mt-1 italic font-medium">Product name cannot be changed once created.</p>
                 </div>
 
-                <div class="flex justify-between items-center pt-4 border-t border-tan border-opacity-30">
-                    <button type="button" onclick="window.location='{{ route('products.index') }}'" 
-                            class="text-gray-500 hover:text-sienna font-semibold transition">
-                        Cancel
-                    </button>
-                    <button type="submit" 
-                            class="bg-sienna hover:bg-opacity-90 text-cream font-inter px-10 py-2 rounded-lg shadow-md transition font-bold uppercase tracking-widest">
-                        Update Product
-                    </button>
+                <div>
+                    <x-input-label for="inventory_type" value="Inventory Type (Non-editable)" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input id="inventory_type" type="text" value="{{ $product->inventory_type }}" readonly class="mt-1 block w-full bg-gray-100 !text-sm cursor-not-allowed opacity-60" />
+                    <p class="text-[10px] text-sage mt-1 italic font-medium">Type cannot be changed after creation</p>
                 </div>
-            </form>
+
+                <div>
+                    <x-input-label for="category_id" value="Category *" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <select name="category_id" id="category_id" required class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm bg-cream bg-opacity-10">
+                        <option value="">Select Category</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>{{ $category->category_name }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="status" value="Status *" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <select name="status" id="status" required class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm bg-cream bg-opacity-10">
+                        <option value="Active" {{ old('status', $product->status) == 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Inactive" {{ old('status', $product->status) == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                    </select>
+                    <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="quantity" value="Current Stock *" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input id="quantity" name="quantity" type="number" value="{{ old('quantity', $product->quantity) }}" min="0" required class="mt-1 block w-full !text-sm" />
+                    <x-input-error :messages="$errors->get('quantity')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="selling_price" value="Selling Price (₱) *" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input id="selling_price" name="selling_price" type="number" step="0.01" value="{{ old('selling_price', $product->selling_price) }}" min="0" required class="mt-1 block w-full !text-sm" />
+                    <x-input-error :messages="$errors->get('selling_price')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="expiration_date" value="Expiration Date" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input id="expiration_date" name="expiration_date" type="date" value="{{ old('expiration_date', $product->expiration_date?->format('Y-m-d')) }}" class="mt-1 block w-full !text-sm" />
+                    <x-input-error :messages="$errors->get('expiration_date')" class="mt-2" />
+                </div>
+
+                <div>
+                    <x-input-label for="stock_alert_threshold" value="Stock Alert Threshold *" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input id="stock_alert_threshold" name="stock_alert_threshold" type="number" value="{{ old('stock_alert_threshold', $product->stock_alert_threshold) }}" min="0" required class="mt-1 block w-full !text-sm" />
+                    <x-input-error :messages="$errors->get('stock_alert_threshold')" class="mt-2" />
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-8 border-t border-sienna border-opacity-10">
+                <a href="{{ route('products.index') }}" class="text-xs font-black text-sage uppercase tracking-widest hover:text-sienna transition">
+                    ← Back to Catalog
+                </a>
+                <x-primary-button class="!bg-terracotta hover:!bg-terracotta-dark shadow-rustic">
+                    Update Product
+                </x-primary-button>
+            </div>
+        </form>
+    </div>
+</x-app-layout>
         </div>
     </div>
 </x-app-layout>

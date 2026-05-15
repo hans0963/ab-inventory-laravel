@@ -49,7 +49,9 @@ class PurchaseController extends Controller
     public function create()
     {
         $suppliers = Supplier::all();
-        $products = Product::where('status', 'Active')->get();
+        $products = Product::where('status', 'Active')
+            ->where('inventory_type', 'Raw Material')
+            ->get();
         $employees = Employee::all();
         return view('purchases.create', compact('suppliers', 'products', 'employees'));
     }
@@ -84,7 +86,7 @@ class PurchaseController extends Controller
             $purchase->save();
 
             // Generate PO number after purchase is created
-            $purchase->po_number = $purchase->generatePONumber();
+            $purchase->po_number = Purchase::generatePONumber();
             $purchase->save();
 
             $total = 0;

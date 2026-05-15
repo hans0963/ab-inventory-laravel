@@ -81,15 +81,20 @@ function addItem() {
     
     const itemHTML = `
         <div class="border border-gray-300 rounded-lg p-4 item-row">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Product *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Raw Material *</label>
                     <select name="items[${itemCount}][product_id]" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                        <option value="">Select Product</option>
+                        <option value="">Select Item</option>
                         @foreach($products as $product)
                             <option value="{{ $product->id }}">{{ $product->product_name }}</option>
                         @endforeach
                     </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Batch No.</label>
+                    <input type="text" name="items[${itemCount}][batch_number]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="e.g. B-123">
                 </div>
 
                 <div>
@@ -99,14 +104,14 @@ function addItem() {
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Qty Received *</label>
-                    <input type="number" name="items[${itemCount}][quantity_received]" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    <input type="number" name="items[${itemCount}][quantity_received]" required min="0" value="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Unit Cost *</label>
-                    <input type="number" name="items[${itemCount}][unit_cost]" min="0" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                    <input type="number" step="0.01" name="items[${itemCount}][unit_cost]" required min="0" value="0.00" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                 </div>
 
                 <div>
@@ -124,8 +129,10 @@ function addItem() {
                     </select>
                 </div>
             </div>
-
-            <button type="button" onclick="removeItem(this)" class="mt-4 text-red-600 hover:text-red-800 text-sm font-semibold">Remove Item</button>
+            
+            <div class="mt-4 flex justify-end">
+                <button type="button" onclick="this.closest('.item-row').remove()" class="text-red-600 text-sm hover:underline">Remove Item</button>
+            </div>
         </div>
     `;
 

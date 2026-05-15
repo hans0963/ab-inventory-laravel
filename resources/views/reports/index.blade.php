@@ -13,15 +13,83 @@
     <div class="space-y-10">
         <!-- Summary Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <x-stat-card title="Inventory Value" :value="'₱' . number_format($totalInventoryValue ?? 0, 2)" icon="📦" border="terracotta" />
-            <x-stat-card title="Monthly Sales" :value="'₱' . number_format($monthlySales ?? 0, 2)" icon="💰" border="sage" />
-            <x-stat-card title="Total Customers" :value="$totalCustomers ?? 0" icon="👥" border="sienna" />
-            <x-stat-card title="Total Employees" :value="$totalEmployees ?? 0" icon="👥" border="cream" />
+            <x-stat-card title="Today's Sales" :value="'₱' . number_format($todaySales ?? 0, 2)" icon="💰" border="sage" />
+            <x-stat-card title="Monthly Sales" :value="'₱' . number_format($monthlySales ?? 0, 2)" icon="📅" border="terracotta" />
+            <x-stat-card title="Yearly Sales" :value="'₱' . number_format($yearlySales ?? 0, 2)" icon="📈" border="sienna" />
+            <x-stat-card title="Inventory Value" :value="'₱' . number_format($totalInventoryValue ?? 0, 2)" icon="📦" border="cream" />
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Fast Moving Products -->
+            <div class="card-rustic border-sage">
+                <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
+                    <span class="mr-2 text-2xl">🚀</span> Fast Moving Products
+                </h3>
+                <div class="overflow-hidden rounded-xl border border-sienna border-opacity-10">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-center">Units Sold</th>
+                                <th class="px-6 py-4 text-right">Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                            @forelse($fastMoving ?? [] as $product)
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $product->product_name }}</td>
+                                    <td class="px-6 py-4 text-center text-sage font-black">{{ $product->total_sold }}</td>
+                                    <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($product->revenue, 2) }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-6 py-8 text-center text-sage italic">No data available.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Slow Moving Products -->
+            <div class="card-rustic border-terracotta">
+                <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
+                    <span class="mr-2 text-2xl">🐌</span> Slow Moving Products
+                </h3>
+                <div class="overflow-hidden rounded-xl border border-sienna border-opacity-10">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-center">Units Sold</th>
+                                <th class="px-6 py-4 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                            @forelse($slowMoving ?? [] as $product)
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $product->product_name }}</td>
+                                    <td class="px-6 py-4 text-center text-sage font-black">{{ (int)$product->total_sold }}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <span class="text-[9px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-600 uppercase font-black tracking-widest">
+                                            Low Velocity
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="px-6 py-8 text-center text-sage italic">No data available.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Top Customers -->
-            <div class="card-rustic border-sage">
+            <div class="card-rustic border-sienna">
                 <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
                     <span class="mr-2 text-2xl">🏆</span> Top Customers
                 </h3>
@@ -51,85 +119,28 @@
                 </div>
             </div>
 
-            <!-- Recent Orders -->
-            <div class="card-rustic border-terracotta">
+            <!-- Recent Transactions -->
+            <div class="card-rustic border-cream">
                 <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
-                    <span class="mr-2 text-2xl">📜</span> System Transactions
+                    <span class="mr-2 text-2xl">📜</span> Recent Transactions
                 </h3>
                 <div class="space-y-4 max-h-[28rem] overflow-y-auto pr-2 custom-scrollbar">
                     @forelse($recentOrders ?? [] as $order)
                         <div class="flex items-center justify-between p-4 bg-cream bg-opacity-30 rounded-xl hover:bg-opacity-60 transition border border-sienna border-opacity-10">
                             <div>
-                                <p class="font-bold text-sienna">#{{ $order->id }} — {{ $order->customer_name }}</p>
-                                <p class="text-xs text-sage font-medium">{{ \Carbon\Carbon::parse($order->order_date)->format('M d, Y h:i A') }}</p>
+                                <p class="font-bold text-sienna">{{ $order->product_name }} — {{ $order->customer_name }}</p>
+                                <p class="text-xs text-sage font-medium">{{ \Carbon\Carbon::parse($order->created_at)->format('M d, Y h:i A') }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="font-black text-terracotta text-lg">₱{{ number_format($order->total, 2) }}</p>
+                                <p class="font-black text-terracotta text-lg">₱{{ number_format($order->total_amount, 2) }}</p>
                                 <span class="text-[9px] px-2 py-0.5 rounded-full bg-sage bg-opacity-20 text-sage-dark uppercase font-black tracking-widest">
-                                    {{ $order->order_status ?? 'Completed' }}
+                                    {{ $order->payment_type }}
                                 </span>
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-12 text-sage italic">No recent orders processed.</div>
+                        <div class="text-center py-12 text-sage italic">No recent transactions processed.</div>
                     @endforelse
-                </div>
-            </div>
-        </div>
-
-        <!-- Analytics & Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Top Selling Products -->
-            <div class="card-rustic border-sienna lg:col-span-2">
-                <h3 class="text-xl font-lora font-bold text-sienna mb-6 flex items-center">
-                    <span class="mr-2 text-2xl">🔥</span> Best Selling Products
-                </h3>
-                <div class="overflow-hidden rounded-xl border border-sienna border-opacity-10">
-                    <table class="min-w-full text-sm">
-                        <thead>
-                            <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
-                                <th class="px-6 py-4 text-left">Product</th>
-                                <th class="px-6 py-4 text-center">Units Sold</th>
-                                <th class="px-6 py-4 text-right">Revenue Generated</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
-                            @forelse($topProducts ?? [] as $product)
-                                <tr class="hover:bg-cream hover:bg-opacity-20 transition">
-                                    <td class="px-6 py-4 font-bold text-sienna">{{ $product->name }}</td>
-                                    <td class="px-6 py-4 text-center text-sage font-black">{{ $product->quantity_sold }}</td>
-                                    <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($product->revenue, 2) }}</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-12 text-center text-sage italic">No product sales recorded.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Sales Charts -->
-            <div class="card-rustic border-sage space-y-8">
-                <h3 class="text-xl font-lora font-bold text-sienna flex items-center">
-                    <span class="mr-2 text-2xl">📊</span> Sales Analytics
-                </h3>
-                
-                <!-- Bar Chart - Monthly Sales -->
-                <div class="space-y-3">
-                    <p class="text-xs font-black text-sage uppercase tracking-widest">Monthly Trend</p>
-                    <div class="h-40 w-full">
-                        <canvas id="salesBarChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Pie Chart - Sales by Category -->
-                <div class="space-y-3">
-                    <p class="text-xs font-black text-sage uppercase tracking-widest">Category Share</p>
-                    <div class="h-40 w-full">
-                        <canvas id="categoryPieChart"></canvas>
-                    </div>
                 </div>
             </div>
         </div>

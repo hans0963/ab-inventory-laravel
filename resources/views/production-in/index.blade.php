@@ -1,25 +1,25 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-12 px-4">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h1 class="text-4xl font-bold text-gray-800">Production IN Batches</h1>
-                <p class="text-gray-600 mt-2">Manage incoming production batches and inventory</p>
+                <h2 class="font-formal text-4xl text-sienna">
+                    {{ __('Production IN Batches') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Manage incoming production batches and inventory</p>
             </div>
-            <a href="{{ route('production-in.create') }}" class="bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow">
+            <a href="{{ route('production-in.create') }}" class="bg-sienna text-cream px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition">
                 + New Production IN
             </a>
         </div>
+    </x-slot>
 
+    <div class="space-y-8">
         <!-- Filters -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="card-rustic border-sage">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    <x-input-label for="status" value="Status" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <select name="status" class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm">
                         <option value="">All Statuses</option>
                         <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
                         <option value="Approved" {{ request('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
@@ -27,100 +27,64 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    <x-input-label for="date_from" value="Date From" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input type="date" name="date_from" value="{{ request('date_from') }}" class="mt-1 block w-full !text-sm" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                    <x-input-label for="date_to" value="Date To" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input type="date" name="date_to" value="{{ request('date_to') }}" class="mt-1 block w-full !text-sm" />
                 </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        Filter
-                    </button>
-                </div>
-                <div class="flex items-end">
-                    <a href="{{ route('production-in.index') }}" class="w-full text-center bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">
+                <div class="flex space-x-2">
+                    <x-primary-button class="flex-1 justify-center py-2">Filter</x-primary-button>
+                    <a href="{{ route('production-in.index') }}" class="flex-1 text-center bg-cream border border-sienna border-opacity-20 text-sienna px-4 py-2 rounded-md text-xs font-bold uppercase tracking-widest hover:bg-opacity-50 transition">
                         Reset
                     </a>
                 </div>
             </form>
         </div>
 
-        <!-- Alerts -->
-        @if($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <ul class="list-disc">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <!-- Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Batch #</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Items</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Total Value</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Created By</th>
-                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Actions</th>
+        <div class="card-rustic border-sienna overflow-hidden p-0">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                        <th class="px-6 py-4 text-left">Batch #</th>
+                        <th class="px-6 py-4 text-left">Date</th>
+                        <th class="px-6 py-4 text-center">Items</th>
+                        <th class="px-6 py-4 text-right">Total Value</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-left">Created By</th>
+                        <th class="px-6 py-4 text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y">
+                <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
                     @forelse($productionIns as $batch)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ $batch->production_in_no }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ $batch->date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ $batch->items->count() }} items</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">₱{{ number_format($batch->total_inventory_value, 2) }}</td>
-                            <td class="px-6 py-4 text-sm">
-                                @if($batch->status === 'Pending')
-                                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
-                                @elseif($batch->status === 'Approved')
-                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
-                                @else
-                                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">Rejected</span>
-                                @endif
+                        <tr class="hover:bg-cream hover:bg-opacity-20 transition">
+                            <td class="px-6 py-4 font-bold text-sienna">{{ $batch->production_in_no }}</td>
+                            <td class="px-6 py-4 text-sage">{{ $batch->date->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 text-center font-medium">{{ $batch->items->count() }}</td>
+                            <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($batch->total_inventory_value, 2) }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest 
+                                    {{ $batch->status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ($batch->status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
+                                    {{ $batch->status }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ $batch->createdBy->name ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 text-center text-sm">
-                                <a href="{{ route('production-in.show', $batch->id) }}" class="text-blue-600 hover:text-blue-800 font-semibold">View</a>
-                                @if($batch->status === 'Pending')
-                                    <form action="{{ route('production-in.destroy', $batch->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this batch?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-800 font-semibold ml-3">Delete</button>
-                                    </form>
-                                @endif
+                            <td class="px-6 py-4 text-sage">{{ $batch->createdBy->name ?? 'N/A' }}</td>
+                            <td class="px-6 py-4 text-center space-x-2">
+                                <a href="{{ route('production-in.show', $batch->id) }}" class="text-sienna hover:text-terracotta transition font-bold">View</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                                No production batches found.
-                            </td>
+                            <td colspan="7" class="px-6 py-12 text-center text-sage italic">No production batches found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-8">
-            {{ $productionIns->links() }}
+            <div class="p-4 border-t border-sienna border-opacity-10">
+                {{ $productionIns->links() }}
+            </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

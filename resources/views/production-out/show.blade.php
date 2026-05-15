@@ -1,93 +1,106 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-12 px-4">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h1 class="text-4xl font-bold text-gray-800">Production OUT Details</h1>
-                <p class="text-gray-600 mt-2">Reference #{{ $productionOut->production_out_no }}</p>
+                <h2 class="font-formal text-4xl text-sienna">
+                    {{ __('Production OUT Details') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Reference #{{ $productionOut->production_out_no }} — Wastage and Pull-outs</p>
             </div>
-            <a href="{{ route('production-out.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold">← Back</a>
+            <a href="{{ route('production-out.index') }}" class="text-xs font-black text-sage uppercase tracking-widest hover:text-sienna transition flex items-center">
+                ← Back to List
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="space-y-8 max-w-5xl mx-auto mt-8">
+        {{-- Quick Stats --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <x-stat-card title="Reference #" :value="$productionOut->production_out_no" icon="🔢" border="sienna" />
+            <x-stat-card title="Date" :value="$productionOut->date->format('M d, Y')" icon="📅" border="sage" />
+            <div class="card-rustic border-terracotta flex flex-col justify-center p-4">
+                <p class="text-[10px] font-black text-sage uppercase tracking-widest mb-1">Status</p>
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest text-center
+                    {{ $productionOut->status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ($productionOut->status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
+                    {{ $productionOut->status }}
+                </span>
+            </div>
+            <x-stat-card title="Reason" :value="$productionOut->reason" icon="📝" border="cream" />
         </div>
 
-        <!-- Info Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Reference #</p>
-                <p class="text-lg font-semibold text-gray-800">{{ $productionOut->production_out_no }}</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Date</p>
-                <p class="text-lg font-semibold text-gray-800">{{ $productionOut->date->format('M d, Y') }}</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Status</p>
-                <p class="text-lg font-semibold">
-                    @if($productionOut->status === 'Pending')
-                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">Pending</span>
-                    @elseif($productionOut->status === 'Approved')
-                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Approved</span>
-                    @else
-                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">Rejected</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {{-- Audit Trail --}}
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card-rustic border-sienna h-full">
+                    <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2">Audit Trail</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-sage font-black">Encoded By</p>
+                            <p class="text-base font-bold text-sienna">{{ $productionOut->createdBy->name ?? 'N/A' }}</p>
+                            <p class="text-[10px] text-sage italic">{{ $productionOut->created_date->format('M d, Y h:i A') }}</p>
+                        </div>
+                        @if($productionOut->approvedBy)
+                            <div class="pt-4 border-t border-sienna border-opacity-10">
+                                <p class="text-[10px] uppercase tracking-widest text-sage font-black">Approved By</p>
+                                <p class="text-base font-bold text-sienna">{{ $productionOut->approvedBy->name }}</p>
+                                <p class="text-[10px] text-sage italic">{{ $productionOut->approved_date->format('M d, Y h:i A') }}</p>
+                            </div>
+                        @endif
+                        @if($productionOut->notes)
+                            <div class="pt-4 border-t border-sienna border-opacity-10">
+                                <p class="text-[10px] uppercase tracking-widest text-sage font-black">Notes</p>
+                                <p class="text-sm text-sage font-medium">{{ $productionOut->notes }}</p>
+                            </div>
+                        @endif
+                    </div>
+
+                    @if($productionOut->status === 'Pending' && auth()->user()->isManager())
+                        <div class="mt-8 flex flex-col gap-3">
+                            <form action="{{ route('production-out.approve', $productionOut->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-sage hover:bg-sage-dark text-white font-bold py-3 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs">
+                                    Approve OUT
+                                </button>
+                            </form>
+                            <form action="{{ route('production-out.reject', $productionOut->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-terracotta hover:bg-terracotta-dark text-white font-bold py-3 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs">
+                                    Reject OUT
+                                </button>
+                            </form>
+                        </div>
                     @endif
-                </p>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Reason</p>
-                <p class="text-lg font-semibold text-gray-800">{{ $productionOut->reason }}</p>
+
+            {{-- Items Table --}}
+            <div class="lg:col-span-2">
+                <div class="card-rustic border-sage p-0 overflow-hidden">
+                    <div class="p-6 border-b border-sienna border-opacity-10">
+                        <h3 class="text-xl font-lora font-bold text-sienna">Removed Items</h3>
+                    </div>
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-cream bg-opacity-50 text-sienna uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-center">Qty</th>
+                                <th class="px-6 py-4 text-right">Unit Price</th>
+                                <th class="px-6 py-4 text-right">Total Value</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                            @foreach($productionOut->items as $item)
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $item->product->product_name }}</td>
+                                    <td class="px-6 py-4 text-center font-black">{{ number_format($item->quantity) }}</td>
+                                    <td class="px-6 py-4 text-right">₱{{ number_format($item->unit_price, 2) }}</td>
+                                    <td class="px-6 py-4 text-right font-bold text-terracotta">₱{{ number_format($item->total_value, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-
-        <!-- Items Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Quantity</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Unit Price</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Total Value</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    @foreach($productionOut->items as $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-800">{{ $item->product->product_name }}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-600">{{ number_format($item->quantity) }}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-600">₱{{ number_format($item->unit_price, 2) }}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-600">₱{{ number_format($item->total_value, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex gap-4">
-            @if($productionOut->status === 'Pending')
-                <form action="{{ route('production-out.approve', $productionOut->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700" onclick="return confirm('Approve this OUT transaction?');">
-                        ✓ Approve
-                    </button>
-                </form>
-                <form action="{{ route('production-out.reject', $productionOut->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" onclick="return confirm('Reject this OUT transaction?');">
-                        ✗ Reject
-                    </button>
-                </form>
-                <form action="{{ route('production-out.destroy', $productionOut->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700" onclick="return confirm('Delete this OUT transaction?');">
-                        Delete
-                    </button>
-                </form>
-            @endif
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

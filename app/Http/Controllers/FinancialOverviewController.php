@@ -29,7 +29,7 @@ class FinancialOverviewController extends Controller
         
         // Monthly data for chart
         $monthlyData = Order::selectRaw('MONTH(created_at) as month, SUM(total) as revenue')
-            ->groupBy('month')
+            ->groupBy(DB::raw('MONTH(created_at)'))
             ->orderBy('month')
             ->get();
         

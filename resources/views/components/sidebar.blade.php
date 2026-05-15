@@ -7,82 +7,118 @@
     <!-- Navigation -->
     <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
         <!-- Dashboard (All Roles) -->
-        <a href="{{ route('dashboard') }}" 
-           class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
+        <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
             🏠 Dashboard
-        </a>
+        </x-sidebar-link>
         
-        <!-- Cashier Modules Only -->
-        @if(auth()->user()->isCashier())
-            <a href="{{ route('products.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
+        <!-- Inventory Management -->
+        @can('view-products')
+            <x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">
                 📦 Products
-            </a>
-            <a href="{{ route('sales-orders.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                🛒 Sales Orders
-            </a>
-            <a href="{{ route('customers.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                👥 Customers
-            </a>
-        @endif
+            </x-sidebar-link>
+        @endcan
 
-        <!-- Manager Modules Only -->
-        @if(auth()->user()->isManager())
-            <a href="{{ route('products.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                📦 Products
-            </a>
-            <a href="{{ route('categories.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
+        @can('view-categories')
+            <x-sidebar-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                 📂 Categories
-            </a>
-            <a href="{{ route('orders.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                🛒 Sales Orders
-            </a>
-            <a href="{{ route('customers.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                👥 Customers
-            </a>
-            <a href="{{ route('raw-materials.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                🌾 Raw Materials
-            </a>
-            <a href="{{ route('production-in.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                ➡️ Production In
-            </a>
-            <a href="{{ route('production-out.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                ⬅️ Production Out
-            </a>
-            <a href="{{ route('purchases.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                🛍️ Purchases
-            </a>
-            <a href="{{ route('manager-sales-report.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                📊 Sales Report
-            </a>
-            <a href="{{ route('manager-reports.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                📈 Inventory & Production Reports
-            </a>
-        @endif
+            </x-sidebar-link>
+        @endcan
 
-        <!-- Admin Modules Only -->
-        @if(auth()->user()->isAdmin())
-            <a href="{{ route('sales-report.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                📊 Sales Report
-            </a>
-            <a href="{{ route('reports.index') }}" 
-               class="flex items-center px-4 py-2 text-sage hover:bg-sienna hover:text-cream rounded-md transition">
-                📈 Reports
-            </a>
-        @endif
+        <!-- Sales & Customers -->
+        @can('view-sales-orders')
+            <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
+                💰 Sales
+            </x-sidebar-link>
+        @endcan
+
+        @can('view-customers')
+            <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                👥 Customers
+            </x-sidebar-link>
+        @endcan
+
+        <!-- Production & Stock -->
+        @can('view-production-in')
+            <x-sidebar-link :href="route('production-in.index')" :active="request()->routeIs('production-in.*')">
+                ➡️ Production In
+            </x-sidebar-link>
+        @endcan
+
+        @can('view-production-out')
+            <x-sidebar-link :href="route('production-out.index')" :active="request()->routeIs('production-out.*')">
+                ⬅️ Production Out
+            </x-sidebar-link>
+        @endcan
+
+        @can('view-inventory')
+            <x-sidebar-link :href="route('stock-withdrawal.index')" :active="request()->routeIs('stock-withdrawal.*')">
+                📤 Stock Withdrawal
+            </x-sidebar-link>
+        @endcan
+
+        <!-- Purchasing & Suppliers -->
+        @can('view-purchases')
+            <x-sidebar-link :href="route('purchases.index')" :active="request()->routeIs('purchases.*')">
+                🛍️ Purchases
+            </x-sidebar-link>
+            <x-sidebar-link :href="route('inventory-receiving.index')" :active="request()->routeIs('inventory-receiving.*')">
+                📥 Receiving
+            </x-sidebar-link>
+        @endcan
+
+        @can('view-suppliers')
+            <x-sidebar-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.*')">
+                🚚 Suppliers
+            </x-sidebar-link>
+        @endcan
+
+        <!-- User & System Management -->
+        @can('view-employees')
+            <x-sidebar-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
+                👔 Employees
+            </x-sidebar-link>
+        @endcan
+
+        @can('admin')
+            <x-sidebar-link :href="route('discounts.index')" :active="request()->routeIs('discounts.*')">
+                🏷️ Discount Types
+            </x-sidebar-link>
+        @endcan
+
+        <!-- Reports Section -->
+        <div class="pt-4 pb-1">
+            <p class="text-[10px] font-black text-sage uppercase tracking-widest px-4 mb-2">Reports</p>
+            
+            @can('view-manager-sales-report')
+                <x-sidebar-link :href="route('inventory.sales')" :active="request()->routeIs('inventory.sales')">
+                    📊 Sales Summary
+                </x-sidebar-link>
+            @endcan
+
+            @can('view-inventory')
+                <x-sidebar-link :href="route('reports.inventory')" :active="request()->routeIs('reports.inventory')">
+                    📋 Inventory Balance
+                </x-sidebar-link>
+            @endcan
+
+            @can('view-production-in')
+                <x-sidebar-link :href="route('reports.production', ['type' => 'in'])" :active="request()->routeIs('reports.production') && request('type') == 'in'">
+                    📈 Production IN
+                </x-sidebar-link>
+            @endcan
+
+            @can('view-production-out')
+                <x-sidebar-link :href="route('reports.production', ['type' => 'out'])" :active="request()->routeIs('reports.production') && request('type') == 'out'">
+                    📉 Production OUT
+                </x-sidebar-link>
+            @endcan
+
+            @can('view-reports')
+                <x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.index')">
+                    📉 Business Intelligence
+                </x-sidebar-link>
+            @endcan
+        </div>
     </nav>
 
     <!-- Logout Button -->

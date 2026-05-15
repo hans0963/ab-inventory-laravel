@@ -22,7 +22,7 @@
             </div>
 
             <div class="bg-white rounded-xl shadow p-6">
-                <p class="text-3xl font-bold text-orange-500">{{ $wastePercent ?? '2.4%' }}</p>
+                <p class="text-3xl font-bold text-orange-500">{{ $wastePercent }}%</p>
                 <p class="text-gray-500">Waste Percentage</p>
             </div>
 

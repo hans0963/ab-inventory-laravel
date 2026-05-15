@@ -1,25 +1,25 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h1 class="text-3xl font-bold" style="color: #E2725B;">Inventory Receiving</h1>
-                <p class="text-gray-600 mt-2">Manage incoming stock from suppliers</p>
+                <h2 class="font-formal text-4xl text-sienna">
+                    {{ __('Inventory Receiving') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Manage incoming stock from artisan suppliers</p>
             </div>
-            <a href="{{ route('inventory-receiving.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
-                + New Receiving
+            <a href="{{ route('inventory-receiving.create') }}" class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
+                <span class="mr-2 text-xl">+</span> New Receiving
             </a>
         </div>
+    </x-slot>
 
+    <div class="space-y-8">
         <!-- Filters -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="card-rustic border-sage">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    <x-input-label for="status" value="Status" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <select name="status" class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm bg-cream bg-opacity-10">
                         <option value="">All Statuses</option>
                         <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
                         <option value="Approved" {{ request('status') == 'Approved' ? 'selected' : '' }}>Approved</option>
@@ -28,82 +28,78 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
-                    <select name="supplier_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    <x-input-label for="supplier_id" value="Supplier" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <select name="supplier_id" class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm bg-cream bg-opacity-10">
                         <option value="">All Suppliers</option>
                         @foreach($suppliers as $supplier)
                             <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
-                                {{ $supplier->supplier_name }}
+                                {{ $supplier->suppliers_name }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
-                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    <x-input-label for="date_from" value="From Date" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input type="date" name="date_from" value="{{ request('date_from') }}" class="mt-1 block w-full !text-sm" />
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
-                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500">
+                    <x-input-label for="date_to" value="To Date" class="text-[10px] uppercase tracking-widest text-sage" />
+                    <x-text-input type="date" name="date_to" value="{{ request('date_to') }}" class="mt-1 block w-full !text-sm" />
                 </div>
 
-                <div class="md:col-span-4 flex gap-2">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">Filter</button>
-                    <a href="{{ route('inventory-receiving.index') }}" class="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg">Reset</a>
+                <div class="md:col-span-4 flex gap-4">
+                    <x-primary-button class="px-8 py-2">Filter</x-primary-button>
+                    <a href="{{ route('inventory-receiving.index') }}" class="inline-flex items-center px-8 py-2 bg-cream border border-sienna border-opacity-20 rounded-md font-bold text-xs text-sienna uppercase tracking-widest hover:bg-opacity-50 transition">
+                        Reset
+                    </a>
                 </div>
             </form>
         </div>
 
         <!-- Receivings Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <table class="w-full">
-                <thead style="background-color: #F5E6D3;">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Receiving #</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Date</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Supplier</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Items</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Total Cost</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Status</th>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Actions</th>
+        <div class="card-rustic border-sienna p-0 overflow-hidden">
+            <table class="min-w-full text-sm">
+                <thead>
+                    <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                        <th class="px-6 py-4 text-left">Receiving #</th>
+                        <th class="px-6 py-4 text-left">Date</th>
+                        <th class="px-6 py-4 text-left">Supplier</th>
+                        <th class="px-6 py-4 text-center">Items</th>
+                        <th class="px-6 py-4 text-right">Total Cost</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
                     @forelse($receivings as $receiving)
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-6 py-4 font-semibold">{{ $receiving->receiving_no }}</td>
-                            <td class="px-6 py-4">{{ $receiving->date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4">{{ $receiving->supplier->supplier_name }}</td>
-                            <td class="px-6 py-4">{{ $receiving->total_items }}</td>
-                            <td class="px-6 py-4 font-semibold">₱{{ number_format($receiving->total_cost, 2) }}</td>
-                            <td class="px-6 py-4">
-                                @if($receiving->status === 'Pending')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">Pending</span>
-                                @elseif($receiving->status === 'Approved')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Approved</span>
-                                @else
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Rejected</span>
-                                @endif
+                        <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                            <td class="px-6 py-4 font-bold text-sienna">{{ $receiving->receiving_no }}</td>
+                            <td class="px-6 py-4 text-sage font-medium">{{ $receiving->date->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 font-bold text-sienna">{{ $receiving->supplier->suppliers_name }}</td>
+                            <td class="px-6 py-4 text-center font-black">{{ $receiving->items->count() }}</td>
+                            <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($receiving->total_cost, 2) }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest 
+                                    {{ $receiving->status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ($receiving->status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
+                                    {{ $receiving->status }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4">
-                                <a href="{{ route('inventory-receiving.show', $receiving) }}" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">View</a>
+                            <td class="px-6 py-4 text-center">
+                                <a href="{{ route('inventory-receiving.show', $receiving->id) }}" class="text-sienna hover:text-terracotta transition font-bold">View</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">No inventory receivings found</td>
+                            <td colspan="7" class="px-6 py-12 text-center text-sage italic">No inventory receivings found.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-6">
-            {{ $receivings->links() }}
+            <div class="p-6 border-t border-sienna border-opacity-10">
+                {{ $receivings->links() }}
+            </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

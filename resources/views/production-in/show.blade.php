@@ -1,139 +1,116 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-12 px-4">
-    <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h1 class="text-4xl font-bold text-gray-800">Production IN Details</h1>
-                <p class="text-gray-600 mt-2">Batch #{{ $productionIn->production_in_no }}</p>
+                <h2 class="font-formal text-4xl text-sienna">
+                    {{ __('Production IN Details') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Batch #{{ $productionIn->production_in_no }} — Overview and Items</p>
             </div>
-            <a href="{{ route('production-in.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold">← Back</a>
+            <a href="{{ route('production-in.index') }}" class="text-xs font-black text-sage uppercase tracking-widest hover:text-sienna transition flex items-center">
+                ← Back to List
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="space-y-8 max-w-5xl mx-auto mt-8">
+        {{-- Quick Stats --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <x-stat-card title="Batch Number" :value="$productionIn->production_in_no" icon="🔢" border="sienna" />
+            <x-stat-card title="Date" :value="$productionIn->date->format('M d, Y')" icon="📅" border="sage" />
+            <div class="card-rustic border-terracotta flex flex-col justify-center p-4">
+                <p class="text-[10px] font-black text-sage uppercase tracking-widest mb-1">Status</p>
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest text-center
+                    {{ $productionIn->status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ($productionIn->status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
+                    {{ $productionIn->status }}
+                </span>
+            </div>
+            <x-stat-card title="Total Value" :value="'₱' . number_format($productionIn->total_inventory_value, 2)" icon="💰" border="cream" />
         </div>
 
-        <!-- Alerts -->
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {{-- Batch Information --}}
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card-rustic border-sienna h-full">
+                    <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2">Audit Trail</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-sage font-black">Created By</p>
+                            <p class="text-base font-bold text-sienna">{{ $productionIn->createdBy->name ?? 'N/A' }}</p>
+                            <p class="text-[10px] text-sage italic">{{ $productionIn->created_date->format('M d, Y h:i A') }}</p>
+                        </div>
+                        @if($productionIn->approvedBy)
+                            <div class="pt-4 border-t border-sienna border-opacity-10">
+                                <p class="text-[10px] uppercase tracking-widest text-sage font-black">Approved By</p>
+                                <p class="text-base font-bold text-sienna">{{ $productionIn->approvedBy->name }}</p>
+                                <p class="text-[10px] text-sage italic">{{ $productionIn->approved_date->format('M d, Y h:i A') }}</p>
+                            </div>
+                        @endif
+                        @if($productionIn->notes)
+                            <div class="pt-4 border-t border-sienna border-opacity-10">
+                                <p class="text-[10px] uppercase tracking-widest text-sage font-black">Notes</p>
+                                <p class="text-sm text-sage font-medium">{{ $productionIn->notes }}</p>
+                            </div>
+                        @endif
+                    </div>
 
-        <!-- Info Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Batch #</p>
-                <p class="text-lg font-semibold text-gray-800">{{ $productionIn->production_in_no }}</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Date</p>
-                <p class="text-lg font-semibold text-gray-800">{{ $productionIn->date->format('M d, Y') }}</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Status</p>
-                <p class="text-lg font-semibold">
-                    @if($productionIn->status === 'Pending')
-                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">Pending</span>
-                    @elseif($productionIn->status === 'Approved')
-                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Approved</span>
-                    @else
-                        <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">Rejected</span>
+                    @if($productionIn->status === 'Pending' && auth()->user()->isManager())
+                        <div class="mt-8 flex flex-col gap-3">
+                            <form action="{{ route('production-in.approve', $productionIn->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-sage hover:bg-sage-dark text-white font-bold py-3 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs">
+                                    Approve Batch
+                                </button>
+                            </form>
+                            <form action="{{ route('production-in.reject', $productionIn->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-terracotta hover:bg-terracotta-dark text-white font-bold py-3 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs">
+                                    Reject Batch
+                                </button>
+                            </form>
+                        </div>
                     @endif
-                </p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-4">
-                <p class="text-gray-600 text-sm">Total Value</p>
-                <p class="text-lg font-semibold text-gray-800">₱{{ number_format($productionIn->total_inventory_value, 2) }}</p>
-            </div>
-        </div>
-
-        <!-- Details -->
-        <div class="bg-white rounded-lg shadow-md p-8 mb-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Batch Information</h2>
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-gray-600 text-sm">Created By</p>
-                    <p class="text-gray-800 font-medium">{{ $productionIn->createdBy->name ?? 'N/A' }}</p>
                 </div>
-                <div>
-                    <p class="text-gray-600 text-sm">Created Date</p>
-                    <p class="text-gray-800 font-medium">{{ $productionIn->created_date->format('M d, Y') }}</p>
-                </div>
-                @if($productionIn->approvedBy)
-                    <div>
-                        <p class="text-gray-600 text-sm">Approved By</p>
-                        <p class="text-gray-800 font-medium">{{ $productionIn->approvedBy->name }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Approved Date</p>
-                        <p class="text-gray-800 font-medium">{{ $productionIn->approved_date->format('M d, Y') }}</p>
-                    </div>
-                @endif
-                @if($productionIn->notes)
-                    <div class="col-span-2">
-                        <p class="text-gray-600 text-sm">Notes</p>
-                        <p class="text-gray-800">{{ $productionIn->notes }}</p>
-                    </div>
-                @endif
             </div>
-        </div>
 
-        <!-- Items Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-            <table class="w-full">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Quantity</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Unit Price</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Total Value</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Expiration</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    @foreach($productionIn->items as $item)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm text-gray-800">{{ $item->product->product_name }}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-600">{{ number_format($item->quantity) }}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-600">₱{{ number_format($item->unit_price, 2) }}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-600">₱{{ number_format($item->total_value, 2) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                @if($item->expiration_date)
-                                    {{ $item->expiration_date->format('M d, Y') }}
-                                @else
-                                    N/A
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex gap-4">
-            @if($productionIn->status === 'Pending')
-                <form action="{{ route('production-in.approve', $productionIn->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700" onclick="return confirm('Approve this production batch?');">
-                        ✓ Approve Batch
-                    </button>
-                </form>
-                <form action="{{ route('production-in.reject', $productionIn->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700" onclick="return confirm('Reject this production batch?');">
-                        ✗ Reject Batch
-                    </button>
-                </form>
-                <form action="{{ route('production-in.destroy', $productionIn->id) }}" method="POST" style="display:inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700" onclick="return confirm('Delete this batch?');">
-                        Delete
-                    </button>
-                </form>
-            @endif
+            {{-- Items Table --}}
+            <div class="lg:col-span-2">
+                <div class="card-rustic border-sage p-0 overflow-hidden">
+                    <div class="p-6 border-b border-sienna border-opacity-10">
+                        <h3 class="text-xl font-lora font-bold text-sienna">Batch Items</h3>
+                    </div>
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-cream bg-opacity-50 text-sienna uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-center">Qty</th>
+                                <th class="px-6 py-4 text-right">Unit Price</th>
+                                <th class="px-6 py-4 text-right">Total</th>
+                                <th class="px-6 py-4 text-left">Expiration</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                            @foreach($productionIn->items as $item)
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $item->product->product_name }}</td>
+                                    <td class="px-6 py-4 text-center font-black">{{ number_format($item->quantity) }}</td>
+                                    <td class="px-6 py-4 text-right">₱{{ number_format($item->unit_price, 2) }}</td>
+                                    <td class="px-6 py-4 text-right font-bold text-terracotta">₱{{ number_format($item->total_value, 2) }}</td>
+                                    <td class="px-6 py-4">
+                                        @if($item->expiration_date)
+                                            <span class="text-xs font-medium {{ $item->expiration_date->isPast() ? 'text-red-600' : 'text-sage' }}">
+                                                {{ $item->expiration_date->format('M d, Y') }}
+                                            </span>
+                                        @else
+                                            <span class="text-xs text-sage italic opacity-60">N/A</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

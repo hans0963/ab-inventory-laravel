@@ -38,7 +38,7 @@ class InventoryReceivingController extends Controller
         }
 
         $receivings = $query->paginate(15);
-        $suppliers = Supplier::where('status', 'Active')->get();
+        $suppliers = Supplier::where('status', '=', 'Active')->get();
 
         return view('inventory-receiving.index', compact('receivings', 'suppliers'));
     }
@@ -48,8 +48,10 @@ class InventoryReceivingController extends Controller
      */
     public function create()
     {
-        $suppliers = Supplier::where('status', 'Active')->get();
-        $products = Product::where('status', 'Active')->get();
+        $suppliers = Supplier::where('status', '=', 'Active')->get();
+        $products = Product::where('status', 'Active')
+            ->where('inventory_type', 'Raw Material')
+            ->get();
         $purchases = Purchase::where('status', 'Pending')->orWhere('status', 'Partial')->get();
 
         return view('inventory-receiving.create', compact('suppliers', 'products', 'purchases'));
@@ -86,6 +88,7 @@ class InventoryReceivingController extends Controller
             InventoryReceivingItem::create([
                 'inventory_receiving_id' => $receiving->id,
                 'product_id' => $itemData['product_id'],
+                'batch_number' => $itemData['batch_number'] ?? null,
                 'quantity_ordered' => $itemData['quantity_ordered'],
                 'quantity_received' => $itemData['quantity_received'],
                 'unit_cost' => $itemData['unit_cost'],

@@ -27,9 +27,10 @@ class EnhancedPurchaseSeeder extends Seeder
         $suppliers = Supplier::take(3)->get();
         $products = Product::where('status', 'Active')->take(5)->get();
         $receivings = InventoryReceiving::where('status', 'Approved')->take(4)->get();
+        $employee = \App\Models\Employee::first();
 
-        if ($suppliers->isEmpty() || $products->isEmpty()) {
-            $this->command->warn('Not enough suppliers or products.');
+        if ($suppliers->isEmpty() || $products->isEmpty() || !$employee) {
+            $this->command->warn('Not enough suppliers, products, or employees.');
             return;
         }
 
@@ -37,17 +38,18 @@ class EnhancedPurchaseSeeder extends Seeder
         $purchaseStatuses = ['Pending', 'Approved', 'Partial', 'Complete'];
 
         foreach ($purchaseStatuses as $index => $status) {
+            $createdDate = now()->subDays(rand(1, 30));
             $purchase = Purchase::create([
                 'purchase_date' => now()->subDays(rand(1, 30)),
                 'supplier_id' => $suppliers->random()->id,
-                'employee_id' => null,
+                'employee_id' => $employee->id,
                 'reference' => 'PUR-' . now()->format('YmdHis') . '-' . str_pad($index, 3, '0', STR_PAD_LEFT),
-                'po_number' => Purchase::generatePONumber(),
+                'po_number' => Purchase::generatePONumber($createdDate),
                 'status' => $status,
                 'total_amount' => 0,
                 'notes' => "Sample purchase - {$status} status",
                 'created_by' => $user->id,
-                'created_date' => now()->subDays(rand(1, 30)),
+                'created_date' => $createdDate,
                 'approved_by' => $status !== 'Pending' ? $user->id : null,
                 'approved_date' => $status !== 'Pending' ? now()->subDays(rand(0, 20)) : null
             ]);

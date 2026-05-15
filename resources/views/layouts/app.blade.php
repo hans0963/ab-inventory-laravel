@@ -51,7 +51,7 @@
 
             <!-- Main Content -->
             <main class="min-h-screen pt-20 pb-12">
-                @if(isset($header))
+                @if(isset($header) || View::hasSection('header'))
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
                         @if (session('error'))
                             <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -63,11 +63,17 @@
                                 <span class="block sm:inline">{{ session('success') }}</span>
                             </div>
                         @endif
-                        {{ $header }}
+                        
+                        @if(isset($header))
+                            {{ $header }}
+                        @else
+                            @yield('header')
+                        @endif
                     </div>
                 @endif
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {{ $slot }}
+                    {{ $slot ?? '' }}
+                    @yield('content')
                 </div>
             </main>
         </div>

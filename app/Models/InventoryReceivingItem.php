@@ -15,6 +15,7 @@ class InventoryReceivingItem extends Model
     protected $fillable = [
         'inventory_receiving_id',
         'product_id',
+        'batch_number',
         'quantity_ordered',
         'quantity_received',
         'unit_cost',

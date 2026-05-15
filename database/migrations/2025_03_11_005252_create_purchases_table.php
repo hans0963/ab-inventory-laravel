@@ -12,8 +12,9 @@ return new class extends Migration {
             $table->date('purchase_date');
             $table->unsignedBigInteger('supplier_id');
             $table->unsignedBigInteger('employee_id')->nullable();
-            $table->string('reference', 20)->unique();
+            $table->string('reference', 50)->unique();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('supplier_id')->references('id')->on('suppliers')->onDelete('cascade');
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('set null');

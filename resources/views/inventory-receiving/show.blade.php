@@ -1,137 +1,120 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-6xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
             <div>
-                <h1 class="text-3xl font-bold" style="color: #E2725B;">{{ $receiving->receiving_no }}</h1>
-                <p class="text-gray-600 mt-2">{{ $receiving->date->format('F d, Y') }} • {{ $receiving->supplier->supplier_name }}</p>
+                <h2 class="font-formal text-4xl text-sienna">
+                    {{ __('Receiving Details') }}
+                </h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Reference #{{ $receiving->receiving_no }} — Stock Acquisition Overview</p>
             </div>
-            <div class="text-right">
-                @if($receiving->status === 'Pending')
-                    <span class="px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">Pending</span>
-                @elseif($receiving->status === 'Approved')
-                    <span class="px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">Approved</span>
-                @else
-                    <span class="px-4 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800">Rejected</span>
-                @endif
+            <a href="{{ route('inventory-receiving.index') }}" class="text-xs font-black text-sage uppercase tracking-widest hover:text-sienna transition flex items-center">
+                ← Back to List
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="space-y-8 max-w-6xl mx-auto mt-8">
+        {{-- Quick Stats --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <x-stat-card title="Receiving #" :value="$receiving->receiving_no" icon="🔢" border="sienna" />
+            <x-stat-card title="Date" :value="$receiving->date->format('M d, Y')" icon="📅" border="sage" />
+            <div class="card-rustic border-terracotta flex flex-col justify-center p-4">
+                <p class="text-[10px] font-black text-sage uppercase tracking-widest mb-1">Status</p>
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest text-center
+                    {{ $receiving->status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : ($receiving->status === 'Approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800') }}">
+                    {{ $receiving->status }}
+                </span>
             </div>
+            <x-stat-card title="Total Cost" :value="'₱' . number_format($receiving->total_cost, 2)" icon="💰" border="cream" />
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Summary Cards -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <p class="text-gray-600 text-sm">Total Items</p>
-                <p class="text-3xl font-bold" style="color: #E2725B;">{{ $receiving->total_items }}</p>
-            </div>
-
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <p class="text-gray-600 text-sm">Total Cost</p>
-                <p class="text-3xl font-bold" style="color: #E2725B;">₱{{ number_format($receiving->total_cost, 2) }}</p>
-            </div>
-
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <p class="text-gray-600 text-sm">Created By</p>
-                <p class="text-lg font-semibold">{{ $receiving->createdBy->name }}</p>
-                <p class="text-xs text-gray-500">{{ $receiving->created_date->format('M d, Y') }}</p>
-            </div>
-        </div>
-
-        <!-- Items Table -->
-        <div class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
-            <div class="px-6 py-4 border-b">
-                <h2 class="text-xl font-bold" style="color: #E2725B;">Received Items</h2>
-            </div>
-            <table class="w-full">
-                <thead style="background-color: #F5E6D3;">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-sm font-semibold" style="color: #E2725B;">Product</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold" style="color: #E2725B;">Ordered</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold" style="color: #E2725B;">Received</th>
-                        <th class="px-6 py-3 text-right text-sm font-semibold" style="color: #E2725B;">Unit Cost</th>
-                        <th class="px-6 py-3 text-right text-sm font-semibold" style="color: #E2725B;">Total</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold" style="color: #E2725B;">Condition</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold" style="color: #E2725B;">Exp. Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($receiving->items as $item)
-                        <tr class="border-t hover:bg-gray-50">
-                            <td class="px-6 py-4 font-semibold">{{ $item->product->product_name }}</td>
-                            <td class="px-6 py-4 text-center">{{ $item->quantity_ordered }}</td>
-                            <td class="px-6 py-4 text-center font-semibold">{{ $item->quantity_received }}</td>
-                            <td class="px-6 py-4 text-right">₱{{ number_format($item->unit_cost, 2) }}</td>
-                            <td class="px-6 py-4 text-right font-semibold">₱{{ number_format($item->total_cost, 2) }}</td>
-                            <td class="px-6 py-4 text-center">
-                                @if($item->condition === 'Good')
-                                    <span class="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">Good</span>
-                                @elseif($item->condition === 'Damaged')
-                                    <span class="px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800">Damaged</span>
-                                @elseif($item->condition === 'Expired')
-                                    <span class="px-2 py-1 rounded text-xs font-semibold bg-orange-100 text-orange-800">Expired</span>
-                                @else
-                                    <span class="px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">Other</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                {{ $item->expiration_date ? $item->expiration_date->format('M d, Y') : '—' }}
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Approval Info -->
-        @if($receiving->status !== 'Pending')
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h3 class="text-lg font-bold mb-4" style="color: #E2725B;">Approval Details</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <p class="text-gray-600 text-sm">Approved By</p>
-                        <p class="font-semibold">{{ $receiving->approvedBy->name ?? 'N/A' }}</p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {{-- Audit Trail & Supplier --}}
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card-rustic border-sienna">
+                    <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2">Procurement Log</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-sage font-black">Supplier</p>
+                            <p class="text-base font-bold text-sienna">{{ $receiving->supplier->suppliers_name }}</p>
+                            <p class="text-xs text-sage font-medium">{{ $receiving->supplier->suppliers_company }}</p>
+                        </div>
+                        <div class="pt-4 border-t border-sienna border-opacity-10">
+                            <p class="text-[10px] uppercase tracking-widest text-sage font-black">Encoded By</p>
+                            <p class="text-base font-bold text-sienna">{{ $receiving->createdBy->name ?? 'N/A' }}</p>
+                            <p class="text-[10px] text-sage italic">{{ $receiving->created_date->format('M d, Y h:i A') }}</p>
+                        </div>
+                        @if($receiving->approvedBy)
+                            <div class="pt-4 border-t border-sienna border-opacity-10">
+                                <p class="text-[10px] uppercase tracking-widest text-sage font-black">Approved By</p>
+                                <p class="text-base font-bold text-sienna">{{ $receiving->approvedBy->name }}</p>
+                                <p class="text-[10px] text-sage italic">{{ $receiving->approved_date->format('M d, Y h:i A') }}</p>
+                            </div>
+                        @endif
+                        @if($receiving->notes)
+                            <div class="pt-4 border-t border-sienna border-opacity-10">
+                                <p class="text-[10px] uppercase tracking-widest text-sage font-black">Notes</p>
+                                <p class="text-sm text-sage font-medium">{{ $receiving->notes }}</p>
+                            </div>
+                        @endif
                     </div>
-                    <div>
-                        <p class="text-gray-600 text-sm">Approval Date</p>
-                        <p class="font-semibold">{{ $receiving->approved_date ? $receiving->approved_date->format('M d, Y g:i A') : 'N/A' }}</p>
-                    </div>
+
+                    @if($receiving->status === 'Pending' && auth()->user()->isManager())
+                        <div class="mt-8 flex flex-col gap-3">
+                            <form action="{{ route('inventory-receiving.approve', $receiving->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-sage hover:bg-sage-dark text-white font-bold py-3 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs">
+                                    Approve Receiving
+                                </button>
+                            </form>
+                            <form action="{{ route('inventory-receiving.reject', $receiving->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="w-full bg-terracotta hover:bg-terracotta-dark text-white font-bold py-3 rounded-xl shadow-md transition-all uppercase tracking-widest text-xs">
+                                    Reject Receiving
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </div>
-        @endif
 
-        <!-- Actions -->
-        @if($receiving->status === 'Pending')
-            <div class="flex gap-4 mb-8">
-                <a href="{{ route('inventory-receiving.edit', $receiving) }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold">
-                    Edit
-                </a>
-                <form action="{{ route('inventory-receiving.approve', $receiving) }}" method="POST" class="inline">
-                    @csrf
-                    @method('POST')
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold" onclick="return confirm('Approve this receiving?')">
-                        Approve
-                    </button>
-                </form>
-                <form action="{{ route('inventory-receiving.reject', $receiving) }}" method="POST" class="inline">
-                    @csrf
-                    @method('POST')
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold" onclick="return confirm('Reject this receiving?')">
-                        Reject
-                    </button>
-                </form>
-                <form action="{{ route('inventory-receiving.destroy', $receiving) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold" onclick="return confirm('Delete this receiving?')">
-                        Delete
-                    </button>
-                </form>
+            {{-- Items Table --}}
+            <div class="lg:col-span-2">
+                <div class="card-rustic border-sage p-0 overflow-hidden">
+                    <div class="p-6 border-b border-sienna border-opacity-10">
+                        <h3 class="text-xl font-lora font-bold text-sienna">Received Items</h3>
+                    </div>
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="bg-cream bg-opacity-50 text-sienna uppercase text-[10px] tracking-widest font-black">
+                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-center">Ordered</th>
+                                <th class="px-6 py-4 text-center">Received</th>
+                                <th class="px-6 py-4 text-right">Unit Cost</th>
+                                <th class="px-6 py-4 text-right">Total</th>
+                                <th class="px-6 py-4 text-center">Condition</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                            @foreach($receiving->items as $item)
+                                <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $item->product->product_name }}</td>
+                                    <td class="px-6 py-4 text-center text-sage">{{ $item->quantity_ordered }}</td>
+                                    <td class="px-6 py-4 text-center font-black text-sienna">{{ $item->quantity_received }}</td>
+                                    <td class="px-6 py-4 text-right">₱{{ number_format($item->unit_cost, 2) }}</td>
+                                    <td class="px-6 py-4 text-right font-bold text-terracotta">₱{{ number_format($item->total_cost, 2) }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-[9px] px-2 py-0.5 rounded-full uppercase font-black tracking-widest 
+                                            {{ $item->condition === 'Good' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $item->condition }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        @endif
-
-        <a href="{{ route('inventory-receiving.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold">← Back to Receivings</a>
+        </div>
     </div>
-</div>
-@endsection
+</x-app-layout>
