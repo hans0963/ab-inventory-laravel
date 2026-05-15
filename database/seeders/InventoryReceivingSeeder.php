@@ -98,7 +98,6 @@ class InventoryReceivingSeeder extends Seeder
                     'quantity_ordered' => $qtyOrdered,
                     'quantity_received' => $qtyReceived,
                     'unit_cost' => $unitCost,
-                    'total_cost' => $itemCost,
                     'expiration_date' => now()->addMonths(rand(3, 12)),
                     'condition' => $condition
                 ]);

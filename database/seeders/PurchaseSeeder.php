@@ -25,11 +25,15 @@ class PurchaseSeeder extends Seeder
         // Create 15 formal procurement records
         for ($i = 1; $i <= 15; $i++) {
             $reference = 'PO-' . now()->year . '-' . str_pad($i, 4, '0', STR_PAD_LEFT) . '-' . rand(1000, 9999);
+            $poNumber = 'PO-' . now()->format('Ymd') . '-' . str_pad($i, 3, '0', STR_PAD_LEFT);
             $purchase = Purchase::create([
                 'purchase_date' => now()->subDays(rand(1, 45)),
                 'supplier_id' => $suppliers->random()->id,
                 'employee_id' => $employees->random()->id,
-                'reference' => $reference
+                'reference' => $reference,
+                'po_number' => $poNumber,
+                'status' => 'Pending',
+                'total_amount' => 0
             ]);
             
             // Add purchase details
@@ -38,7 +42,8 @@ class PurchaseSeeder extends Seeder
 
             foreach ($selectedProducts as $product) {
                 $quantity = rand(10, 50);
-                $price = $product->buying_price;
+                // Use selling price discounted by 30% for purchase price
+                $price = $product->selling_price * 0.70;
                 
                 PurchaseDetail::create([
                     'purchase_id' => $purchase->id,
@@ -48,6 +53,9 @@ class PurchaseSeeder extends Seeder
                     'total' => $quantity * $price
                 ]);
             }
+
+            // Calculate and update total amount
+            $purchase->update(['total_amount' => $purchase->calculateTotal()]);
         }
     }
 }

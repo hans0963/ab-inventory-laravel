@@ -127,6 +127,7 @@ class DatabaseSeeder extends Seeder
             ProductionOutSeeder::class,
             StockWithdrawalSeeder::class,
             InventoryReceivingSeeder::class,
+            EnhancedPurchaseSeeder::class,
         ]);
     }
 }
