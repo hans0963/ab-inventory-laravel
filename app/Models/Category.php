@@ -16,7 +16,12 @@ class Category extends Model
     use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'id';
-    protected $fillable = ['category_name', 'description'];
+    protected $fillable = ['category_name', 'description', 'status'];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     public function products()
     {
