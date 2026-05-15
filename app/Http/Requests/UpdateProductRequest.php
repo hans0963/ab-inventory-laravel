@@ -22,9 +22,12 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // product_name is NOT editable after creation
             'category_id' => 'required|integer|exists:categories,id',
             'selling_price' => 'required|numeric|min:0|max:999999.99',
             'quantity' => 'required|integer|min:0|max:999999',
+            'status' => 'required|in:Active,Inactive',
+            'expiration_date' => 'nullable|date|after_or_equal:today',
             'stock_alert_threshold' => 'required|integer|min:0|max:999999',
         ];
     }
@@ -40,6 +43,10 @@ class UpdateProductRequest extends FormRequest
             'selling_price.required' => 'Selling price is required.',
             'selling_price.numeric' => 'Selling price must be a valid number.',
             'quantity.required' => 'Quantity is required.',
+            'status.required' => 'Status is required.',
+            'status.in' => 'Status must be Active or Inactive.',
+            'expiration_date.date' => 'Expiration date must be a valid date.',
+            'expiration_date.after_or_equal' => 'Expiration date must be today or later.',
             'stock_alert_threshold.required' => 'Stock alert threshold is required.',
         ];
     }

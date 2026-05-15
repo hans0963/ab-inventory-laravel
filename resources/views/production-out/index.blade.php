@@ -1,109 +1,107 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center w-full">
+@extends('layouts.app')
+
+@section('content')
+<div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-12 px-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
             <div>
-                <h2 class="font-formal font-semibold text-2xl text-amber-900 leading-tight">
-                    {{ __('Production Out') }}
-                </h2>
-                <p class="text-sm text-gray-500 mt-1">Track products removed from shelves (pull-outs)</p>
+                <h1 class="text-4xl font-bold text-gray-800">Production OUT</h1>
+                <p class="text-gray-600 mt-2">Manage product removals and production outs</p>
             </div>
-            <a href="{{ route('production-out.create') }}"
-               class="inline-flex items-center gap-2 px-5 py-3 rounded-full text-white text-sm font-semibold shadow-sm transition hover:opacity-90"
-               style="background-color: #E2725B;">
-                <span class="text-lg leading-none">+</span>
-                Record Loss
+            <a href="{{ route('production-out.create') }}" class="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow">
+                + New Production OUT
             </a>
         </div>
-    </x-slot>
 
-    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-            {{-- Search Bar --}}
-            <div class="p-5 border-b border-gray-100">
-                <div class="relative">
-                    <div class="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
-                        </svg>
-                    </div>
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Search production loss records..."
-                        class="w-full rounded-full border border-gray-200 bg-gray-50 py-3 pl-11 pr-5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent"
-                        oninput="filterTable(this.value)"
-                    />
+        <!-- Filters -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <option value="">All Statuses</option>
+                        <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Approved" {{ request('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="Rejected" {{ request('status') === 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                    </select>
                 </div>
-            </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
+                    <input type="date" name="date_from" value="{{ request('date_from') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
+                    <input type="date" name="date_to" value="{{ request('date_to') }}" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                        Filter
+                    </button>
+                </div>
+                <div class="flex items-end">
+                    <a href="{{ route('production-out.index') }}" class="w-full text-center bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
 
-            {{-- Table --}}
-            <table class="min-w-full text-sm" id="productionOutTable">
-                <thead>
-                    <tr class="border-b border-gray-100">
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">ID</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Product</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Quantity</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Date Pulled Out</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Reason/Remarks</th>
-                        <th class="text-left px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-wide">Actions</th>
+        <!-- Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-100 border-b">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Reference #</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Reason</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Items</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+                        <th class="px-6 py-4 text-center text-sm font-semibold text-gray-700">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100" id="tableBody">
-                    @forelse($losses as $loss)
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 font-semibold" style="color: #E2725B;">
-                                #{{ $loss->id }}
+                <tbody class="divide-y">
+                    @forelse($productionOuts as $out)
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ $out->production_out_no }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ $out->date->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ $out->reason }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ $out->items->count() }} items</td>
+                            <td class="px-6 py-4 text-sm">
+                                @if($out->status === 'Pending')
+                                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">Pending</span>
+                                @elseif($out->status === 'Approved')
+                                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Approved</span>
+                                @else
+                                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">Rejected</span>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 font-semibold text-gray-800">
-                                {{ $loss->product->product_name ?? 'N/A' }}
-                            </td>
-                            <td class="px-6 py-4 text-red-600 font-bold">
-                                -{{ $loss->pull_out }}
-                            </td>
-                            <td class="px-6 py-4 text-gray-600">
-                                {{ \Carbon\Carbon::parse($loss->date)->format('Y-m-d H:i') }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                    {{ $loss->remarks ?? $loss->transaction_type }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <form action="{{ route('production-out.destroy', $loss->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700">Delete</button>
-                                </form>
+                            <td class="px-6 py-4 text-center text-sm">
+                                <a href="{{ route('production-out.show', $out->id) }}" class="text-blue-600 hover:text-blue-800 font-semibold">View</a>
+                                @if($out->status === 'Pending')
+                                    <form action="{{ route('production-out.destroy', $out->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-800 font-semibold ml-3">Delete</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">
-                                No production loss records found.
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                No production outs found.
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
 
-            <div class="p-4">
-                {{ $losses->links() }}
-            </div>
-
+        <!-- Pagination -->
+        <div class="mt-8">
+            {{ $productionOuts->links() }}
         </div>
     </div>
-
-    @push('scripts')
-    <script>
-        function filterTable(query) {
-            const rows = document.querySelectorAll('#tableBody tr');
-            const q = query.toLowerCase();
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(q) ? '' : 'none';
-            });
-        }
-    </script>
-    @endpush
-</x-app-layout>
+</div>
+@endsection

@@ -60,12 +60,12 @@ class Sale extends Model
     /**
      * Calculate total amount after discount and VAT
      */
-    public function calculateTotal(): decimal
+    public function calculateTotal(): float
     {
         $subtotal = $this->sold * $this->product->selling_price;
         $afterDiscount = $subtotal - $this->discount_amount;
         $vat = $afterDiscount * ($this->vat_rate / 100);
-        return $afterDiscount + $vat;
+        return (float)($afterDiscount + $vat);
     }
 
     /**

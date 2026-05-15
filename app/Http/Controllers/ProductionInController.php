@@ -2,67 +2,133 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
+use App\Models\ProductionIn;
+use App\Models\ProductionInItem;
 use App\Models\Product;
-use App\Models\InventoryMovement;
+use App\Http\Requests\StoreProductionInRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductionInController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Using InventoryMovement as a source for production-in (new_luto > 0)
-        $batches = InventoryMovement::where('new_luto', '>', 0)
-            ->with(['product'])
-            ->latest()
-            ->paginate(10);
-            
-        return view('production-in.index', compact('batches'));
+        $query = ProductionIn::with('items', 'createdBy', 'approvedBy');
+
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('date_from') && $request->date_from) {
+            $query->where('date', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to) {
+            $query->where('date', '<=', $request->date_to);
+        }
+
+        $productionIns = $query->latest()->paginate(10);
+        return view('production-in.index', compact('productionIns'));
     }
 
     public function create()
     {
-        $products = Product::all();
+        $products = Product::where('status', 'Active')
+                          ->where('inventory_type', 'Finished Product')
+                          ->get();
         return view('production-in.create', compact('products'));
     }
 
-    public function store(Request $request)
+    public function store(StoreProductionInRequest $request)
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $product = Product::findOrFail($request->product_id);
-        $oldBalance = $product->quantity;
-        
-        // Update product quantity
-        $product->increment('quantity', $request->quantity);
+            $productionIn = ProductionIn::create([
+                'production_in_no' => ProductionIn::generateProductionInNo(),
+                'date' => $request->date,
+                'notes' => $request->notes,
+                'created_by' => Auth::id(),
+                'created_date' => now()->toDateString(),
+                'status' => 'Pending'
+            ]);
 
-        // Record movement
-        InventoryMovement::create([
-            'product_id' => $request->product_id,
-            'employee_id' => Auth::id() ?? 1, // Fallback for dev
-            'balance_forwarded' => $oldBalance,
-            'new_luto' => $request->quantity,
-            'new_balance' => $oldBalance,
-            'total_inventory' => $oldBalance + $request->quantity,
-            'date' => now(),
-            'transaction_type' => 'PRODUCTION_IN'
-        ]);
+            $totalValue = 0;
+            foreach ($request->items as $itemData) {
+                $itemValue = $itemData['quantity'] * $itemData['unit_price'];
+                ProductionInItem::create([
+                    'production_in_id' => $productionIn->id,
+                    'product_id' => $itemData['product_id'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'total_value' => $itemValue,
+                    'expiration_date' => $itemData['expiration_date'] ?? null
+                ]);
+                $totalValue += $itemValue;
+            }
 
-        return redirect()->route('production-in.index')->with('success', 'Production recorded successfully.');
+            $productionIn->total_inventory_value = $totalValue;
+            $productionIn->save();
+
+            DB::commit();
+
+            return redirect()->route('production-in.show', $productionIn->id)
+                           ->with('success', 'Production IN created successfully. Reference: ' . $productionIn->production_in_no);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to create production IN: ' . $e->getMessage());
+        }
     }
 
-    public function destroy($id)
+    public function show(ProductionIn $productionIn)
     {
-        $movement = InventoryMovement::findOrFail($id);
-        
-        // Reverse stock if needed, but usually production records are permanent logs
-        // For this CRUD, we'll just delete the log entry
-        $movement->delete();
-        
-        return redirect()->route('production-in.index')->with('success', 'Production record removed.');
+        $productionIn->load('items.product', 'createdBy', 'approvedBy');
+        return view('production-in.show', compact('productionIn'));
+    }
+
+    public function approve(ProductionIn $productionIn)
+    {
+        if (!Auth::user()->can('view-inventory')) {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $productionIn->approve(Auth::user());
+
+            DB::commit();
+
+            return redirect()->route('production-in.show', $productionIn->id)
+                           ->with('success', 'Production IN approved successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to approve: ' . $e->getMessage());
+        }
+    }
+
+    public function reject(ProductionIn $productionIn)
+    {
+        if (!Auth::user()->can('view-inventory')) {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        $productionIn->reject(Auth::user());
+
+        return redirect()->route('production-in.show', $productionIn->id)
+                       ->with('success', 'Production IN rejected.');
+    }
+
+    public function destroy(ProductionIn $productionIn)
+    {
+        if ($productionIn->status !== 'Pending') {
+            return redirect()->back()->with('error', 'Cannot delete approved or rejected production IN records.');
+        }
+
+        $productionIn->delete();
+
+        return redirect()->route('production-in.index')
+                       ->with('success', 'Production IN deleted successfully.');
     }
 }

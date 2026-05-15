@@ -40,7 +40,6 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request)
     {
         $validated = $request->validated();
-        $validated['buying_price'] = 0; // Defaulting to 0 since it's removed from UI
 
         Product::create($validated);
 
@@ -64,9 +63,12 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Check if product has sales history in order_details
-        if ($product->orderDetails()->exists()) {
-            return redirect()->route('products.index')->with('error', 'Cannot delete "' . $product->product_name . '" because it has existing sales records. You should keep it for historical reporting.');
+        // Check if product has transactions (sales, inventory movements, etc.)
+        if ($product->orderDetails()->exists() || 
+            ($product->inventory_movements ?? collect())->count() > 0) {
+            return redirect()->route('products.index')->with('error', 
+                'Cannot delete "' . $product->product_name . '" because it has existing transactions. 
+                Please set status to Inactive instead for historical reporting.');
         }
 
         $product_name = $product->product_name;

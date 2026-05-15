@@ -23,6 +23,13 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-semibold text-sienna mb-2">Inventory Type *</label>
+                        <input type="text" value="{{ $product->inventory_type }}" readonly 
+                               class="w-full border-sienna bg-gray-100 rounded-md shadow-sm text-gray-600 cursor-not-allowed">
+                        <p class="text-[10px] text-sage mt-1 italic">Type cannot be changed after creation</p>
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-semibold text-sienna mb-2">Category *</label>
                         <select name="category_id" required 
                                 class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
@@ -34,6 +41,16 @@
                             @endforeach
                         </select>
                         @error('category_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-sienna mb-2">Status *</label>
+                        <select name="status" required 
+                                class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
+                            <option value="Active" {{ old('status', $product->status) === 'Active' ? 'selected' : '' }}>Active</option>
+                            <option value="Inactive" {{ old('status', $product->status) === 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                        @error('status') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -53,11 +70,19 @@
                     </div>
 
                     <div>
+                        <label class="block text-sm font-semibold text-sienna mb-2">Expiration Date</label>
+                        <input type="date" name="expiration_date" value="{{ old('expiration_date', $product->expiration_date?->format('Y-m-d')) }}"
+                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
+                        <p class="text-[10px] text-sage mt-1 italic">Optional: Set for perishable items</p>
+                        @error('expiration_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
                         <label class="block text-sm font-semibold text-sienna mb-2">Stock Alert Threshold *</label>
                         <input type="number" name="stock_alert_threshold" value="{{ old('stock_alert_threshold', $product->stock_alert_threshold) }}" required min="0"
                                class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
                                placeholder="e.g. 10">
-                        <p class="text-[10px] text-sage mt-1 italic italic">Notify when stock falls below this level</p>
+                        <p class="text-[10px] text-sage mt-1 italic">Notify when stock falls below this level</p>
                         @error('stock_alert_threshold') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>

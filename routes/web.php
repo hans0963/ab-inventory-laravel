@@ -10,6 +10,8 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\DiscountTypeController;
 
 use App\Http\Controllers\InventoryStatusController;
 use App\Http\Controllers\InventoryMovementsController;
@@ -21,6 +23,8 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RawMaterialController;
 use App\Http\Controllers\ProductionInController;
 use App\Http\Controllers\ProductionOutController;
+use App\Http\Controllers\StockWithdrawalController;
+use App\Http\Controllers\InventoryReceivingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -52,6 +56,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['can:view-purchases'])->group(function () {
         Route::resource('purchases', PurchaseController::class);
+        Route::post('purchases/{purchase}/link-receiving', [PurchaseController::class, 'linkReceiving'])->name('purchases.link-receiving');
+        Route::post('purchases/{purchase}/unlink-receiving', [PurchaseController::class, 'unlinkReceiving'])->name('purchases.unlink-receiving');
+        Route::get('purchases/{purchase}/receiving-matching', [PurchaseController::class, 'receivingMatching'])->name('purchases.receiving-matching');
+        Route::get('purchases-receiving-progress', [PurchaseController::class, 'receivingProgress'])->name('purchases.receiving-progress');
     });
 
     Route::middleware(['can:view-inventory'])->group(function () {
@@ -71,6 +79,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('/orders/store', [OrderController::class, 'store'])->name('orders.store');
+        
+        // Phase 1: Enhanced Sales Routes
+        Route::resource('sales', SaleController::class);
+        Route::get('/sales/{sale}/print', [SaleController::class, 'printReceipt'])->name('sales.print');
+    });
+
+    // Phase 1: Discount Types Management (Manager/Admin)
+    Route::middleware(['can:view-products'])->group(function () {
+        Route::resource('discounts', DiscountTypeController::class);
     });
 
     Route::middleware(['can:view-customers'])->group(function () {
@@ -94,7 +111,17 @@ Route::middleware(['auth', 'role:manager'])->group(function () {
     Route::post('raw-materials/{rawMaterial}/adjust', [RawMaterialController::class, 'adjust'])->name('raw-materials.adjust');
     Route::resource('raw-materials', RawMaterialController::class);
     Route::resource('production-in', ProductionInController::class);
+    Route::post('production-in/{productionIn}/approve', [ProductionInController::class, 'approve'])->name('production-in.approve');
+    Route::post('production-in/{productionIn}/reject', [ProductionInController::class, 'reject'])->name('production-in.reject');
     Route::resource('production-out', ProductionOutController::class);
+    Route::post('production-out/{productionOut}/approve', [ProductionOutController::class, 'approve'])->name('production-out.approve');
+    Route::post('production-out/{productionOut}/reject', [ProductionOutController::class, 'reject'])->name('production-out.reject');
+    Route::resource('stock-withdrawal', StockWithdrawalController::class);
+    Route::post('stock-withdrawal/{withdrawal}/approve', [StockWithdrawalController::class, 'approve'])->name('stock-withdrawal.approve');
+    Route::resource('inventory-receiving', InventoryReceivingController::class);
+    Route::post('inventory-receiving/{inventoryReceiving}/approve', [InventoryReceivingController::class, 'approve'])->name('inventory-receiving.approve');
+    Route::post('inventory-receiving/{inventoryReceiving}/reject', [InventoryReceivingController::class, 'reject'])->name('inventory-receiving.reject');
+    Route::post('stock-withdrawal/{withdrawal}/reject', [StockWithdrawalController::class, 'reject'])->name('stock-withdrawal.reject');
     
     Route::get('/manager-sales-report', [ReportController::class, 'salesReport'])->name('manager-sales-report.index');
     Route::get('/manager-reports', [ReportController::class, 'managerReports'])->name('manager-reports.index');

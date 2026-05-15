@@ -30,6 +30,7 @@ class CategoryController extends Controller
         $request->validate([
             'category_name' => 'required|string|max:50|unique:categories',
             'description' => 'nullable|string|max:255',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         Category::create($request->all());
@@ -47,6 +48,7 @@ class CategoryController extends Controller
         $request->validate([
             'category_name' => 'required|string|max:50|unique:categories,category_name,' . $category->id . ',id',
             'description' => 'nullable|string|max:255',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         $category->update($request->all());
@@ -56,13 +58,13 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
-        // Check if category has products
+        // Prevent deletion if linked to products
         if ($category->products()->exists()) {
             return redirect()->route('categories.index')->with('error', 'Cannot delete "' . $category->category_name . '" because it has existing products. Please move or delete the products first.');
         }
 
         $category_name = $category->category_name;
         $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Category "' . $category_name . '" archived successfully.');
+        return redirect()->route('categories.index')->with('success', 'Category "' . $category_name . '" deleted successfully.');
     }
 }

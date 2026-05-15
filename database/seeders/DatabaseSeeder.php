@@ -123,6 +123,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             OrderSeeder::class,
             PurchaseSeeder::class,
+            ProductionInSeeder::class,
+            ProductionOutSeeder::class,
+            StockWithdrawalSeeder::class,
+            InventoryReceivingSeeder::class,
         ]);
     }
 }

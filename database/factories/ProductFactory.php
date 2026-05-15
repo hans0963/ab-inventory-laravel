@@ -26,7 +26,7 @@ class ProductFactory extends Factory
         return [
             'product_name' => $this->faker->unique()->word(), // Placeholder, will be overridden in seeder
             'category_id' => Category::factory(),
-            'buying_price' => 0,
+            
             'selling_price' => $this->faker->randomFloat(2, 25, 250),
             'quantity' => $this->faker->numberBetween(20, 100),
             'stock_alert_threshold' => 10,

@@ -2,67 +2,139 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
+use App\Models\ProductionOut;
+use App\Models\ProductionOutItem;
 use App\Models\Product;
-use App\Models\InventoryMovement;
+use App\Http\Requests\StoreProductionOutRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ProductionOutController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Using InventoryMovement as a source for production-out (pull_out > 0 and type != SALE)
-        $losses = InventoryMovement::where('pull_out', '>', 0)
-            ->where('transaction_type', '!=', 'SALE')
-            ->with(['product', 'employee'])
-            ->latest()
-            ->paginate(10);
-            
-        return view('production-out.index', compact('losses'));
+        $query = ProductionOut::with('items', 'createdBy', 'approvedBy');
+
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('date_from') && $request->date_from) {
+            $query->where('date', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to) {
+            $query->where('date', '<=', $request->date_to);
+        }
+
+        $productionOuts = $query->latest()->paginate(10);
+        return view('production-out.index', compact('productionOuts'));
     }
 
     public function create()
     {
-        $products = Product::all();
+        $products = Product::where('status', 'Active')
+                          ->where('inventory_type', 'Finished Product')
+                          ->where('quantity', '>', 0)
+                          ->get();
         return view('production-out.create', compact('products'));
     }
 
-    public function store(Request $request)
+    public function store(StoreProductionOutRequest $request)
     {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'reason' => 'required|string',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $product = Product::findOrFail($request->product_id);
-        $oldBalance = $product->quantity;
-        
-        // Update product quantity (decrement for pull out)
-        $product->decrement('quantity', min($request->quantity, $oldBalance));
+            // Validate stock availability
+            foreach ($request->items as $itemData) {
+                $product = Product::findOrFail($itemData['product_id']);
+                if ($product->quantity < $itemData['quantity']) {
+                    return redirect()->back()
+                        ->with('error', "Insufficient stock for {$product->product_name}. Available: {$product->quantity}");
+                }
+            }
 
-        // Record movement
-        InventoryMovement::create([
-            'product_id' => $request->product_id,
-            'employee_id' => Auth::id() ?? 1,
-            'balance_forwarded' => $oldBalance,
-            'pull_out' => $request->quantity,
-            'new_balance' => max(0, $oldBalance - $request->quantity),
-            'new_luto' => 0,
-            'total_inventory' => max(0, $oldBalance - $request->quantity),
-            'date' => now(),
-            'transaction_type' => 'PULL_OUT',
-            'remarks' => $request->reason // Assuming we can use a remarks field or just the type
-        ]);
+            $productionOut = ProductionOut::create([
+                'production_out_no' => ProductionOut::generateProductionOutNo(),
+                'date' => $request->date,
+                'reason' => $request->reason,
+                'notes' => $request->notes,
+                'created_by' => Auth::id(),
+                'created_date' => now()->toDateString(),
+                'status' => 'Pending'
+            ]);
 
-        return redirect()->route('production-out.index')->with('success', 'Pull-out recorded successfully.');
+            foreach ($request->items as $itemData) {
+                $product = Product::findOrFail($itemData['product_id']);
+                $itemValue = $itemData['quantity'] * $itemData['unit_price'];
+                ProductionOutItem::create([
+                    'production_out_id' => $productionOut->id,
+                    'product_id' => $itemData['product_id'],
+                    'quantity' => $itemData['quantity'],
+                    'unit_price' => $itemData['unit_price'],
+                    'total_value' => $itemValue
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('production-out.show', $productionOut->id)
+                           ->with('success', 'Production OUT created successfully. Reference: ' . $productionOut->production_out_no);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to create production OUT: ' . $e->getMessage());
+        }
     }
 
-    public function destroy($id)
+    public function show(ProductionOut $productionOut)
     {
-        $movement = InventoryMovement::findOrFail($id);
-        $movement->delete();
-        return redirect()->route('production-out.index')->with('success', 'Pull-out record removed.');
+        $productionOut->load('items.product', 'createdBy', 'approvedBy');
+        return view('production-out.show', compact('productionOut'));
+    }
+
+    public function approve(ProductionOut $productionOut)
+    {
+        if (!Auth::user()->can('view-inventory')) {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $productionOut->approve(Auth::user());
+
+            DB::commit();
+
+            return redirect()->route('production-out.show', $productionOut->id)
+                           ->with('success', 'Production OUT approved and stock updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Failed to approve: ' . $e->getMessage());
+        }
+    }
+
+    public function reject(ProductionOut $productionOut)
+    {
+        if (!Auth::user()->can('view-inventory')) {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        $productionOut->reject(Auth::user());
+
+        return redirect()->route('production-out.show', $productionOut->id)
+                       ->with('success', 'Production OUT rejected.');
+    }
+
+    public function destroy(ProductionOut $productionOut)
+    {
+        if ($productionOut->status !== 'Pending') {
+            return redirect()->back()->with('error', 'Cannot delete approved or rejected production OUT records.');
+        }
+
+        $productionOut->delete();
+
+        return redirect()->route('production-out.index')
+                       ->with('success', 'Production OUT deleted successfully.');
     }
 }
