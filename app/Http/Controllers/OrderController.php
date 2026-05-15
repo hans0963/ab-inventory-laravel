@@ -9,60 +9,55 @@ use App\Models\OrderDetail;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Http\Requests\StoreOrderRequest;
 
 class OrderController extends Controller
 {
     public function create()
     {
+        $walkInCustomer = Customer::where('name', 'Walk-in Customer')->first();
         return view('orders.create', [
             'customers' => Customer::all(),
-            'employees' => Employee::all(),
-            'products' => Product::all()
+            'products' => Product::all(),
+            'default_customer_id' => $walkInCustomer ? $walkInCustomer->id : null
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreOrderRequest $request)
     {
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'employee_id' => 'required|exists:employees,id',
-            'payment_type' => 'required|in:Cash,Credit Card,Bank Transfer,Online Payment',
-            'product_id' => 'required|array',
-            'product_id.*' => 'required|exists:products,id',
-            'quantity' => 'required|array',
-            'quantity.*' => 'required|integer|min:1',
-            'price' => 'required|array',
-            'price.*' => 'required|numeric|min:0',
-        ]);
-
+        $validated = $request->validated();
+        
         \DB::beginTransaction();
 
         try {
             $totalProducts = 0;
             $totalPrice = 0;
 
-            foreach ($request->product_id as $index => $productId) {
-                $totalProducts += $request->quantity[$index];
-                $totalPrice += $request->quantity[$index] * $request->price[$index];
+            foreach ($validated['product_id'] as $index => $productId) {
+                $totalProducts += $validated['quantity'][$index];
+                $totalPrice += $validated['quantity'][$index] * $validated['price'][$index];
             }
 
+            // Get the logged in user's employee ID
+            $employeeId = auth()->user()->employee_id ?? Employee::first()->id;
+
             $order = Order::create([
-                'customer_id' => $request->customer_id,
-                'employee_id' => $request->employee_id,
+                'customer_id' => $validated['customer_id'],
+                'employee_id' => $employeeId,
                 'order_date' => now(),
                 'total' => $totalPrice,
-                'payment_type' => $request->payment_type,
+                'payment_type' => $validated['payment_type'],
                 'total_products' => $totalProducts,
                 'order_status' => 'Completed', // Defaulting to Completed as it's a direct sale
             ]);
 
-            foreach ($request->product_id as $index => $productId) {
+            foreach ($validated['product_id'] as $index => $productId) {
                 OrderDetail::create([
                     'order_id' => $order->id,
                     'product_id' => $productId,
-                    'quantity' => $request->quantity[$index],
-                    'unit_cost' => $request->price[$index],
-                    'total' => $request->quantity[$index] * $request->price[$index],
+                    'quantity' => $validated['quantity'][$index],
+                    'unit_cost' => $validated['price'][$index],
+                    'total' => $validated['quantity'][$index] * $validated['price'][$index],
                 ]);
             }
 
@@ -72,7 +67,11 @@ class OrderController extends Controller
         
         } catch (\Exception $e) {
             \DB::rollback();
-            return back()->withErrors(['error' => '❌ Order failed: ' . $e->getMessage()]);
+            \Log::error('Order creation failed: ' . $e->getMessage());
+            $message = app()->environment('production') 
+                ? '❌ Order failed: Please try again.' 
+                : '❌ Order failed: ' . $e->getMessage();
+            return back()->withErrors(['error' => $message]);
         }
     }
 
@@ -93,6 +92,5 @@ class OrderController extends Controller
         $order = Order::with(['customer', 'orderDetails.product'])->findOrFail($id);
         return view('orders.show', compact('order'));
     }
-
 }
 

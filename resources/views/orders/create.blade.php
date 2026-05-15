@@ -18,9 +18,10 @@
                         <label class="block text-sm font-semibold text-sienna mb-2">Customer *</label>
                         <select name="customer_id" required 
                                 class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                            <option value="">Select Customer</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                                <option value="{{ $customer->id }}" {{ $customer->id == $default_customer_id ? 'selected' : '' }}>
+                                    {{ $customer->name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -29,7 +30,7 @@
                         <label class="block text-sm font-semibold text-sienna mb-2">Payment Type *</label>
                         <select name="payment_type" required 
                                 class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                            <option value="Cash">Cash</option>
+                            <option value="Cash" selected>Cash</option>
                             <option value="Credit Card">Credit Card</option>
                             <option value="Bank Transfer">Bank Transfer</option>
                             <option value="Online Payment">Online Payment</option>
@@ -38,14 +39,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-sienna mb-2">Recorded By (Employee) *</label>
-                    <select name="employee_id" required 
-                            class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                        <option value="">Select Employee</option>
-                        @foreach($employees as $employee)
-                            <option value="{{ $employee->id }}">{{ $employee->employee_name }}</option>
-                        @endforeach
-                    </select>
+                    <label class="block text-sm font-semibold text-sienna mb-2">Recorded By</label>
+                    <div class="w-full border border-sienna bg-gray-50 rounded-md shadow-sm p-2 text-sienna opacity-70">
+                        {{ auth()->user()->name }} ({{ ucfirst(auth()->user()->role) }})
+                    </div>
                 </div>
 
                 <div class="bg-cream bg-opacity-20 p-6 rounded-lg border border-tan border-opacity-30 space-y-4">

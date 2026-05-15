@@ -23,7 +23,7 @@ class RawMaterialFactory extends Factory
                 'Ube Halaya',
                 'Cheddar Cheese',
                 'Desiccated Coconut'
-            ]) . ' ' . $this->faker->unique()->numberBetween(1, 1000),
+            ]),
             'quantity' => $this->faker->numberBetween(10, 100),
             'unit' => $this->faker->randomElement(['kg', 'liters', 'tray', 'pack']),
             'expiration_date' => $this->faker->dateTimeBetween('+1 month', '+6 months'),

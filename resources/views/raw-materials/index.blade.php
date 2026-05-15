@@ -10,10 +10,20 @@
                 <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Monitor raw materials and expiration</p>
             </div>
 
-            <a href="{{ route('raw-materials.create') }}" 
-               class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
-                <span class="mr-2 text-xl">+</span> Stock In
-            </a>
+            <div class="flex gap-4">
+                <a href="{{ route('raw-materials.create') }}" 
+                   class="bg-sage hover:bg-opacity-90 text-white font-bold px-4 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center text-sm" title="Register New Ingredient">
+                    <span class="mr-2 text-lg">★</span> New
+                </a>
+                <a href="{{ route('raw-materials.in') }}" 
+                   class="bg-green-600 hover:bg-green-700 text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
+                    <span class="mr-2 text-xl">+</span> Stock In
+                </a>
+                <a href="{{ route('raw-materials.out') }}" 
+                   class="bg-orange-600 hover:bg-orange-700 text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
+                    <span class="mr-2 text-xl">-</span> Stock Out
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -101,7 +111,7 @@
                                 </td>
                                 <td class="px-6 py-5 text-center">
                                     <div class="flex items-center justify-center space-x-3">
-                                        <a href="{{ route('raw-materials.edit', $material->id) }}" class="p-2 text-sage hover:text-sienna hover:bg-sage hover:bg-opacity-10 rounded-lg transition-all">
+                                        <a href="{{ route('raw-materials.edit', $material->id) }}" class="p-2 text-sage hover:text-sienna hover:bg-sage hover:bg-opacity-10 rounded-lg transition-all" title="Edit">
                                             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
@@ -122,5 +132,4 @@
             </div>
         </div>
     </div>
-
 </x-app-layout>

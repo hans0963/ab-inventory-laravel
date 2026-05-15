@@ -18,6 +18,13 @@ class CategoryController extends Controller
         return view('categories.create');
     }
 
+    public function show(Category $category)
+    {
+        $category->loadCount('products');
+        $products = $category->products()->latest()->paginate(10);
+        return view('categories.show', compact('category', 'products'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -49,7 +56,13 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        // Check if category has products
+        if ($category->products()->exists()) {
+            return redirect()->route('categories.index')->with('error', 'Cannot delete "' . $category->category_name . '" because it has existing products. Please move or delete the products first.');
+        }
+
+        $category_name = $category->category_name;
         $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully.');
+        return redirect()->route('categories.index')->with('success', 'Category "' . $category_name . '" archived successfully.');
     }
 }

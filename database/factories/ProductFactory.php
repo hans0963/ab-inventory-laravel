@@ -12,34 +12,24 @@ class ProductFactory extends Factory
 
     public function definition(): array
     {
+        $productsByCategory = [
+            'Bread and Rolls' => ['Artisan Sourdough', 'French Baguette', 'Whole Wheat Loaf', 'Classic Pandesal', 'Dinner Rolls', 'Brioche Buns', 'Ciabatta'],
+            'Pastries' => ['Butter Croissant', 'Pain au Chocolat', 'Apple Turnover', 'Cheese Danish', 'Blueberry Tart', 'Palmier', 'Cinnamon Roll'],
+            'Cakes' => ['Red Velvet Cake', 'Chocolate Ganache Cake', 'Strawberry Shortcake', 'New York Cheesecake', 'Ube Chiffon Cake', 'Mocha Pound Cake'],
+            'Cookies and Biscuits' => ['Chocolate Chip Cookies', 'Oatmeal Raisin Cookies', 'Double Chocolate Crinkles', 'Butter Shortbread', 'Snickerdoodles', 'Biscotti'],
+            'Quick Breads and Muffins' => ['Banana Walnut Bread', 'Blueberry Muffin', 'Lemon Poppyseed Scone', 'Double Chocolate Muffin', 'Zucchini Bread'],
+            'Pies and Tarts' => ['Classic Apple Pie', 'Egg Tart', 'Buko Pie', 'Lemon Meringue Tart', 'Peach Mango Pie', 'Pumpkin Pie'],
+            'Savory Goods' => ['Chicken Empanada', 'Ham and Cheese Puffs', 'Savory Quiche', 'Garlic Breadsticks', 'Soft Pretzels', 'Sausage Rolls'],
+            'Donuts and Fried Products' => ['Glazed Donut', 'Chocolate Frosted Donut', 'Bavarian Cream Filled', 'Spanish Churros', 'Beignets', 'Twisted Donut'],
+        ];
+
         return [
-            'product_name' => $this->faker->randomElement([
-                'Premium Pandesal',
-                'Classic Ensaymada',
-                'Spanish Bread',
-                'Ube Cheese Pandesal',
-                'Cheese Roll',
-                'Pan de Coco',
-                'Monay',
-                'Hopia Baboy',
-                'Chocolate Crinkles',
-                'Otap',
-                'Barquillos',
-                'Mamon',
-                'Bibingka',
-                'Puto Bumbong',
-                'Cassava Cake',
-                'Egg Pie',
-                'Buko Pie',
-                'Banana Cake',
-                'Carrot Cake',
-                'Pianono'
-            ]) . ' (' . $this->faker->unique()->numberBetween(1, 10000) . ')',
+            'product_name' => $this->faker->unique()->word(), // Placeholder, will be overridden in seeder
             'category_id' => Category::factory(),
-            'buying_price' => $this->faker->randomFloat(2, 5, 50),
-            'selling_price' => $this->faker->randomFloat(2, 60, 150),
-            'quantity' => $this->faker->numberBetween(50, 500),
-            'stock_alert_threshold' => 20,
+            'buying_price' => 0,
+            'selling_price' => $this->faker->randomFloat(2, 25, 250),
+            'quantity' => $this->faker->numberBetween(20, 100),
+            'stock_alert_threshold' => 10,
         ];
     }
 }

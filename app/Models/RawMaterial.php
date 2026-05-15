@@ -12,4 +12,9 @@ class RawMaterial extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['material_name', 'quantity', 'unit', 'expiration_date'];
+
+    public function movements()
+    {
+        return $this->hasMany(RawMaterialMovement::class);
+    }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
@@ -35,16 +37,9 @@ class ProductController extends Controller
         return view('products.create', compact('categories'));
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $validated = $request->validate([
-            'product_name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'selling_price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'stock_alert_threshold' => 'required|integer|min:0',
-        ]);
-
+        $validated = $request->validated();
         $validated['buying_price'] = 0; // Defaulting to 0 since it's removed from UI
 
         Product::create($validated);
@@ -58,14 +53,9 @@ class ProductController extends Controller
         return view('products.edit', compact('product', 'categories'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'selling_price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'stock_alert_threshold' => 'required|integer|min:0',
-        ]);
+        $validated = $request->validated();
 
         $product->update($validated);
 
