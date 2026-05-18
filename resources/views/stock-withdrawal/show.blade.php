@@ -17,7 +17,7 @@
         {{-- Quick Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <x-stat-card title="Reference #" :value="$withdrawal->withdrawal_no" icon="🔢" border="sienna" />
-            <x-stat-card title="Date" :value="$withdrawal->date->format('M d, Y')" icon="📅" border="sage" />
+            <x-stat-card title="Date" :value="$withdrawal->date ? $withdrawal->date->format('M d, Y') : 'N/A'" icon="📅" border="sage" />
             <div class="card-rustic border-terracotta flex flex-col justify-center p-4">
                 <p class="text-[10px] font-black text-sage uppercase tracking-widest mb-1">Status</p>
                 <span class="inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest text-center
@@ -41,13 +41,13 @@
                         <div>
                             <p class="text-[10px] uppercase tracking-widest text-sage font-black">Encoded By</p>
                             <p class="text-base font-bold text-sienna">{{ $withdrawal->createdBy->name ?? 'N/A' }}</p>
-                            <p class="text-[10px] text-sage italic">{{ $withdrawal->created_at->format('M d, Y h:i A') }}</p>
+                            <p class="text-[10px] text-sage italic">{{ $withdrawal->created_at ? $withdrawal->created_at->format('M d, Y h:i A') : 'N/A' }}</p>
                         </div>
-                        @if($withdrawal->approvedBy)
+                        @if($withdrawal->approvedBy && $withdrawal->approved_date)
                             <div class="pt-4 border-t border-sienna border-opacity-10">
                                 <p class="text-[10px] uppercase tracking-widest text-sage font-black">Approved By</p>
                                 <p class="text-base font-bold text-sienna">{{ $withdrawal->approvedBy->name }}</p>
-                                <p class="text-[10px] text-sage italic">{{ $withdrawal->approved_at->format('M d, Y h:i A') }}</p>
+                                <p class="text-[10px] text-sage italic">{{ $withdrawal->approved_date->format('M d, Y h:i A') }}</p>
                             </div>
                         @endif
                         @if($withdrawal->notes)

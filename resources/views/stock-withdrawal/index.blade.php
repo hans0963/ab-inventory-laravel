@@ -62,7 +62,7 @@
                     @forelse($withdrawals as $withdrawal)
                         <tr class="hover:bg-cream hover:bg-opacity-20 transition">
                             <td class="px-6 py-4 font-bold text-sienna">{{ $withdrawal->withdrawal_no }}</td>
-                            <td class="px-6 py-4 text-sage">{{ $withdrawal->date->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 text-sage">{{ $withdrawal->date ? $withdrawal->date->format('M d, Y') : 'N/A' }}</td>
                             <td class="px-6 py-4 text-sienna font-medium">{{ $withdrawal->reason }}</td>
                             <td class="px-6 py-4 text-center font-medium">{{ $withdrawal->items->count() }}</td>
                             <td class="px-6 py-4 text-right font-black text-terracotta">₱{{ number_format($withdrawal->total_value, 2) }}</td>

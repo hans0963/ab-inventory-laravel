@@ -118,7 +118,7 @@ class Purchase extends Model
     {
         $total = 0;
         foreach ($this->inventoryReceivings as $receiving) {
-            $total += $receiving->inventoryReceivingItems()
+            $total += $receiving->items()
                 ->where('condition', 'Good')
                 ->sum('quantity_received');
         }

@@ -63,17 +63,27 @@ class SupplierController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Supplier $supplier)
     {
-        //
+        return view('suppliers.edit', compact('supplier'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Supplier $supplier)
     {
-        //
+        $validatedData = $request->validate([
+            'suppliers_name' => 'required|string|max:255',
+            'suppliers_company' => 'nullable|string|max:255',
+            'suppliers_email' => 'nullable|email|unique:suppliers,suppliers_email,' . $supplier->id,
+            'suppliers_phone' => 'nullable|string|max:20',
+            'suppliers_address' => 'nullable|string|max:255',
+        ]);
+
+        $supplier->update($validatedData);
+
+        return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully!');
     }
 
     /**
