@@ -51,8 +51,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center space-x-2">
-                                    <a href="{{ route('discounts.edit', $discount->id) }}" class="text-blue-500 hover:text-blue-700">Edit</a>
-                                    <form method="POST" action="{{ route('discounts.destroy', $discount->id) }}" style="display:inline;">
+                                    <a href="{{ route('discounts.edit', $discount) }}" class="text-blue-500 hover:text-blue-700">Edit</a>
+                                    <form method="POST" action="{{ route('discounts.destroy', $discount) }}" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" onclick="return confirm('Are you sure?')" class="text-red-500 hover:text-red-700">Delete</button>

@@ -24,10 +24,13 @@
         @stack('scripts')
     </head>
     <body class="font-inter antialiased bg-cream text-sienna">
-        <div class="min-h-screen" x-data="{ openSidebar: false }">
-            @include('layouts.navigation')
+        <div class="min-h-screen flex" x-data="{ openSidebar: false }">
+            <!-- Persistent Sidebar for Desktop -->
+            <aside class="hidden lg:flex lg:flex-shrink-0 lg:w-64 border-r border-sienna h-screen sticky top-0 z-40 bg-cream">
+                <x-sidebar />
+            </aside>
 
-            <!-- Sidebar -->
+            <!-- Mobile Sidebar Drawer -->
             <div x-show="openSidebar" 
                  x-cloak 
                  @click.away="openSidebar = false"
@@ -38,44 +41,48 @@
                  x-transition:leave="transition ease-in duration-150 transform"
                  x-transition:leave-start="translate-x-0 opacity-100"
                  x-transition:leave-end="-translate-x-full opacity-0"
-                 class="fixed left-0 top-0 h-screen w-64 bg-cream shadow-lg z-40 border-r border-sienna">
+                 class="fixed left-0 top-0 h-screen w-64 bg-cream shadow-lg z-50 border-r border-sienna lg:hidden">
                 <x-sidebar />
             </div>
 
-            <!-- Overlay -->
+            <!-- Mobile Overlay -->
             <div x-show="openSidebar" 
                  x-cloak 
                  @click="openSidebar = false"
-                 class="fixed inset-0 bg-black bg-opacity-40 z-30">
+                 class="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden">
             </div>
 
-            <!-- Main Content -->
-            <main class="min-h-screen pt-20 pb-12">
-                @if(isset($header) || View::hasSection('header'))
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-                        @if (session('error'))
-                            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                                <span class="block sm:inline">{{ session('error') }}</span>
-                            </div>
-                        @endif
-                        @if (session('success'))
-                            <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                                <span class="block sm:inline">{{ session('success') }}</span>
-                            </div>
-                        @endif
-                        
-                        @if(isset($header))
-                            {{ $header }}
-                        @else
-                            @yield('header')
-                        @endif
+            <div class="flex-1 flex flex-col min-w-0">
+                @include('layouts.navigation')
+
+                <!-- Main Content -->
+                <main class="flex-1 pt-8 pb-12 overflow-y-auto">
+                    @if(isset($header) || View::hasSection('header'))
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+                            @if (session('error'))
+                                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                    <span class="block sm:inline">{{ session('error') }}</span>
+                                </div>
+                            @endif
+                            @if (session('success'))
+                                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                                    <span class="block sm:inline">{{ session('success') }}</span>
+                                </div>
+                            @endif
+                            
+                            @if(isset($header))
+                                {{ $header }}
+                            @else
+                                @yield('header')
+                            @endif
+                        </div>
+                    @endif
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        {{ $slot ?? '' }}
+                        @yield('content')
                     </div>
-                @endif
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {{ $slot ?? '' }}
-                    @yield('content')
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     </body>
 </html>

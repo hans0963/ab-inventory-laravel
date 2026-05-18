@@ -86,7 +86,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Phase 1: Discount Types Management (Manager/Admin)
-    Route::middleware(['can:view-products'])->group(function () {
+    Route::middleware(['can:view-discounts'])->group(function () {
         Route::resource('discounts', DiscountTypeController::class);
     });
 
@@ -96,10 +96,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth'])->name('inventory.sales');
-Route::get('/inventory-report', [ReportController::class, 'inventoryReport'])->middleware(['auth'])->name('reports.inventory');
-Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth'])->name('reports.production');
-Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth'])->name('financial.overview');
+Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'can:view-manager-sales-report'])->name('inventory.sales');
+Route::get('/inventory-report', [ReportController::class, 'inventoryReport'])->middleware(['auth', 'can:view-inventory'])->name('reports.inventory');
+Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth', 'can:view-production-in'])->name('reports.production');
+Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth', 'can:view-reports'])->name('financial.overview');
 
 // Cashier Module Routes
 Route::get('/sales-orders', [OrderController::class, 'index'])->middleware(['auth', 'role:cashier'])->name('sales-orders.index');

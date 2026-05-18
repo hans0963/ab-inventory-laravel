@@ -28,7 +28,6 @@ class StoreSaleRequest extends FormRequest
             'date' => 'required|date',
             'sold' => 'required|integer|min:1|max:999999',
             'discount_type_id' => 'nullable|integer|exists:discount_types,id',
-            'discount_amount' => 'nullable|numeric|min:0|max:999999.99',
             'payment_type' => 'required|in:Cash,Credit Card,Bank Transfer,Check,E-Wallet',
             'vat_rate' => 'required|numeric|min:0|max:100',
         ];
@@ -51,7 +50,6 @@ class StoreSaleRequest extends FormRequest
             'sold.integer' => 'Quantity sold must be a number.',
             'sold.min' => 'Quantity sold must be at least 1.',
             'discount_type_id.exists' => 'Selected discount type is invalid.',
-            'discount_amount.numeric' => 'Discount amount must be a valid number.',
             'payment_type.required' => 'Payment type is required.',
             'payment_type.in' => 'Payment type must be Cash, Credit Card, Bank Transfer, Check, or E-Wallet.',
             'vat_rate.required' => 'VAT rate is required.',

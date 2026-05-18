@@ -40,18 +40,18 @@ class DiscountTypeController extends Controller
     /**
      * Show the form for editing the specified discount type.
      */
-    public function edit(DiscountType $discountType)
+    public function edit(DiscountType $discount)
     {
-        return view('discounts.edit', compact('discountType'));
+        return view('discounts.edit', compact('discount'));
     }
 
     /**
      * Update the specified discount type in storage.
      */
-    public function update(UpdateDiscountTypeRequest $request, DiscountType $discountType)
+    public function update(UpdateDiscountTypeRequest $request, DiscountType $discount)
     {
         $validated = $request->validated();
-        $discountType->update($validated);
+        $discount->update($validated);
 
         return redirect()->route('discounts.index')->with('success', 'Discount type updated successfully.');
     }
@@ -59,17 +59,17 @@ class DiscountTypeController extends Controller
     /**
      * Remove the specified discount type from storage.
      */
-    public function destroy(DiscountType $discountType)
+    public function destroy(DiscountType $discount)
     {
         // Prevent deletion if discount type is used in sales
-        if ($discountType->sales()->exists()) {
+        if ($discount->sales()->exists()) {
             return redirect()->route('discounts.index')->with('error', 
-                'Cannot delete "' . $discountType->discount_name . '" because it is used in sales transactions. 
+                'Cannot delete "' . $discount->discount_name . '" because it is used in sales transactions. 
                 Please set status to Inactive instead.');
         }
 
-        $name = $discountType->discount_name;
-        $discountType->delete();
+        $name = $discount->discount_name;
+        $discount->delete();
 
         return redirect()->route('discounts.index')->with('success', 'Discount type "' . $name . '" deleted successfully.');
     }

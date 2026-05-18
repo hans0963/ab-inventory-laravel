@@ -79,13 +79,14 @@
             </x-sidebar-link>
         @endcan
 
-        @can('admin')
+        @can('view-discounts')
             <x-sidebar-link :href="route('discounts.index')" :active="request()->routeIs('discounts.*')">
                 🏷️ Discount Types
             </x-sidebar-link>
         @endcan
 
         <!-- Reports Section -->
+        @if(auth()->user()->can('view-manager-sales-report') || auth()->user()->can('view-inventory') || auth()->user()->can('view-production-in') || auth()->user()->can('view-production-out') || auth()->user()->can('view-reports'))
         <div class="pt-4 pb-1">
             <p class="text-[10px] font-black text-sage uppercase tracking-widest px-4 mb-2">Reports</p>
             
@@ -119,6 +120,7 @@
                 </x-sidebar-link>
             @endcan
         </div>
+        @endif
     </nav>
 
     <!-- Logout Button -->

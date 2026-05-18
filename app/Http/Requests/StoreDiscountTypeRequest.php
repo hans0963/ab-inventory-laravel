@@ -11,7 +11,7 @@ class StoreDiscountTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->can('view-sales-orders');
+        return auth()->check() && auth()->user()->can('view-discounts');
     }
 
     /**

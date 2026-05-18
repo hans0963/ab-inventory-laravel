@@ -103,7 +103,7 @@ class SaleController extends Controller
             $discountType = DiscountType::find($validated['discount_type_id']);
             $validated['discount_amount'] = $subtotal * ($discountType->discount_percentage / 100);
         } else {
-            $validated['discount_amount'] = $validated['discount_amount'] ?? 0;
+            $validated['discount_amount'] = 0;
         }
 
         // Calculate VAT

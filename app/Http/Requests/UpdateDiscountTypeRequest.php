@@ -11,7 +11,7 @@ class UpdateDiscountTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->can('view-sales-orders');
+        return auth()->check() && auth()->user()->can('view-discounts');
     }
 
     /**
@@ -22,7 +22,7 @@ class UpdateDiscountTypeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'discount_name' => 'required|string|max:50|unique:discount_types,discount_name,' . $this->discount_type->id . ',id',
+            'discount_name' => 'required|string|max:50|unique:discount_types,discount_name,' . $this->discount->id . ',id',
             'discount_percentage' => 'required|numeric|min:0|max:100',
             'description' => 'nullable|string|max:255',
             'status' => 'required|in:Active,Inactive',

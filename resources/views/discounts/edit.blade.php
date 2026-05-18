@@ -10,13 +10,13 @@
 
     <div class="py-6 max-w-3xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white rounded-lg shadow-md p-8 border-l-4 border-sienna">
-            <form method="POST" action="{{ route('discounts.update', $discountType->id) }}" class="space-y-6">
+            <form method="POST" action="{{ route('discounts.update', $discount) }}" class="space-y-6">
                 @csrf
                 @method('PUT')
 
                 <div>
                     <label class="block text-sm font-semibold text-sienna mb-2">Discount Name *</label>
-                    <input type="text" name="discount_name" required value="{{ $discountType->discount_name }}"
+                    <input type="text" name="discount_name" required value="{{ $discount->discount_name }}"
                            class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
                            placeholder="e.g., PWD, Senior Citizen, Store Discount">
                     @error('discount_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -25,7 +25,7 @@
                 <div>
                     <label class="block text-sm font-semibold text-sienna mb-2">Discount Percentage (%) *</label>
                     <input type="number" step="0.01" name="discount_percentage" required min="0" max="100"
-                           value="{{ $discountType->discount_percentage }}"
+                           value="{{ $discount->discount_percentage }}"
                            class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
                            placeholder="e.g., 10 for 10%">
                     @error('discount_percentage') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -35,7 +35,7 @@
                     <label class="block text-sm font-semibold text-sienna mb-2">Description</label>
                     <textarea name="description" rows="3"
                            class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                           placeholder="e.g., For persons with disability">{{ $discountType->description }}</textarea>
+                           placeholder="e.g., For persons with disability">{{ $discount->description }}</textarea>
                     @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
@@ -43,8 +43,8 @@
                     <label class="block text-sm font-semibold text-sienna mb-2">Status *</label>
                     <select name="status" required 
                             class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
-                        <option value="Active" {{ $discountType->status === 'Active' ? 'selected' : '' }}>Active</option>
-                        <option value="Inactive" {{ $discountType->status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                        <option value="Active" {{ $discount->status === 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Inactive" {{ $discount->status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                     @error('status') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>

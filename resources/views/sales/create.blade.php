@@ -102,14 +102,6 @@
                         </select>
                     </div>
 
-                    <!-- Discount Amount -->
-                    <div>
-                        <label class="block text-sm font-semibold text-sienna mb-2">Discount Amount (₱)</label>
-                        <input type="number" step="0.01" name="discount_amount" min="0"
-                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10"
-                               placeholder="0.00" id="discountAmount" onchange="calculateTotals()" readonly>
-                    </div>
-
                     <!-- VAT Rate -->
                     <div>
                         <label class="block text-sm font-semibold text-sienna mb-2">VAT Rate (%) *</label>
@@ -182,7 +174,6 @@
 
             // Calculate discount
             const discount = subtotal * (discountPercentage / 100);
-            document.getElementById('discountAmount').value = discount.toFixed(2);
             document.getElementById('discountDisplay').textContent = discount.toFixed(2);
 
             // After discount
