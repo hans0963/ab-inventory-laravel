@@ -44,6 +44,7 @@
                             <th class="px-6 py-4 text-left">Email</th>
                             <th class="px-6 py-4 text-left">Phone</th>
                             <th class="px-6 py-4 text-left">Position</th>
+                            <th class="px-6 py-4 text-left">Role</th>
                             <th class="px-6 py-4 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -58,6 +59,15 @@
                                     <span class="bg-sage bg-opacity-10 text-sage-dark px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                                         {{ $employee->position }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-5">
+                                    @if($employee->user)
+                                        <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                            {{ $employee->user->role }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 italic text-xs">No account</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-5 text-center">
                                     <div class="flex items-center justify-center space-x-3">

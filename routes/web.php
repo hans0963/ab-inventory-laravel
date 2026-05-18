@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Manager & Admin Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['can:view-categories'])->group(function () {
         Route::resource('categories', CategoryController::class);
     });
@@ -69,7 +69,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Cashier, Manager & Admin Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['can:view-products'])->group(function () {
         Route::resource('products', ProductController::class);
     });
@@ -96,16 +96,16 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'can:view-manager-sales-report'])->name('inventory.sales');
-Route::get('/inventory-report', [ReportController::class, 'inventoryReport'])->middleware(['auth', 'can:view-inventory'])->name('reports.inventory');
-Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth', 'can:view-production-in'])->name('reports.production');
-Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth', 'can:view-reports'])->name('financial.overview');
+Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'verified', 'can:view-manager-sales-report'])->name('inventory.sales');
+Route::get('/inventory-report', [ReportController::class, 'inventoryReport'])->middleware(['auth', 'verified', 'can:view-inventory'])->name('reports.inventory');
+Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth', 'verified', 'can:view-production-in'])->name('reports.production');
+Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth', 'verified', 'can:view-reports'])->name('financial.overview');
 
 // Cashier Module Routes
-Route::get('/sales-orders', [OrderController::class, 'index'])->middleware(['auth', 'role:cashier'])->name('sales-orders.index');
+Route::get('/sales-orders', [OrderController::class, 'index'])->middleware(['auth', 'verified', 'role:cashier'])->name('sales-orders.index');
 
 // Manager Module Routes
-Route::middleware(['auth', 'role:manager'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:manager'])->group(function () {
     Route::get('raw-materials/in', [RawMaterialController::class, 'stockInView'])->name('raw-materials.in');
     Route::post('raw-materials/in', [RawMaterialController::class, 'processStockIn'])->name('raw-materials.processIn');
     Route::get('raw-materials/out', [RawMaterialController::class, 'stockOutView'])->name('raw-materials.out');
@@ -130,8 +130,8 @@ Route::middleware(['auth', 'role:manager'])->group(function () {
 });
 
 // Admin Module Routes
-Route::get('/admin-sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'role:admin'])->name('sales-report.index');
+Route::get('/admin-sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'verified', 'role:admin'])->name('sales-report.index');
 
-Route::get('/admin-reports', [ReportController::class, 'adminReports'])->middleware(['auth', 'role:admin'])->name('reports.index');
+Route::get('/admin-reports', [ReportController::class, 'adminReports'])->middleware(['auth', 'verified', 'role:admin'])->name('reports.index');
 
 require __DIR__.'/auth.php';

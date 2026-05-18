@@ -90,14 +90,26 @@
                     @else Sales Performance (Last 7 Days)
                     @endif
                 </h3>
-                <div class="h-80">
-                    <canvas id="dailySalesChart"></canvas>
+                <div class="h-80 flex items-center justify-center">
+                    @if(count($chartLabels) > 0)
+                        <canvas id="dailySalesChart"></canvas>
+                    @else
+                        <div class="text-center">
+                            <p class="text-sage italic">No sales data recorded for this period.</p>
+                        </div>
+                    @endif
                 </div>
             </div>
             <div class="card-rustic border-sage lg:col-span-1">
                 <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2">Sales by Category</h3>
-                <div class="h-80">
-                    <canvas id="salesByCategoryChart"></canvas>
+                <div class="h-80 flex items-center justify-center">
+                    @if(count($categoryLabels) > 0)
+                        <canvas id="salesByCategoryChart"></canvas>
+                    @else
+                        <div class="text-center">
+                            <p class="text-sage italic">No category data for this period.</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -108,44 +120,50 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Daily Sales Chart
-            const dailySalesCtx = document.getElementById('dailySalesChart').getContext('2d');
-            new Chart(dailySalesCtx, {
-                type: 'line',
-                data: {
-                    labels: {!! json_encode($chartLabels) !!},
-                    datasets: [{
-                        label: 'Sales (₱)',
-                        data: {!! json_encode($chartValues) !!},
-                        borderColor: '#E2725B',
-                        backgroundColor: 'rgba(226, 114, 91, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
+            const dailySalesCanvas = document.getElementById('dailySalesChart');
+            if (dailySalesCanvas) {
+                const dailySalesCtx = dailySalesCanvas.getContext('2d');
+                new Chart(dailySalesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: {!! json_encode($chartLabels) !!},
+                        datasets: [{
+                            label: 'Sales (₱)',
+                            data: {!! json_encode($chartValues) !!},
+                            borderColor: '#E2725B',
+                            backgroundColor: 'rgba(226, 114, 91, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
 
             // Sales by Category Chart
-            const categoryCtx = document.getElementById('salesByCategoryChart').getContext('2d');
-            new Chart(categoryCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: {!! json_encode($categoryLabels) !!},
-                    datasets: [{
-                        data: {!! json_encode($categorySalesData) !!},
-                        backgroundColor: ['#E2725B', '#8A9A5B', '#A0522D', '#D2B48C', '#F5F5DC']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
+            const categoryCanvas = document.getElementById('salesByCategoryChart');
+            if (categoryCanvas) {
+                const categoryCtx = categoryCanvas.getContext('2d');
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: {!! json_encode($categoryLabels) !!},
+                        datasets: [{
+                            data: {!! json_encode($categorySalesData) !!},
+                            backgroundColor: ['#E2725B', '#8A9A5B', '#A0522D', '#D2B48C', '#F5F5DC']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
         });
     </script>
     @endpush

@@ -75,18 +75,18 @@ class ReportController extends Controller
         if ($period === 'year') {
             // Monthly grouping for year view
             $chartData = DB::table('sales')
-                ->select(DB::raw('MONTHNAME(created_at) as label'), DB::raw('SUM(total_amount) as total'))
-                ->whereYear('created_at', now()->year)
-                ->groupBy(DB::raw('MONTH(created_at)'), DB::raw('MONTHNAME(created_at)'))
-                ->orderBy(DB::raw('MONTH(created_at)'))
+                ->select(DB::raw('MONTHNAME(sales.created_at) as label'), DB::raw('SUM(sales.total_amount) as total'))
+                ->whereYear('sales.created_at', now()->year)
+                ->groupBy(DB::raw('MONTH(sales.created_at)'), DB::raw('MONTHNAME(sales.created_at)'))
+                ->orderBy(DB::raw('MONTH(sales.created_at)'))
                 ->get();
         } else {
             // Daily grouping
             $days = $period === 'today' ? 0 : ($period === 'month' ? 30 : 7);
             $chartData = DB::table('sales')
-                ->select(DB::raw('DATE(created_at) as label'), DB::raw('SUM(total_amount) as total'))
-                ->where('created_at', '>=', now()->subDays($days))
-                ->groupBy(DB::raw('DATE(created_at)'))
+                ->select(DB::raw('DATE(sales.created_at) as label'), DB::raw('SUM(sales.total_amount) as total'))
+                ->where('sales.created_at', '>=', now()->subDays($days))
+                ->groupBy(DB::raw('DATE(sales.created_at)'))
                 ->orderBy('label', 'asc')
                 ->get();
         }
@@ -97,8 +97,8 @@ class ReportController extends Controller
         // Chart Data: Sales by Category (for the period)
         $salesByCategory = (clone $query)
             ->join('products', 'sales.product_id', '=', 'products.id')
-            ->join('categories', 'products.category_id', '=', 'categories.id')
-            ->select('categories.category_name', DB::raw('SUM(sales.total_amount) as revenue'))
+            ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
+            ->select(DB::raw('COALESCE(categories.category_name, "Uncategorized") as category_name'), DB::raw('SUM(sales.total_amount) as revenue'))
             ->groupBy('categories.category_name')
             ->get();
 

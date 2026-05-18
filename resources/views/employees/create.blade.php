@@ -36,8 +36,20 @@
                         <!-- Position -->
                         <div class="mb-4">
                             <x-input-label for="position" :value="__('Position')" />
-                            <x-text-input id="position" type="text" name="position" class="block mt-1 w-full" required />
+                            <x-text-input id="position" type="text" name="position" class="block mt-1 w-full" required placeholder="e.g. Branch Manager, Senior Cashier" />
                             @error('position') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <!-- Role (Login Permission) -->
+                        <div class="mb-4">
+                            <x-input-label for="role" :value="__('System Role (Login Permission)')" />
+                            <select id="role" name="role" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                                <option value="">Select Role</option>
+                                <option value="manager">Manager (Can access Inventory & Reports)</option>
+                                <option value="cashier">Cashier (Can access Sales only)</option>
+                            </select>
+                            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-wider">Default password will be: <span class="text-indigo-600">arbees123</span></p>
+                            @error('role') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <!-- Buttons -->

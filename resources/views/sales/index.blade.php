@@ -1,23 +1,23 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
+        <div class="flex flex-col md:flex-row justify-between items-center w-full bg-cream p-4 rounded-xl shadow-sm border border-sienna border-opacity-20 gap-4">
             <div>
-                <h2 class="font-formal text-4xl text-sienna">
+                <h2 class="font-formal text-4xl text-sienna leading-tight text-center md:text-left">
                     {{ __('Sales Transactions') }}
                 </h2>
-                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Record and track bakeshop sales</p>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-[10px] text-center md:text-left">Record and track bakeshop sales</p>
             </div>
-            <a href="{{ route('sales.create') }}" class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
+            <a href="{{ route('sales.create') }}" class="w-full md:w-auto bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center">
                 <span class="mr-2 text-xl">+</span> New Sale
             </a>
         </div>
     </x-slot>
 
-    <div class="space-y-8">
-        <div class="card-rustic border-sienna">
+    <div class="space-y-6 md:space-y-8">
+        <div class="card-rustic border-sienna overflow-hidden">
             {{-- Search & Filters --}}
-            <div class="p-6 border-b border-sienna border-opacity-10">
-                <form action="{{ route('sales.index') }}" method="GET" class="flex gap-4">
+            <div class="p-4 md:p-6 border-b border-sienna border-opacity-10">
+                <form action="{{ route('sales.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1 relative">
                         <input type="text" name="search" placeholder="Search receipt or product..." value="{{ request('search') }}"
                                class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 pl-12 pr-4 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all shadow-inner">
@@ -27,7 +27,7 @@
                             </svg>
                         </div>
                     </div>
-                    <button type="submit" class="bg-sienna hover:bg-sienna-dark text-cream font-bold px-6 py-3 rounded-xl shadow-md transition-all">
+                    <button type="submit" class="w-full md:w-auto bg-sienna hover:bg-sienna-dark text-cream font-bold px-8 py-3 rounded-xl shadow-md transition-all">
                         Search
                     </button>
                 </form>
@@ -36,7 +36,7 @@
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead>
-                        <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
+                        <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black whitespace-nowrap">
                             <th class="px-6 py-4 text-left">Receipt No.</th>
                             <th class="px-6 py-4 text-left">Date</th>
                             <th class="px-6 py-4 text-left">Product</th>
@@ -50,7 +50,7 @@
                     </thead>
                     <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
                         @forelse($sales as $sale)
-                            <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                            <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors whitespace-nowrap">
                                 <td class="px-6 py-4 font-mono text-xs text-sienna font-bold">{{ $sale->receipt_number }}</td>
                                 <td class="px-6 py-4 text-sage font-medium">{{ $sale->date->format('M d, Y') }}</td>
                                 <td class="px-6 py-4 font-bold text-sienna">{{ $sale->product->product_name }}</td>
@@ -58,7 +58,7 @@
                                 <td class="px-6 py-4 text-right text-red-600 font-medium">₱{{ number_format($sale->discount_amount, 2) }}</td>
                                 <td class="px-6 py-4 text-right text-green-600 font-medium">₱{{ number_format($sale->vat_amount, 2) }}</td>
                                 <td class="px-6 py-4 text-right font-black text-terracotta text-base">₱{{ number_format($sale->total_amount, 2) }}</td>
-                                <td class="px-6 py-4 text-sage text-xs">{{ $sale->employee->user->name ?? $sale->employee->employee_name }}</td>
+                                <td class="px-6 py-4 text-sage text-[10px] uppercase font-bold tracking-tighter">{{ $sale->employee->user->name ?? $sale->employee->employee_name }}</td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center space-x-3">
                                         <a href="{{ route('sales.show', $sale->id) }}" class="p-2 text-sage hover:text-sienna hover:bg-sage hover:bg-opacity-10 rounded-lg transition-all" title="View Details">
@@ -79,7 +79,7 @@
                 </table>
             </div>
 
-            <div class="p-6 border-t border-sienna border-opacity-10">
+            <div class="p-4 md:p-6 border-t border-sienna border-opacity-10">
                 {{ $sales->links() }}
             </div>
         </div>
