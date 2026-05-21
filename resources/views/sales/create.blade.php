@@ -1,3 +1,4 @@
+<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center w-full bg-cream p-4 rounded-xl shadow-sm border border-sienna border-opacity-20">
             <div>

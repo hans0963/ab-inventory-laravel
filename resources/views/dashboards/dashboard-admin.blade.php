@@ -11,173 +11,184 @@
     </x-slot>    
 
     <div class="space-y-10">
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <a href="{{ route('inventory.sales') }}" class="block transform hover:scale-105 transition">
-                <x-stat-card title="Today's Sales" :value="'₱' . number_format($todaySales, 2)" icon="💰" border="sage" />
-            </a>
-            <a href="{{ route('inventory.sales') }}" class="block transform hover:scale-105 transition">
-                <x-stat-card title="Monthly Sales" :value="'₱' . number_format($monthlySales, 2)" icon="📅" border="terracotta" />
-            </a>
-            <a href="{{ route('inventory.sales') }}" class="block transform hover:scale-105 transition">
-                <x-stat-card title="Yearly Sales" :value="'₱' . number_format($yearlySales, 2)" icon="📈" border="sienna" />
-            </a>
-            <a href="{{ route('reports.inventory') }}" class="block transform hover:scale-105 transition">
-                <x-stat-card title="Total Revenue" :value="'₱' . number_format($totalRevenue, 2)" icon="🏛️" border="cream" />
-            </a>
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <h2 class="font-formal text-4xl text-sienna">Admin Dashboard</h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Comprehensive overview of your bakeshop performance</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('sales.create') }}" class="inline-flex items-center justify-center rounded-full bg-sienna px-5 py-3 text-xs font-bold uppercase tracking-widest text-cream hover:bg-opacity-90 transition">
+                    New Sale
+                </a>
+                <a href="{{ route('products.create') }}" class="inline-flex items-center justify-center rounded-full bg-terracotta px-5 py-3 text-xs font-bold uppercase tracking-widest text-cream hover:bg-opacity-90 transition">
+                    Add Product
+                </a>
+                <a href="{{ route('purchases.create') }}" class="inline-flex items-center justify-center rounded-full bg-sage px-5 py-3 text-xs font-bold uppercase tracking-widest text-cream hover:bg-opacity-90 transition">
+                    Create Purchase Order
+                </a>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Fast Moving Products -->
-            <a href="{{ route('reports.index') }}" class="card-rustic border-sage hover:bg-cream hover:bg-opacity-20 transition">
-                <h2 class="text-xl font-bold text-sienna mb-6 flex items-center">
-                    <span class="mr-2 text-2xl">🚀</span> Fast Moving Products
-                </h2>
-                <div class="space-y-4">
-                    @forelse($fastMovingProducts as $product)
-                        <div class="flex items-center justify-between p-3 bg-cream bg-opacity-30 rounded-lg">
-                            <span class="font-medium text-sienna">{{ $product->product_name }}</span>
-                            <span class="bg-sage text-white px-2 py-1 rounded text-xs font-bold">{{ $product->total_sold }} sold</span>
-                        </div>
-                    @empty
-                        <p class="text-sage italic text-center py-4">No data available</p>
-                    @endforelse
-                </div>
-            </a>
-
-            <!-- Slow Moving Products -->
-            <a href="{{ route('reports.index') }}" class="card-rustic border-terracotta hover:bg-cream hover:bg-opacity-20 transition">
-                <h2 class="text-xl font-bold text-sienna mb-6 flex items-center">
-                    <span class="mr-2 text-2xl">🐌</span> Slow Moving Products
-                </h2>
-                <div class="space-y-4">
-                    @forelse($slowMovingProducts as $product)
-                        <div class="flex items-center justify-between p-3 bg-cream bg-opacity-30 rounded-lg">
-                            <span class="font-medium text-sienna">{{ $product->product_name }}</span>
-                            <span class="bg-terracotta text-white px-2 py-1 rounded text-xs font-bold">{{ (int)$product->total_sold }} sold</span>
-                        </div>
-                    @empty
-                        <p class="text-sage italic text-center py-4">No data available</p>
-                    @endforelse
-                </div>
-            </a>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
+            <x-stat-card title="Sales Today" :value="'₱' . number_format($todaySales, 2)" icon="💰" border="sage" />
+            <x-stat-card title="Orders Today" :value="$totalOrdersToday" icon="🧾" border="terracotta" />
+            <x-stat-card title="Total Products" :value="$totalProducts" icon="📦" border="sienna" />
+            <x-stat-card title="Low Stock Items" :value="$lowStockItemCount" icon="⚠️" border="cream" />
+            <x-stat-card title="Total Customers" :value="$totalCustomers" icon="👥" border="sage" />
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Sales by Category (Pie Chart) -->
-            <div class="card-rustic border-sienna lg:col-span-1">
-                <h2 class="text-xl font-bold text-sienna mb-6">Sales by Category</h2>
-                <div class="relative h-64">
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="card-rustic border-sage p-6">
+                <h2 class="text-xl font-bold text-sienna mb-4">Daily Sales (Last 7 Days)</h2>
+                <div class="relative h-72">
+                    <canvas id="dailySalesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card-rustic border-terracotta p-6">
+                <h2 class="text-xl font-bold text-sienna mb-4">Sales by Category</h2>
+                <div class="relative h-72">
                     <canvas id="salesByCategoryChart"></canvas>
                 </div>
-                <div class="mt-4 space-y-2">
-                    @foreach($salesByCategory as $category)
-                        <div class="flex justify-between text-[10px] uppercase tracking-widest font-bold">
-                            <span class="text-sienna">{{ $category->category_name }}</span>
-                            <span class="text-sage">₱{{ number_format($category->revenue, 2) }}</span>
-                        </div>
-                    @endforeach
-                </div>
             </div>
 
-            <!-- Recent Sales Orders -->
-            <div class="lg:col-span-2">
-                <div class="card-rustic border-terracotta h-full">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-bold text-sienna">Recent Sales</h2>
-                        <span class="bg-terracotta bg-opacity-10 text-terracotta px-3 py-1 rounded-full text-xs font-bold uppercase">Live Updates</span>
-                    </div>
-                    <div class="divide-y divide-sienna divide-opacity-10">
-                        @forelse($recentOrders ?? [] as $sale)
-                            <div class="flex justify-between items-center py-4 hover:bg-cream hover:bg-opacity-50 transition rounded-lg px-2 -mx-2">
-                                <div>
-                                    <p class="font-bold text-sienna">{{ $sale->product->product_name }} — {{ $sale->customer->name ?? 'Walk-in' }}</p>
-                                    <p class="text-sm text-sage font-medium">{{ $sale->sold }} unit(s) @ ₱{{ number_format($sale->total_amount, 2) }}</p>
-                                    <p class="text-xs text-sienna opacity-60">{{ $sale->created_at->diffForHumans() }}</p>
-                                </div>
-                                <div class="text-xl font-bold text-terracotta">₱{{ number_format($sale->total_amount, 2) }}</div>
-                            </div>
-                        @empty
-                            <div class="py-10 text-center">
-                                <p class="text-sage italic">No recent sales found.</p>
-                            </div>
-                        @endforelse
-                    </div>
+            <div class="card-rustic border-sienna p-6">
+                <h2 class="text-xl font-bold text-sienna mb-4">Revenue Trend This Month</h2>
+                <div class="relative h-72">
+                    <canvas id="revenueTrendChart"></canvas>
                 </div>
             </div>
         </div>
 
-        @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const ctx = document.getElementById('salesByCategoryChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: {!! json_encode($salesByCategory->pluck('category_name')) !!},
-                        datasets: [{
-                            data: {!! json_encode($salesByCategory->pluck('revenue')) !!},
-                            backgroundColor: [
-                                '#E2725B', // terracotta
-                                '#8A9A5B', // sage
-                                '#4B3621', // sienna
-                                '#F5F5DC', // beige/cream
-                                '#D2B48C', // tan
-                                '#BC8F8F', // rosy brown
-                                '#A0522D', // sienna dark
-                                '#556B2F'  // olive dark
-                            ],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            });
-        </script>
-        @endpush
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="card-rustic border-sage lg:col-span-2 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-bold text-sienna">Top Selling Products</h2>
+                    <span class="text-xs uppercase tracking-widest text-sage font-black">Last 30 days</span>
+                </div>
+                <div class="space-y-4">
+                    @forelse($fastMovingProducts as $product)
+                        <div class="grid grid-cols-[1fr_auto] gap-4 items-center bg-cream bg-opacity-20 rounded-xl p-4">
+                            <div>
+                                <p class="font-semibold text-sienna">{{ $product->product_name }}</p>
+                                <p class="text-xs uppercase tracking-widest text-sage">Best seller</p>
+                            </div>
+                            <span class="rounded-full bg-sienna px-3 py-2 text-cream text-sm font-black">{{ $product->total_sold }}</span>
+                        </div>
+                    @empty
+                        <p class="text-sage italic">No sales data available.</p>
+                    @endforelse
+                </div>
+            </div>
 
-        <!-- Low Stock Alerts -->
-        <div class="card-rustic border-sienna">
-            <h2 class="text-xl font-bold text-sienna mb-6">Inventory Alerts (Low Stock)</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead>
-                        <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest font-black">
-                            <th class="px-6 py-4 text-left">Product</th>
-                            <th class="px-6 py-4 text-center">Current Qty</th>
-                            <th class="px-6 py-4 text-center">Threshold</th>
-                            <th class="px-6 py-4 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
-                        @forelse($lowStockAlerts as $alert)
-                            <tr>
-                                <td class="px-6 py-4 font-bold text-sienna">{{ $alert->product_name }}</td>
-                                <td class="px-6 py-4 text-center font-black text-terracotta">{{ $alert->quantity }}</td>
-                                <td class="px-6 py-4 text-center text-sage">{{ $alert->stock_alert_threshold }}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 uppercase font-black tracking-widest">
-                                        Low Stock
-                                    </span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-sage italic">No inventory alerts.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            <div class="card-rustic border-terracotta p-6">
+                <h2 class="text-xl font-bold text-sienna mb-6">Recent Activity</h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-sienna mb-3">Latest Transactions</h3>
+                        <div class="space-y-3">
+                            @forelse($recentOrders as $sale)
+                                <div class="rounded-xl border border-sienna/10 bg-cream p-3">
+                                    <p class="font-medium text-sienna">{{ $sale->product->product_name }} — {{ $sale->customer->name ?? 'Walk-in' }}</p>
+                                    <p class="text-xs text-sage">₱{{ number_format($sale->total_amount, 2) }} • {{ $sale->sold }} unit(s)</p>
+                                    <p class="text-[11px] uppercase tracking-widest text-sienna/80">{{ $sale->created_at->diffForHumans() }}</p>
+                                </div>
+                            @empty
+                                <p class="text-sage italic">No recent transactions.</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-sienna mb-3">Recent Stock Updates</h3>
+                        <div class="space-y-3">
+                            @forelse($recentStockUpdates as $movement)
+                                <div class="rounded-xl border border-terracotta/10 bg-cream p-3">
+                                    <p class="font-medium text-sienna">{{ $movement->product->product_name ?? 'Inventory item' }}</p>
+                                    <p class="text-xs text-sage">{{ ucfirst($movement->transaction_type ?? 'update') }} • {{ $movement->created_at->format('M d, Y') }}</p>
+                                    <p class="text-[11px] uppercase tracking-widest text-sienna/80">Balance: {{ $movement->new_balance ?? $movement->total_inventory ?? '—' }}</p>
+                                </div>
+                            @empty
+                                <p class="text-sage italic">No recent stock updates.</p>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dailyCtx = document.getElementById('dailySalesChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'bar',
+                data: {
+                    labels: {!! json_encode($dailySalesLabels) !!},
+                    datasets: [{
+                        label: 'Sales',
+                        data: {!! json_encode($dailySalesData) !!},
+                        backgroundColor: '#E2725B',
+                        borderRadius: 8,
+                        maxBarThickness: 24
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { ticks: { callback: function(value) { return '₱' + value.toLocaleString(); } } }
+                    }
+                }
+            });
+
+            const categoryCtx = document.getElementById('salesByCategoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: {!! json_encode($salesByCategory->pluck('category_name')) !!},
+                    datasets: [{
+                        data: {!! json_encode($salesByCategory->pluck('revenue')) !!},
+                        backgroundColor: ['#E2725B', '#8A9A5B', '#4B3621', '#F5F5DC', '#D2B48C', '#BC8F8F', '#A0522D', '#556B2F'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+                }
+            });
+
+            const trendCtx = document.getElementById('revenueTrendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($revenueTrendLabels) !!},
+                    datasets: [{
+                        label: 'Revenue',
+                        data: {!! json_encode($revenueTrendData) !!},
+                        fill: true,
+                        backgroundColor: 'rgba(226, 114, 91, 0.18)',
+                        borderColor: '#E2725B',
+                        tension: 0.35,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#E2725B'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { callback: function(value) { return '₱' + value.toLocaleString(); } } }
+                    }
+                }
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

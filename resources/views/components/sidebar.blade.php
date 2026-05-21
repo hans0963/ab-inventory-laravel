@@ -1,89 +1,152 @@
-<div class="h-full flex flex-col bg-cream font-inter">
+<div x-data="{ openGroup: null }" class="h-full flex flex-col bg-cream font-inter">
     <!-- Logo -->
     <div class="p-4 text-center border-b border-sienna bg-terracotta">
         <h1 class="text-xl font-formal font-semibold text-white">{{ ucfirst(auth()->user()->role) }}</h1>
     </div>
 
     <!-- Navigation -->
+    @php
+        $showInventoryProducts = auth()->user()->can('view-products') || auth()->user()->can('view-categories') || auth()->user()->can('view-inventory');
+        $showSalesCustomers = auth()->user()->can('view-sales-orders') || auth()->user()->can('view-customers') || auth()->user()->can('view-discounts');
+        $showProduction = auth()->user()->can('view-production-in') || auth()->user()->can('view-production-out');
+        $showProcurement = auth()->user()->can('view-purchases') || auth()->user()->can('view-suppliers') || auth()->user()->can('view-inventory-receiving');
+        $showHR = auth()->user()->can('view-employees');
+    @endphp
+
     <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
         <!-- Dashboard (All Roles) -->
         <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
             🏠 Dashboard
         </x-sidebar-link>
-        
-        <!-- Inventory Management -->
-        @can('view-products')
-            <x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">
-                📦 Products
-            </x-sidebar-link>
-        @endcan
 
-        @can('view-categories')
-            <x-sidebar-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
-                📂 Categories
-            </x-sidebar-link>
-        @endcan
+        <!-- Inventory & Products -->
+        @if($showInventoryProducts)
+            <div class="mt-2">
+                <button @click="openGroup === 'inventory' ? openGroup = null : openGroup = 'inventory'" class="w-full flex items-center justify-between px-3 py-2 text-left text-sienna hover:bg-sienna/5 rounded-md">
+                    <span class="font-semibold">Inventory & Products</span>
+                    <span x-text="openGroup === 'inventory' ? '−' : '+'"></span>
+                </button>
+
+                <div x-show="openGroup === 'inventory'" x-cloak class="mt-2 space-y-1 px-2">
+                    @can('view-products')
+                        <x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                            📦 Products
+                        </x-sidebar-link>
+                    @endcan
+
+                    @can('view-categories')
+                        <x-sidebar-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
+                            📂 Categories
+                        </x-sidebar-link>
+                    @endcan
+
+                    @can('view-inventory')
+                        <x-sidebar-link :href="route('stock-withdrawal.index')" :active="request()->routeIs('stock-withdrawal.*')">
+                            📤 Stock Withdrawal
+                        </x-sidebar-link>
+                    @endcan
+                </div>
+            </div>
+        @endif
 
         <!-- Sales & Customers -->
-        @can('view-sales-orders')
-            <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
-                💰 Sales
-            </x-sidebar-link>
-        @endcan
+        @if($showSalesCustomers)
+            <div class="mt-2">
+                <button @click="openGroup === 'sales' ? openGroup = null : openGroup = 'sales'" class="w-full flex items-center justify-between px-3 py-2 text-left text-sienna hover:bg-sienna/5 rounded-md">
+                    <span class="font-semibold">Sales & Customers</span>
+                    <span x-text="openGroup === 'sales' ? '−' : '+'"></span>
+                </button>
 
-        @can('view-customers')
-            <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
-                👥 Customers
-            </x-sidebar-link>
-        @endcan
+                <div x-show="openGroup === 'sales'" x-cloak class="mt-2 space-y-1 px-2">
+                    @can('view-sales-orders')
+                        <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
+                            💰 Sales
+                        </x-sidebar-link>
+                    @endcan
 
-        <!-- Production & Stock -->
-        @can('view-production-in')
-            <x-sidebar-link :href="route('production-in.index')" :active="request()->routeIs('production-in.*')">
-                ➡️ Production In
-            </x-sidebar-link>
-        @endcan
+                    @can('view-customers')
+                        <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                            👥 Customers
+                        </x-sidebar-link>
+                    @endcan
 
-        @can('view-production-out')
-            <x-sidebar-link :href="route('production-out.index')" :active="request()->routeIs('production-out.*')">
-                ⬅️ Production Out
-            </x-sidebar-link>
-        @endcan
+                    @can('view-discounts')
+                        <x-sidebar-link :href="route('discounts.index')" :active="request()->routeIs('discounts.*')">
+                            🏷️ Discount Types
+                        </x-sidebar-link>
+                    @endcan
+                </div>
+            </div>
+        @endif
 
-        @can('view-inventory')
-            <x-sidebar-link :href="route('stock-withdrawal.index')" :active="request()->routeIs('stock-withdrawal.*')">
-                📤 Stock Withdrawal
-            </x-sidebar-link>
-        @endcan
+        <!-- Production -->
+        @if($showProduction)
+            <div class="mt-2">
+                <button @click="openGroup === 'production' ? openGroup = null : openGroup = 'production'" class="w-full flex items-center justify-between px-3 py-2 text-left text-sienna hover:bg-sienna/5 rounded-md">
+                    <span class="font-semibold">Production</span>
+                    <span x-text="openGroup === 'production' ? '−' : '+'"></span>
+                </button>
 
-        <!-- Purchasing & Suppliers -->
-        @can('view-purchases')
-            <x-sidebar-link :href="route('purchases.index')" :active="request()->routeIs('purchases.*')">
-                🛍️ Purchases
-            </x-sidebar-link>
-            <x-sidebar-link :href="route('inventory-receiving.index')" :active="request()->routeIs('inventory-receiving.*')">
-                📥 Receiving
-            </x-sidebar-link>
-        @endcan
+                <div x-show="openGroup === 'production'" x-cloak class="mt-2 space-y-1 px-2">
+                    @can('view-production-in')
+                        <x-sidebar-link :href="route('production-in.index')" :active="request()->routeIs('production-in.*')">
+                            ➡️ Production In
+                        </x-sidebar-link>
+                    @endcan
 
-        @can('view-suppliers')
-            <x-sidebar-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.*')">
-                🚚 Suppliers
-            </x-sidebar-link>
-        @endcan
+                    @can('view-production-out')
+                        <x-sidebar-link :href="route('production-out.index')" :active="request()->routeIs('production-out.*')">
+                            ⬅️ Production Out
+                        </x-sidebar-link>
+                    @endcan
+                </div>
+            </div>
+        @endif
 
-        <!-- User & System Management -->
-        @can('view-employees')
-            <x-sidebar-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
-                👔 Employees
-            </x-sidebar-link>
-        @endcan
+        <!-- Procurement -->
+        @if($showProcurement)
+            <div class="mt-2">
+                <button @click="openGroup === 'procurement' ? openGroup = null : openGroup = 'procurement'" class="w-full flex items-center justify-between px-3 py-2 text-left text-sienna hover:bg-sienna/5 rounded-md">
+                    <span class="font-semibold">Procurement</span>
+                    <span x-text="openGroup === 'procurement' ? '−' : '+'"></span>
+                </button>
 
-        @can('view-discounts')
-            <x-sidebar-link :href="route('discounts.index')" :active="request()->routeIs('discounts.*')">
-                🏷️ Discount Types
-            </x-sidebar-link>
-        @endcan
+                <div x-show="openGroup === 'procurement'" x-cloak class="mt-2 space-y-1 px-2">
+                    @can('view-purchases')
+                        <x-sidebar-link :href="route('purchases.index')" :active="request()->routeIs('purchases.*')">
+                            🛍️ Purchases
+                        </x-sidebar-link>
+                        <x-sidebar-link :href="route('inventory-receiving.index')" :active="request()->routeIs('inventory-receiving.*')">
+                            📥 Receiving
+                        </x-sidebar-link>
+                    @endcan
+
+                    @can('view-suppliers')
+                        <x-sidebar-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.*')">
+                            🚚 Suppliers
+                        </x-sidebar-link>
+                    @endcan
+                </div>
+            </div>
+        @endif
+
+        <!-- HR -->
+        @if($showHR)
+            <div class="mt-2">
+                <button @click="openGroup === 'hr' ? openGroup = null : openGroup = 'hr'" class="w-full flex items-center justify-between px-3 py-2 text-left text-sienna hover:bg-sienna/5 rounded-md">
+                    <span class="font-semibold">HR</span>
+                    <span x-text="openGroup === 'hr' ? '−' : '+'"></span>
+                </button>
+
+                <div x-show="openGroup === 'hr'" x-cloak class="mt-2 space-y-1 px-2">
+                    @can('view-employees')
+                        <x-sidebar-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
+                            👔 Employees
+                        </x-sidebar-link>
+                    @endcan
+                </div>
+            </div>
+        @endif
 
         <!-- Reports Section -->
         @if(auth()->user()->can('view-manager-sales-report') || auth()->user()->can('view-inventory') || auth()->user()->can('view-production-in') || auth()->user()->can('view-production-out') || auth()->user()->can('view-reports'))

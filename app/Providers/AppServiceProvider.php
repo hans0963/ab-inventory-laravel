@@ -34,9 +34,17 @@ class AppServiceProvider extends ServiceProvider
             return $user->isCashier();
         });
 
+        Gate::define('hr', function (User $user) {
+            return $user->isHR();
+        });
+
         // Admin Modules
         Gate::define('view-admin-dashboard', function (User $user) {
             return $user->isAdmin();
+        });
+
+        Gate::define('view-hr-dashboard', function (User $user) {
+            return $user->isHR() || $user->isAdmin();
         });
 
         Gate::define('view-sales-report', function (User $user) {
@@ -57,7 +65,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-employees', function (User $user) {
-            return $user->isManager() || $user->isAdmin();
+            return $user->isHR() || $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-suppliers', function (User $user) {

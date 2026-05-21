@@ -74,6 +74,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if user is HR
+     */
+    public function isHR(): bool
+    {
+        return $this->role === 'hr';
+    }
+
+    /**
      * Check if user has any of the given roles
      */
     public function hasRole(string|array $roles): bool

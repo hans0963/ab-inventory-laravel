@@ -7,6 +7,7 @@ enum UserRole: string
     case ADMIN = 'admin';
     case MANAGER = 'manager';
     case CASHIER = 'cashier';
+    case HR = 'hr';
 
     /**
      * Get all role values

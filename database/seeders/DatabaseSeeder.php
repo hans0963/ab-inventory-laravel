@@ -14,10 +14,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create role-based users and link them to employees
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name' => 'Administrator',
+                'name' => 'System Admin',
                 'password' => 'password',
                 'role' => 'admin',
                 'email_verified_at' => now(),
@@ -30,6 +30,25 @@ class DatabaseSeeder extends Seeder
                 'employee_name' => $admin->name,
                 'employee_phone' => '09123456789',
                 'position' => 'Administrator'
+            ]
+        );
+
+        $hr = User::updateOrCreate(
+            ['email' => 'hr@example.com'],
+            [
+                'name' => 'HR Manager',
+                'password' => 'password',
+                'role' => 'hr',
+                'email_verified_at' => now(),
+            ]
+        );
+        \App\Models\Employee::firstOrCreate(
+            ['employee_email' => $hr->email],
+            [
+                'user_id' => $hr->id,
+                'employee_name' => $hr->name,
+                'employee_phone' => '09123456792',
+                'position' => 'HR Manager'
             ]
         );
 
