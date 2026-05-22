@@ -197,7 +197,11 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $product) {
             \App\Models\Sale::factory()->count(rand(2, 5))->create([
                 'product_id' => $product->id,
-                'employee_id' => $employees->random()->id
+                'employee_id' => $employees->random()->id,
+                'unit_price' => $product->selling_price,
+                'total_amount' => function (array $attributes) use ($product) {
+                    return $attributes['sold'] * $product->selling_price;
+                }
             ]);
         }
         

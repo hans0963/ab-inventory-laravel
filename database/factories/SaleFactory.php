@@ -17,7 +17,11 @@ class SaleFactory extends Factory
             'product_id' => Product::factory(),
             'employee_id' => Employee::factory(),
             'date' => $this->faker->dateTimeBetween('-30 days', 'now'),
-            'sold' => $this->faker->numberBetween(10, 50),
+            'sold' => $this->faker->numberBetween(2, 20),
+            'unit_price' => 50,
+            'total_amount' => 100,
+            'payment_type' => $this->faker->randomElement(['Cash', 'E-Wallet', 'Credit Card']),
+            'receipt_number' => 'RCP-' . $this->faker->unique()->numberBetween(100000, 999999),
         ];
     }
 }

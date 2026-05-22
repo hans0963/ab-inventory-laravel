@@ -59,6 +59,10 @@ class Sale extends Model
 
     public function getPaymentModeLabelAttribute(): string
     {
+        if (empty($this->payment_type)) {
+            return 'Cash';
+        }
+
         return match ($this->payment_type) {
             'E-Wallet' => 'GCash',
             'Credit Card' => 'Card',
