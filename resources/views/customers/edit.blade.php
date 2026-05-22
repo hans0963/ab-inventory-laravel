@@ -37,6 +37,16 @@
                             @error('address') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
+                        <div class="mb-4">
+                            <x-input-label for="customer_type" :value="__('Customer Type')" />
+                            <select id="customer_type" name="customer_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                @foreach(['Regular','Senior','PWD','VIP'] as $type)
+                                    <option value="{{ $type }}" {{ old('customer_type', $customer->customer_type) === $type ? 'selected' : '' }}>{{ $type }}</option>
+                                @endforeach
+                            </select>
+                            @error('customer_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
                         <div class="text-end">
                             <x-primary-button type="submit">Update</x-primary-button>
                             <x-secondary-button type="button" onclick="window.location='{{ route('customers.index') }}'">Cancel</x-secondary-button>

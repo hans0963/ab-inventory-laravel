@@ -9,10 +9,10 @@
             </div>
             <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                 <a href="{{ route('sales.print', $sale->id) }}" class="bg-sage hover:bg-sage-dark text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all flex items-center justify-center">
-                    🖨️ Print Receipt
+                    Print Receipt
                 </a>
                 <a href="{{ route('sales.index') }}" class="bg-cream hover:bg-sienna hover:text-cream text-sienna border border-sienna font-bold px-6 py-3 rounded-xl transition-all flex items-center justify-center text-[10px] uppercase tracking-widest">
-                    ← Back to List
+                    Back to List
                 </a>
             </div>
         </div>
@@ -40,7 +40,7 @@
                         <div>
                             <p class="text-[10px] uppercase tracking-widest text-sage font-black mb-1">Payment Mode</p>
                             <span class="inline-block bg-terracotta bg-opacity-10 text-terracotta px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                {{ $sale->payment_type }}
+                                {{ $sale->payment_mode_label }}
                             </span>
                         </div>
                     </div>

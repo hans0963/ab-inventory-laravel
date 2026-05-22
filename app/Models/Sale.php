@@ -57,6 +57,15 @@ class Sale extends Model
         return $this->belongsTo(DiscountType::class, 'discount_type_id');
     }
 
+    public function getPaymentModeLabelAttribute(): string
+    {
+        return match ($this->payment_type) {
+            'E-Wallet' => 'GCash',
+            'Credit Card' => 'Card',
+            default => $this->payment_type,
+        };
+    }
+
     /**
      * Calculate total amount after discount and VAT
      */

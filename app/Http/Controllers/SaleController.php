@@ -70,6 +70,12 @@ class SaleController extends Controller
     {
         $validated = $request->validated();
 
+        if ($validated['payment_type'] === 'GCash') {
+            $validated['payment_type'] = 'E-Wallet';
+        } elseif ($validated['payment_type'] === 'Card') {
+            $validated['payment_type'] = 'Credit Card';
+        }
+
         // Get product
         $product = Product::findOrFail($validated['product_id']);
 

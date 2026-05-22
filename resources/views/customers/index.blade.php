@@ -9,8 +9,8 @@
             </div>
 
             <a href="{{ route('customers.create') }}" 
-               class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
-                <span class="mr-2 text-xl">+</span> New Customer
+               class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center">
+                New Customer
             </a>
         </div>
     </x-slot>
@@ -19,16 +19,11 @@
         <div class="card-rustic border-sienna">
             {{-- Header with search --}}
             <div class="mb-8">
-                <div class="relative w-full md:w-1/3">
+                <div class="w-full md:w-1/3">
                     <form action="{{ route('customers.index') }}" method="GET">
                         <input type="text" name="search" value="{{ request('search') }}" 
                                placeholder="Search patrons..." 
-                               class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 pl-12 pr-4 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all shadow-inner">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-sienna opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
+                               class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 px-4 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all shadow-inner">
                     </form>
                 </div>
             </div>
@@ -38,10 +33,13 @@
                 <table class="min-w-full text-sm">
                     <thead>
                         <tr class="bg-sienna text-cream uppercase text-xs tracking-widest font-bold">
-                            <th class="px-6 py-4 text-left">ID</th>
-                            <th class="px-6 py-4 text-left">Patron Name</th>
+                            <th class="px-6 py-4 text-left">Customer ID</th>
+                            <th class="px-6 py-4 text-left">Full Name</th>
                             <th class="px-6 py-4 text-left">Email</th>
                             <th class="px-6 py-4 text-left">Phone</th>
+                            <th class="px-6 py-4 text-left">Type</th>
+                            <th class="px-6 py-4 text-left">Total Purchases</th>
+                            <th class="px-6 py-4 text-left">Date Registered</th>
                             <th class="px-6 py-4 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -52,22 +50,26 @@
                                 <td class="px-6 py-5 text-sienna font-bold text-base">{{ $customer->name }}</td>
                                 <td class="px-6 py-5 text-sage font-medium">{{ $customer->email }}</td>
                                 <td class="px-6 py-5 text-sienna opacity-80">{{ $customer->phone }}</td>
+                                <td class="px-6 py-5 text-sage font-medium uppercase tracking-wide">{{ $customer->customer_type }}</td>
+                                <td class="px-6 py-5 text-sienna font-bold">{{ $customer->total_purchases }}</td>
+                                <td class="px-6 py-5 text-sage">{{ $customer->created_at->format('M d, Y') }}</td>
                                 <td class="px-6 py-5 text-center">
-                                    <div class="flex items-center justify-center space-x-3">
-                                        <a href="{{ route('customers.edit', $customer->id) }}" class="p-2 text-sage hover:text-sienna hover:bg-sage hover:bg-opacity-10 rounded-lg transition-all">
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a href="{{ route('customers.show', $customer->id) }}" class="px-3 py-2 bg-cream bg-opacity-90 text-sienna font-semibold rounded-xl hover:bg-opacity-100 transition-all">
+                                            View
+                                        </a>
+                                        <a href="{{ route('customers.edit', $customer->id) }}" class="px-3 py-2 bg-sage bg-opacity-10 text-sage font-semibold rounded-xl hover:bg-sage hover:text-cream transition-all">
+                                            Edit
                                         </a>
                                         <x-alert-delete 
                                             route="{{ route('customers.destroy', $customer->id) }}" 
-                                            message="Are you sure you want to remove this patron record?" />
+                                            message="Are you sure you want to remove this customer?" />
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-sage italic font-medium">No patrons found.</td>
+                                <td colspan="8" class="px-6 py-12 text-center text-sage italic font-medium">No customers found.</td>
                             </tr>
                         @endforelse
                     </tbody>

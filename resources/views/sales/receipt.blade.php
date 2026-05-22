@@ -105,7 +105,7 @@
         </div>
 
         <div style="margin: 15px 0; font-size: 12px;">
-            <strong>Payment:</strong> {{ $sale->payment_type }}<br>
+            <strong>Payment:</strong> {{ $sale->payment_mode_label }}<br>
             <strong>Cashier:</strong> {{ $sale->employee->user->name ?? 'N/A' }}<br>
             @if($sale->customer && $sale->customer->name != 'Walk-in')
                 <strong>Customer:</strong> {{ $sale->customer->name }}<br>

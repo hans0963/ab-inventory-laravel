@@ -99,7 +99,14 @@
                             @foreach($receiving->items as $item)
                                 <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
                                     <td class="px-6 py-4 font-bold text-sienna">{{ $item->product->product_name }}</td>
-                                    <td class="px-6 py-4 text-center text-sage">{{ $item->quantity_ordered }}</td>
+                                    <td class="px-6 py-4 text-center text-sage">
+                                        {{ $item->quantity_ordered }}
+                                        @if($item->quantity_received != $item->quantity_ordered)
+                                            <div class="text-[9px] text-terracotta font-black uppercase tracking-tighter mt-1">
+                                                Discrepancy: {{ $item->quantity_received - $item->quantity_ordered > 0 ? '+' : '' }}{{ $item->quantity_received - $item->quantity_ordered }}
+                                            </div>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 text-center font-black text-sienna">{{ $item->quantity_received }}</td>
                                     <td class="px-6 py-4 text-right">₱{{ number_format($item->unit_cost, 2) }}</td>
                                     <td class="px-6 py-4 text-right font-bold text-terracotta">₱{{ number_format($item->total_cost, 2) }}</td>

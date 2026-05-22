@@ -60,19 +60,19 @@
                 <div x-show="openGroup === 'sales'" x-cloak class="mt-2 space-y-1 px-2">
                     @can('view-sales-orders')
                         <x-sidebar-link :href="route('sales.index')" :active="request()->routeIs('sales.*')">
-                            💰 Sales
+                            Sales
                         </x-sidebar-link>
                     @endcan
 
                     @can('view-customers')
                         <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
-                            👥 Customers
+                            Customers
                         </x-sidebar-link>
                     @endcan
 
                     @can('view-discounts')
                         <x-sidebar-link :href="route('discounts.index')" :active="request()->routeIs('discounts.*')">
-                            🏷️ Discount Types
+                            Discount Types
                         </x-sidebar-link>
                     @endcan
                 </div>
@@ -89,14 +89,14 @@
 
                 <div x-show="openGroup === 'production'" x-cloak class="mt-2 space-y-1 px-2">
                     @can('view-production-in')
-                        <x-sidebar-link :href="route('production-in.index')" :active="request()->routeIs('production-in.*')">
-                            ➡️ Production In
+                        <x-sidebar-link :href="route('production-management.index', ['tab' => 'in'])" :active="request()->routeIs('production-management.index') && request('tab') === 'in'">
+                            Production IN
                         </x-sidebar-link>
                     @endcan
 
                     @can('view-production-out')
-                        <x-sidebar-link :href="route('production-out.index')" :active="request()->routeIs('production-out.*')">
-                            ⬅️ Production Out
+                        <x-sidebar-link :href="route('production-management.index', ['tab' => 'out'])" :active="request()->routeIs('production-management.index') && request('tab') === 'out'">
+                            Production OUT
                         </x-sidebar-link>
                     @endcan
                 </div>
@@ -155,31 +155,31 @@
             
             @can('view-manager-sales-report')
                 <x-sidebar-link :href="route('inventory.sales')" :active="request()->routeIs('inventory.sales')">
-                    📊 Sales Summary
+                    Sales Summary
                 </x-sidebar-link>
             @endcan
 
             @can('view-inventory')
                 <x-sidebar-link :href="route('reports.inventory')" :active="request()->routeIs('reports.inventory')">
-                    📋 Inventory Balance
+                    Inventory Balance
                 </x-sidebar-link>
             @endcan
 
             @can('view-production-in')
                 <x-sidebar-link :href="route('reports.production', ['type' => 'in'])" :active="request()->routeIs('reports.production') && request('type') == 'in'">
-                    📈 Production IN
+                    Production IN
                 </x-sidebar-link>
             @endcan
 
             @can('view-production-out')
                 <x-sidebar-link :href="route('reports.production', ['type' => 'out'])" :active="request()->routeIs('reports.production') && request('type') == 'out'">
-                    📉 Production OUT
+                    Production OUT
                 </x-sidebar-link>
             @endcan
 
             @can('view-reports')
                 <x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.index')">
-                    📉 Business Intelligence
+                    Business Intelligence
                 </x-sidebar-link>
             @endcan
         </div>

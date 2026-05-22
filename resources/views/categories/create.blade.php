@@ -17,7 +17,7 @@
             <!-- Category Name -->
             <div>
                 <x-input-label for="category_name" value="Category Name *" class="text-[10px] uppercase tracking-widest text-sage" />
-                <x-text-input id="category_name" name="category_name" type="text" value="{{ old('category_name') }}" required placeholder="e.g. Breads, Pastries, Raw Ingredients" class="mt-1 block w-full !text-sm" />
+                <x-text-input id="category_name" name="category_name" type="text" value="{{ old('category_name') }}" required placeholder="e.g. Bread & Rolls" class="mt-1 block w-full !text-sm" />
                 <x-input-error :messages="$errors->get('category_name')" class="mt-2" />
             </div>
 
@@ -28,20 +28,26 @@
                 <x-input-error :messages="$errors->get('description')" class="mt-2" />
             </div>
 
-            <!-- Status -->
-            <div>
-                <x-input-label for="status" value="Status *" class="text-[10px] uppercase tracking-widest text-sage" />
-                <select id="status" name="status" required class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm bg-cream bg-opacity-10">
-                    <option value="Active" {{ old('status') == 'Active' ? 'selected' : '' }}>Active</option>
-                    <option value="Inactive" {{ old('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                </select>
-                <x-input-error :messages="$errors->get('status')" class="mt-2" />
+            <input type="hidden" name="status" value="Active" />
+
+            <!-- Examples -->
+            <div class="bg-cream bg-opacity-10 p-4 rounded-md border border-sienna border-opacity-10 text-sm text-sage">
+                <p class="font-bold text-xs uppercase tracking-widest mb-2">Bakery Category Examples</p>
+                <ul class="list-disc pl-5">
+                    <li>Bread & Rolls</li>
+                    <li>Cakes</li>
+                    <li>Pastries</li>
+                    <li>Cookies & Biscuits</li>
+                    <li>Donuts & Fried Products</li>
+                    <li>Beverages</li>
+                    <li>Seasonal Items</li>
+                </ul>
             </div>
 
             <!-- Buttons -->
             <div class="flex justify-between items-center pt-8 border-t border-sienna border-opacity-10">
                 <a href="{{ route('categories.index') }}" class="text-xs font-black text-sage uppercase tracking-widest hover:text-sienna transition">
-                    ← Back to Categories
+                    Back to Categories
                 </a>
                 <x-primary-button class="!bg-terracotta hover:!bg-terracotta-dark shadow-rustic">
                     Save Category

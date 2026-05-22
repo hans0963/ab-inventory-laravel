@@ -89,4 +89,12 @@ class User extends Authenticatable implements MustVerifyEmail
         $roles = is_array($roles) ? $roles : [$roles];
         return in_array($this->role, $roles);
     }
+
+    /**
+     * Get the employee associated with the user.
+     */
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
 }

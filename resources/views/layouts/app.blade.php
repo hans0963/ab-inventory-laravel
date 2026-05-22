@@ -13,6 +13,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        <script>
+            document.addEventListener('htmx:configRequest', (event) => {
+                event.detail.headers['X-CSRF-Token'] = '{{ csrf_token() }}';
+            });
+        </script>
+
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->

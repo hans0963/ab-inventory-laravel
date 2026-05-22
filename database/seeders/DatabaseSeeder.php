@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@example.com'],
             [
                 'name' => 'System Admin',
-                'password' => 'password',
+                'password' => bcrypt('password'),
                 'role' => 'admin',
                 'email_verified_at' => now(),
             ]
@@ -37,7 +37,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'hr@example.com'],
             [
                 'name' => 'HR Manager',
-                'password' => 'password',
+                'password' => bcrypt('password'),
                 'role' => 'hr',
                 'email_verified_at' => now(),
             ]
@@ -52,11 +52,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $manager = User::firstOrCreate(
+        $manager = User::updateOrCreate(
             ['email' => 'manager@example.com'],
             [
                 'name' => 'Operations Manager',
-                'password' => 'password',
+                'password' => bcrypt('password'),
                 'role' => 'manager',
                 'email_verified_at' => now(),
             ]
@@ -71,11 +71,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $cashier = User::firstOrCreate(
+        $cashier = User::updateOrCreate(
             ['email' => 'cashier@example.com'],
             [
                 'name' => 'Front Desk Cashier',
-                'password' => 'password',
+                'password' => bcrypt('password'),
                 'role' => 'cashier',
                 'email_verified_at' => now(),
             ]

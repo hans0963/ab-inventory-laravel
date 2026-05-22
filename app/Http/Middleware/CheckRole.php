@@ -19,7 +19,8 @@ class CheckRole
             return redirect('/login');
         }
 
-        if (!auth()->user()->hasRole($role)) {
+        $roles = explode(',', $role);
+        if (!auth()->user()->hasRole($roles)) {
             abort(403, 'Unauthorized access.');
         }
 

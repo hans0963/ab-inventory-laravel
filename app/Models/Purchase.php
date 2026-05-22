@@ -12,6 +12,7 @@ class Purchase extends Model
 
     protected $fillable = [
         'purchase_date',
+        'expected_delivery_date',
         'supplier_id',
         'employee_id',
         'reference',
@@ -27,6 +28,7 @@ class Purchase extends Model
 
     protected $casts = [
         'purchase_date' => 'date',
+        'expected_delivery_date' => 'date',
         'created_date' => 'datetime',
         'approved_date' => 'datetime',
         'total_amount' => 'float',

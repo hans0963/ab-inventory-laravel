@@ -16,6 +16,7 @@ class CustomerFactory extends Factory
             'email' => $this->faker->unique()->safeEmail,
             'phone' => $this->faker->phoneNumber,
             'address' => $this->faker->address,
+            'customer_type' => $this->faker->randomElement(['Regular', 'Senior', 'PWD', 'VIP']),
         ];
     }
 }

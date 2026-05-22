@@ -1,85 +1,61 @@
 <x-app-layout>
 
-    @if ($categories->isEmpty())
-        <div class="py-12">
-            <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-                <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow text-gray-800 dark:text-gray-200">
-                    <h3 class="text-lg font-semibold">No Categories Available</h3>
-                    <p class="text-sm mt-2">Please create a new category to proceed.</p>
-
-                    <a href="{{ route('categories.create') }}"
-                       class="mt-4 inline-block bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg">
-                        + Create Category
-                    </a>
-                </div>
+    <x-slot name="header">
+        <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
+            <div>
+                <h2 class="font-formal text-4xl text-sienna">{{ __('Product Categories') }}</h2>
+                <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Organize your bakeshop catalog</p>
             </div>
+
+            <a href="{{ route('categories.create') }}" class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-6 py-2 rounded-xl shadow-rustic transition-all">
+                Add Category
+            </a>
         </div>
-    @else
+    </x-slot>
 
-        <!-- Header -->
-        <x-slot name="header">
-            <div class="flex justify-between items-end border-b-2 border-sienna pb-4">
-                <div>
-                    <h2 class="font-formal text-4xl text-sienna">
-                        {{ __('Product Categories') }}
-                    </h2>
-                    <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Organize your bakeshop catalog</p>
-                </div>
-
-                <a href="{{ route('categories.create') }}" 
-                   class="bg-terracotta hover:bg-terracotta-dark text-cream font-bold px-8 py-3 rounded-xl shadow-rustic transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center">
-                    <span class="mr-2 text-xl">+</span> Add Category
-                </a>
-            </div>
-        </x-slot>
-
-        <!-- Content -->
-        <div class="space-y-8">
-            <!-- Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach ($categories as $category)
-                    <div class="card-rustic border-sienna hover:-translate-y-1 transition-all duration-300">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="bg-terracotta bg-opacity-10 p-3 rounded-xl">
-                                <span class="text-2xl">📂</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <a href="{{ route('categories.show', $category->id) }}" class="p-2 text-sage hover:text-sienna hover:bg-sage hover:bg-opacity-10 rounded-lg transition-all" title="View Details">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                </a>
-                                <a href="{{ route('categories.edit', $category->id) }}" class="p-2 text-terracotta hover:text-terracotta-dark hover:bg-terracotta hover:bg-opacity-10 rounded-lg transition-all" title="Edit Category">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </a>
-                                <x-alert-delete 
-                                    route="{{ route('categories.destroy', $category->id) }}" 
-                                    message="Are you sure you want to archive this category? This will not delete the products inside." />
-                            </div>
-                        </div>
-
-                        <h3 class="text-xl font-lora font-bold text-sienna mb-2">{{ $category->category_name }}</h3>
-                        <p class="text-sm text-sage font-medium line-clamp-2 mb-4">{{ $category->description ?? 'No description available for this artisan group.' }}</p>
-                        
-                        <div class="pt-4 border-t border-sienna border-opacity-10 flex justify-between items-center">
-                            <span class="text-xs font-bold text-sienna opacity-60 uppercase tracking-widest">
-                                {{ $category->products_count ?? $category->products->count() }} Products
-                            </span>
-                            <a href="{{ route('products.index', ['category' => $category->id]) }}" class="text-xs font-black text-terracotta hover:underline">View Catalog →</a>
-                        </div>
-                    </div>
-                @endforeach
+    <div class="space-y-8">
+        <div class="card-rustic border-sienna">
+            <div class="overflow-hidden rounded-xl border border-sienna border-opacity-10 shadow-sm">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="bg-sienna text-cream uppercase text-xs tracking-widest font-bold">
+                            <th class="px-6 py-4 text-left">ID</th>
+                            <th class="px-6 py-4 text-left">Category Name</th>
+                            <th class="px-6 py-4 text-left">Description</th>
+                            <th class="px-6 py-4 text-center">Products</th>
+                            <th class="px-6 py-4 text-center">Status</th>
+                            <th class="px-6 py-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
+                        @forelse ($categories as $category)
+                            <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
+                                <td class="px-6 py-5 font-bold text-sienna opacity-60">#{{ $category->id }}</td>
+                                <td class="px-6 py-5 text-sienna font-bold">{{ $category->category_name }}</td>
+                                <td class="px-6 py-5 text-sage text-sm">{{ Str::limit($category->description ?: '—', 80) }}</td>
+                                <td class="px-6 py-5 text-center font-black text-sienna">{{ $category->products_count }}</td>
+                                <td class="px-6 py-5 text-center font-semibold {{ $category->status === 'Inactive' ? 'text-red-600' : 'text-sage-dark' }}">{{ $category->status }}</td>
+                                <td class="px-6 py-5 text-center">
+                                    <div class="flex items-center justify-center gap-3">
+                                        <a href="{{ route('categories.show', $category->id) }}" class="px-3 py-2 rounded-xl bg-sienna bg-opacity-10 text-sienna text-xs uppercase tracking-wider font-semibold">View</a>
+                                        <a href="{{ route('categories.edit', $category->id) }}" class="px-3 py-2 rounded-xl bg-sage bg-opacity-10 text-sage text-xs uppercase tracking-wider font-semibold">Edit</a>
+                                        <x-alert-delete route="{{ route('categories.destroy', $category->id) }}" message="Are you sure you want to delete this category?" />
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-sage italic font-medium">No categories found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Pagination -->
-            <div class="mt-6">
+            <div class="mt-6 px-4">
                 {{ $categories->links() }}
             </div>
         </div>
-
-    @endif
+    </div>
 
 </x-app-layout>

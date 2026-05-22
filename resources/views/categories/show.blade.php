@@ -2,20 +2,12 @@
     <x-slot name="header">
         <div class="flex justify-between items-center w-full bg-cream p-4 rounded-md shadow-sm border-b border-sienna">
             <div>
-                <h2 class="font-formal text-3xl text-sienna leading-tight">
-                    {{ $category->category_name }}
-                </h2>
+                <h2 class="font-formal text-3xl text-sienna leading-tight">{{ $category->category_name }}</h2>
                 <p class="font-inter text-sage">Category Details and Products</p>
             </div>
             <div class="flex gap-4">
-                <a href="{{ route('categories.edit', $category->id) }}" 
-                   class="bg-sage hover:bg-sage-dark text-white font-bold px-6 py-2 rounded-lg shadow-md transition flex items-center">
-                    ✎ Edit
-                </a>
-                <a href="{{ route('categories.index') }}" 
-                   class="bg-sienna hover:bg-opacity-90 text-white font-bold px-6 py-2 rounded-lg shadow-md transition flex items-center">
-                    ← Back
-                </a>
+                <a href="{{ route('categories.edit', $category->id) }}" class="bg-sage hover:bg-sage-dark text-white font-bold px-6 py-2 rounded-lg shadow-md transition">Edit</a>
+                <a href="{{ route('categories.index') }}" class="bg-sienna hover:bg-opacity-90 text-white font-bold px-6 py-2 rounded-lg shadow-md transition">Back</a>
             </div>
         </div>
     </x-slot>
@@ -24,9 +16,7 @@
         <!-- Category Info Card -->
         <div class="bg-white rounded-lg shadow-md p-8 border-l-4 border-terracotta">
             <div class="flex items-start gap-6">
-                <div class="bg-terracotta bg-opacity-10 p-4 rounded-2xl">
-                    <span class="text-4xl">📂</span>
-                </div>
+                <div class="bg-terracotta bg-opacity-10 p-4 rounded-2xl"></div>
                 <div class="flex-1">
                     <h3 class="text-2xl font-lora font-bold text-sienna mb-2">{{ $category->category_name }}</h3>
                     <p class="text-gray-600 leading-relaxed mb-6">

@@ -7,8 +7,7 @@
                 </h2>
                 <p class="font-inter text-sage mt-1 font-medium uppercase tracking-wider text-xs">Record a new sale with discount and VAT</p>
             </div>
-            <a href="{{ route('sales.index') }}" class="text-sienna hover:text-terracotta font-bold flex items-center transition-colors">
-                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            <a href="{{ route('sales.index') }}" class="text-sienna hover:text-terracotta font-bold transition-colors">
                 Back to Sales
             </a>
         </div>
@@ -72,10 +71,9 @@
                             <div>
                                 <label class="block text-xs font-black text-sienna uppercase tracking-widest mb-2">Payment Mode *</label>
                                 <select name="payment_type" required class="w-full rounded-xl border-sienna border-opacity-20 bg-cream bg-opacity-20 py-3 px-4 focus:ring-2 focus:ring-terracotta focus:border-terracotta transition-all">
-                                    <option value="Cash" selected>💵 Cash</option>
-                                    <option value="E-Wallet">📱 E-Wallet (GCash/Maya)</option>
-                                    <option value="Credit Card">💳 Credit Card</option>
-                                    <option value="Bank Transfer">🏦 Bank Transfer</option>
+                                    <option value="Cash" selected>Cash</option>
+                                    <option value="GCash">GCash</option>
+                                    <option value="Card">Card</option>
                                 </select>
                                 @error('payment_type') <p class="text-red-500 text-[10px] mt-1 font-bold uppercase">{{ $message }}</p> @enderror
                             </div>

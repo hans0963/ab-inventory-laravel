@@ -42,6 +42,17 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
+                                <label class="block text-xs font-black text-sage uppercase tracking-widest mb-2">Expected Delivery Date</label>
+                                <input type="date" name="expected_delivery_date" class="input-artisan">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-sage uppercase tracking-widest mb-2">Reference / Invoice #</label>
+                                <input type="text" name="reference" placeholder="e.g. INV-12345" class="input-artisan">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
                                 <label class="block text-xs font-black text-sage uppercase tracking-widest mb-2">Recorded By *</label>
                                 <select name="employee_id" required class="input-artisan">
                                     <option value="">Select Employee</option>
@@ -51,10 +62,6 @@
                                         </option>
                                     @endforeach
                                 </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-black text-sage uppercase tracking-widest mb-2">Reference / Invoice #</label>
-                                <input type="text" name="reference" placeholder="e.g. INV-12345" class="input-artisan">
                             </div>
                         </div>
                     </div>

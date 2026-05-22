@@ -41,19 +41,83 @@ class PurchaseController extends Controller
         }
 
         $purchases = $query->latest('purchase_date')->paginate(15);
-        $suppliers = Supplier::all();
+        $suppliers = Supplier::where('status', 'Active')->get();
 
         return view('purchases.index', compact('purchases', 'suppliers'));
     }
 
     public function create()
     {
-        $suppliers = Supplier::all();
+        $suppliers = Supplier::where('status', 'Active')->get();
         $products = Product::where('status', 'Active')
             ->where('inventory_type', 'Raw Material')
             ->get();
         $employees = Employee::all();
         return view('purchases.create', compact('suppliers', 'products', 'employees'));
+    }
+
+    public function receivingMatching($id)
+    {
+        $purchase = Purchase::with(['supplier', 'details.product', 'inventoryReceivings'])->findOrFail($id);
+        
+        // Find approved receivings from the same supplier that are not yet linked to this PO
+        // and are not fully linked to other POs (optional complexity, keeping it simple for now)
+        $availableReceivings = InventoryReceiving::with(['supplier', 'items.product'])
+            ->where('supplier_id', $purchase->supplier_id)
+            ->where('status', 'Approved')
+            ->whereDoesntHave('purchases', function($q) use ($id) {
+                $q->where('purchase_id', $id);
+            })
+            ->latest()
+            ->get();
+
+        return view('purchases.receiving-matching', compact('purchase', 'availableReceivings'));
+    }
+
+    public function linkReceiving(Request $request, $id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        $receiving = InventoryReceiving::findOrFail($request->inventory_receiving_id);
+
+        if ($receiving->supplier_id !== $purchase->supplier_id) {
+            return redirect()->back()->withErrors(['error' => 'Supplier mismatch between PO and Receiving record.']);
+        }
+
+        $purchase->linkReceiving(
+            $receiving, 
+            $receiving->total_items, 
+            $receiving->total_cost
+        );
+
+        return redirect()->route('purchases.show', $purchase)->with('success', 'Artisan shipment linked successfully.');
+    }
+
+    public function unlinkReceiving(Request $request, $id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        $receiving = InventoryReceiving::findOrFail($request->inventory_receiving_id);
+
+        $purchase->unlinkReceiving($receiving);
+
+        return redirect()->route('purchases.show', $purchase)->with('success', 'Shipment unlinked from record.');
+    }
+
+    public function markAsReceived($id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        $purchase->status = 'Complete';
+        $purchase->save();
+
+        return redirect()->route('purchases.index')->with('success', 'Purchase order marked as received.');
+    }
+
+    public function cancel($id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        $purchase->status = 'Cancelled';
+        $purchase->save();
+
+        return redirect()->route('purchases.index')->with('success', 'Purchase order cancelled.');
     }
 
     public function store(Request $request)
@@ -63,6 +127,7 @@ class PurchaseController extends Controller
         try {
             $validatedData = $request->validate([
                 'purchase_date' => 'required|date',
+                'expected_delivery_date' => 'nullable|date|after_or_equal:purchase_date',
                 'supplier_id' => 'required|exists:suppliers,id',
                 'employee_id' => 'nullable|exists:employees,id',
                 'product_id' => 'required|array|min:1',
@@ -74,6 +139,7 @@ class PurchaseController extends Controller
             // Create purchase
             $purchase = new Purchase([
                 'purchase_date' => $request->purchase_date,
+                'expected_delivery_date' => $request->expected_delivery_date,
                 'supplier_id' => $request->supplier_id,
                 'employee_id' => $request->employee_id,
                 'reference' => 'PUR-' . now()->format('YmdHis'),
@@ -102,6 +168,8 @@ class PurchaseController extends Controller
                 $itemTotal = $quantity * $price;
                 $total += $itemTotal;
 
+                // Disable stock update trigger during PO creation
+                // We use a temporary flag or just handle it if needed
                 PurchaseDetail::create([
                     'purchase_id' => $purchase->id,
                     'product_id' => $productId,
@@ -116,7 +184,7 @@ class PurchaseController extends Controller
             $purchase->save();
 
             DB::commit();
-            return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase order created successfully');
+            return redirect()->route('purchases.show', $purchase->id)->with('success', 'Purchase order created successfully');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -234,71 +302,6 @@ class PurchaseController extends Controller
             Log::error('Purchase Delete Error: ' . $e->getMessage());
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
-    }
-
-    /**
-     * Link inventory receiving to purchase
-     */
-    public function linkReceiving(Request $request, $id)
-    {
-        Gate::authorize('viewAny', Purchase::class);
-
-        $purchase = Purchase::findOrFail($id);
-
-        $request->validate([
-            'inventory_receiving_id' => 'required|exists:inventory_receivings,id',
-        ]);
-
-        $receiving = InventoryReceiving::findOrFail($request->inventory_receiving_id);
-
-        // Calculate items and amount received (Good condition only)
-        $itemsReceived = $receiving->inventoryReceivingItems()
-            ->where('condition', 'Good')
-            ->count();
-
-        $amountReceived = $receiving->inventoryReceivingItems()
-            ->where('condition', 'Good')
-            ->sum('total_cost');
-
-        $purchase->linkReceiving($receiving, $itemsReceived, $amountReceived);
-
-        return redirect()->route('purchases.show', $purchase)
-            ->with('success', 'Inventory receiving linked to purchase order successfully');
-    }
-
-    /**
-     * Unlink inventory receiving from purchase
-     */
-    public function unlinkReceiving(Request $request, $id)
-    {
-        Gate::authorize('viewAny', Purchase::class);
-
-        $purchase = Purchase::findOrFail($id);
-
-        $request->validate([
-            'inventory_receiving_id' => 'required|exists:inventory_receivings,id',
-        ]);
-
-        $receiving = InventoryReceiving::findOrFail($request->inventory_receiving_id);
-        $purchase->unlinkReceiving($receiving);
-
-        return redirect()->route('purchases.show', $purchase)
-            ->with('success', 'Inventory receiving unlinked from purchase order');
-    }
-
-    /**
-     * Show receiving matching view
-     */
-    public function receivingMatching($id)
-    {
-        $purchase = Purchase::with(['details.product', 'inventoryReceivings'])->findOrFail($id);
-        $availableReceivings = InventoryReceiving::with('items.product')
-            ->where('supplier_id', $purchase->supplier_id)
-            ->where('status', 'Approved')
-            ->whereNotIn('id', $purchase->inventoryReceivings->pluck('id'))
-            ->get();
-
-        return view('purchases.receiving-matching', compact('purchase', 'availableReceivings'));
     }
 
     /**

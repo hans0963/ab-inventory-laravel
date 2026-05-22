@@ -45,6 +45,18 @@
                     @error('address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                <div>
+                    <label class="block text-sm font-semibold text-sienna mb-2">Customer Type *</label>
+                    <select name="customer_type" required
+                            class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
+                        <option value="Regular">Regular</option>
+                        <option value="Senior">Senior</option>
+                        <option value="PWD">PWD</option>
+                        <option value="VIP">VIP</option>
+                    </select>
+                    @error('customer_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+
                 <div class="flex justify-between items-center pt-4 border-t border-tan border-opacity-30">
                     <button type="button" onclick="window.location='{{ route('customers.index') }}'" 
                             class="text-gray-500 hover:text-sienna font-semibold transition">

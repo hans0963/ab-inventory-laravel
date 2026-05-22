@@ -7,44 +7,33 @@
 
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    <form method="POST" action="{{ route('categories.update', $category->id) }}"">
-                        @csrf
-                        @method('PUT')
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <form method="POST" action="{{ route('categories.update', $category->id) }}">
+                    @csrf
+                    @method('PUT')
 
-                        <!-- Category Name -->
-                        <div class="mb-4">
-                            <x-input-label for="category_name" :value="__('Category Name')" />
-                            <x-text-input id="category_name" type="text" name="category_name" class="block mt-1 w-full" value="{{ old('category_name', $category->category_name) }}" required />
-                        </div>
+                    <!-- Category Name -->
+                    <div class="mb-4">
+                        <x-input-label for="category_name" value="Category Name *" class="text-[10px] uppercase tracking-widest text-sage" />
+                        <x-text-input id="category_name" type="text" name="category_name" class="block mt-1 w-full" value="{{ old('category_name', $category->category_name) }}" required />
+                        <x-input-error :messages="$errors->get('category_name')" class="mt-2" />
+                    </div>
 
-                        <!-- Description -->
-                        <div class="mb-4">
-                            <x-input-label for="description" :value="__('Description')" />
-                            <textarea id="description" name="description" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" rows="3">{{ old('description', $category->description) }}</textarea>
-                        </div>
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <x-input-label for="description" value="Description" class="text-[10px] uppercase tracking-widest text-sage" />
+                        <textarea id="description" name="description" class="block mt-1 w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm bg-cream bg-opacity-10" rows="3">{{ old('description', $category->description) }}</textarea>
+                        <x-input-error :messages="$errors->get('description')" class="mt-2" />
+                    </div>
 
-                        <!-- Status -->
-                        <div class="mb-4">
-                            <x-input-label for="status" :value="__('Status')" />
-                            <select id="status" name="status" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
-                                <option value="Active" {{ old('status', $category->status) === 'Active' ? 'selected' : '' }}>Active</option>
-                                <option value="Inactive" {{ old('status', $category->status) === 'Inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                        </div>
+                    <input type="hidden" name="status" value="{{ old('status', $category->status) }}" />
 
-                        <!-- Buttons -->
-                        <div class="text-end">
-                            <x-primary-button type="submit">
-                                {{ __('Save') }}
-                            </x-primary-button>
-                            <x-secondary-button type="button" onclick="window.location='{{ route('categories.index') }}'">
-                                {{ __('Cancel') }}
-                            </x-secondary-button>
-                        </div>
-                    </form>
-                </div>
+                    <!-- Buttons -->
+                    <div class="flex justify-end gap-3">
+                        <x-secondary-button type="button" onclick="window.location='{{ route('categories.index') }}'">Cancel</x-secondary-button>
+                        <x-primary-button type="submit">Save</x-primary-button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

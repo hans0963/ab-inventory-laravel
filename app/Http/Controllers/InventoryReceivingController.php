@@ -92,7 +92,6 @@ class InventoryReceivingController extends Controller
                 'quantity_ordered' => $itemData['quantity_ordered'],
                 'quantity_received' => $itemData['quantity_received'],
                 'unit_cost' => $itemData['unit_cost'],
-                'total_cost' => $itemCost,
                 'expiration_date' => $itemData['expiration_date'] ?? null,
                 'condition' => $itemData['condition']
             ]);
@@ -171,7 +170,6 @@ class InventoryReceivingController extends Controller
                 'quantity_ordered' => $itemData['quantity_ordered'],
                 'quantity_received' => $itemData['quantity_received'],
                 'unit_cost' => $itemData['unit_cost'],
-                'total_cost' => $itemCost,
                 'expiration_date' => $itemData['expiration_date'] ?? null,
                 'condition' => $itemData['condition']
             ]);
