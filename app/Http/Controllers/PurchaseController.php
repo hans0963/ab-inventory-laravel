@@ -13,6 +13,7 @@ use App\Models\Employee;
 use App\Models\PurchaseDetail;
 use App\Models\InventoryReceiving;
 use App\Models\User;
+use App\Services\SystemNotificationService;
 use Illuminate\Support\Facades\Gate;
 use function Symfony\Component\Clock\now;
 
@@ -143,7 +144,7 @@ class PurchaseController extends Controller
                 'supplier_id' => $request->supplier_id,
                 'employee_id' => $request->employee_id,
                 'reference' => 'PUR-' . now()->format('YmdHis'),
-                'status' => 'Pending',
+                'status' => 'Pending Approval',
                 'notes' => $request->notes,
                 'created_by' => auth()->id(),
                 'created_date' => now(),
@@ -183,6 +184,14 @@ class PurchaseController extends Controller
             $purchase->total_amount = $total;
             $purchase->save();
 
+            SystemNotificationService::notifyRoles(
+                ['admin'],
+                'po_pending_approval',
+                'Purchase order pending approval',
+                "Purchase Order {$purchase->po_number} is waiting for approval.",
+                route('purchases.show', $purchase)
+            );
+
             DB::commit();
             return redirect()->route('purchases.show', $purchase->id)->with('success', 'Purchase order created successfully');
 
@@ -215,9 +224,8 @@ class PurchaseController extends Controller
     {
         $purchase = Purchase::with('details')->findOrFail($id);
 
-        // Only allow editing pending purchases
-        if ($purchase->status !== 'Pending') {
-            return redirect()->route('purchases.show', $purchase)->withErrors(['error' => 'Cannot edit completed or partial purchases']);
+        if (!in_array($purchase->status, ['Draft', 'Pending', 'Pending Approval', 'Rejected'], true)) {
+            return redirect()->route('purchases.show', $purchase)->withErrors(['error' => 'Cannot edit approved, ordered, received, or cancelled purchases']);
         }
 
         $suppliers = Supplier::all();
@@ -229,8 +237,8 @@ class PurchaseController extends Controller
     {
         $purchase = Purchase::findOrFail($id);
 
-        if ($purchase->status !== 'Pending') {
-            return redirect()->route('purchases.show', $purchase)->withErrors(['error' => 'Cannot edit non-pending purchases']);
+        if (!in_array($purchase->status, ['Draft', 'Pending', 'Pending Approval', 'Rejected'], true)) {
+            return redirect()->route('purchases.show', $purchase)->withErrors(['error' => 'Cannot edit approved, ordered, received, or cancelled purchases']);
         }
 
         $request->validate([
@@ -249,6 +257,10 @@ class PurchaseController extends Controller
                 'purchase_date' => $request->purchase_date,
                 'supplier_id' => $request->supplier_id,
                 'notes' => $request->notes,
+                'status' => 'Pending Approval',
+                'rejected_by' => null,
+                'rejected_date' => null,
+                'rejection_reason' => null,
             ]);
 
             PurchaseDetail::where('purchase_id', $id)->delete();
@@ -270,6 +282,14 @@ class PurchaseController extends Controller
 
             $purchase->update(['total_amount' => $total]);
 
+            SystemNotificationService::notifyRoles(
+                ['admin'],
+                'po_pending_approval',
+                'Purchase order pending approval',
+                "Purchase Order {$purchase->po_number} was updated and is waiting for approval.",
+                route('purchases.show', $purchase)
+            );
+
             DB::commit();
             return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase order updated successfully');
         } catch (\Exception $e) {
@@ -283,25 +303,70 @@ class PurchaseController extends Controller
     {
         $purchase = Purchase::findOrFail($id);
 
-        // Only allow deleting pending purchases
-        if ($purchase->status !== 'Pending') {
-            return redirect()->route('purchases.show', $purchase)->withErrors(['error' => 'Cannot delete completed or partial purchases']);
+        if (!in_array($purchase->status, ['Draft', 'Pending', 'Pending Approval', 'Rejected'], true)) {
+            return redirect()->route('purchases.show', $purchase)->withErrors(['error' => 'Cannot archive approved, ordered, received, or cancelled purchases']);
         }
 
-        DB::beginTransaction();
+        $purchase->update(['status' => 'Cancelled']);
 
-        try {
-            PurchaseDetail::where('purchase_id', $id)->delete();
-            $purchase->receivingLinks()->delete();
-            $purchase->delete();
+        return redirect()->route('purchases.index')->with('success', 'Purchase order cancelled successfully');
+    }
 
-            DB::commit();
-            return redirect()->route('purchases.index')->with('success', 'Purchase order deleted successfully');
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Purchase Delete Error: ' . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+    public function approve(Purchase $purchase)
+    {
+        if (!auth()->user()->hasRole(['admin'])) {
+            return redirect()->back()->withErrors(['error' => 'Only an owner/admin can approve purchase orders.']);
         }
+
+        if ($purchase->status !== 'Pending Approval') {
+            return redirect()->back()->withErrors(['error' => 'Only purchase orders pending approval can be approved.']);
+        }
+
+        $purchase->update([
+            'status' => 'Approved',
+            'approved_by' => auth()->id(),
+            'approved_date' => now(),
+        ]);
+
+        SystemNotificationService::notifyRoles(
+            ['manager'],
+            'po_approved',
+            'Purchase order approved',
+            "Purchase Order {$purchase->po_number} has been approved.",
+            route('purchases.show', $purchase)
+        );
+
+        return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase order approved.');
+    }
+
+    public function reject(Request $request, Purchase $purchase)
+    {
+        if (!auth()->user()->hasRole(['admin'])) {
+            return redirect()->back()->withErrors(['error' => 'Only an owner/admin can reject purchase orders.']);
+        }
+
+        if ($purchase->status !== 'Pending Approval') {
+            return redirect()->back()->withErrors(['error' => 'Only purchase orders pending approval can be rejected.']);
+        }
+
+        $request->validate(['rejection_reason' => 'required|string|max:1000']);
+
+        $purchase->update([
+            'status' => 'Rejected',
+            'rejected_by' => auth()->id(),
+            'rejected_date' => now(),
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        SystemNotificationService::notifyRoles(
+            ['manager'],
+            'po_rejected',
+            'Purchase order rejected',
+            "Purchase Order {$purchase->po_number} was rejected: {$request->rejection_reason}",
+            route('purchases.show', $purchase)
+        );
+
+        return redirect()->route('purchases.show', $purchase)->with('success', 'Purchase order rejected.');
     }
 
     /**

@@ -53,9 +53,27 @@
                         <option value="Senior">Senior</option>
                         <option value="PWD">PWD</option>
                         <option value="VIP">VIP</option>
+                        <option value="Credit/Loan Customer">Credit/Loan Customer</option>
                     </select>
                     @error('customer_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-sienna mb-2">Credit Limit</label>
+                        <input type="number" step="0.01" min="0" name="credit_limit" value="{{ old('credit_limit', 0) }}"
+                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
+                        @error('credit_limit') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-sienna mb-2">Credit Due Date</label>
+                        <input type="date" name="credit_due_date" value="{{ old('credit_due_date') }}"
+                               class="w-full border-sienna focus:ring-terracotta focus:border-terracotta rounded-md shadow-sm bg-cream bg-opacity-10">
+                        @error('credit_due_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <input type="hidden" name="status" value="Active">
 
                 <div class="flex justify-between items-center pt-4 border-t border-tan border-opacity-30">
                     <button type="button" onclick="window.location='{{ route('customers.index') }}'" 

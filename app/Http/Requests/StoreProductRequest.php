@@ -28,8 +28,14 @@ class StoreProductRequest extends FormRequest
             'selling_price' => 'required|numeric|min:0|max:999999.99',
             'quantity' => 'required|integer|min:0|max:999999',
             'status' => 'required|in:Active,Inactive',
+            'unit' => 'nullable|string|max:50',
             'expiration_date' => 'nullable|date|after_or_equal:today',
+            'expiry_alert_days' => 'nullable|integer|min:0|max:365',
             'stock_alert_threshold' => 'required|integer|min:0|max:999999',
+            'reorder_level' => 'nullable|integer|min:0|max:999999',
+            'reorder_quantity' => 'nullable|integer|min:0|max:999999',
+            'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
+            'supplier_unit_price' => 'nullable|numeric|min:0|max:999999.99',
         ];
     }
 

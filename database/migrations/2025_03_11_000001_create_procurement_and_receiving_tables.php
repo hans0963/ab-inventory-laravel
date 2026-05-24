@@ -19,13 +19,16 @@ return new class extends Migration
             $table->foreignId('employee_id')->nullable()->constrained()->onDelete('set null');
             $table->string('reference')->nullable();
             $table->string('po_number')->nullable();
-            $table->enum('status', ['Pending', 'Approved', 'Partial', 'Complete', 'Cancelled'])->default('Pending');
+            $table->enum('status', ['Draft', 'Pending', 'Pending Approval', 'Approved', 'Rejected', 'Ordered', 'Partial', 'Complete', 'Cancelled'])->default('Pending Approval');
             $table->decimal('total_amount', 15, 2)->default(0);
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('created_date')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('approved_date')->nullable();
+            $table->foreignId('rejected_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->timestamp('rejected_date')->nullable();
+            $table->text('rejection_reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -80,6 +83,17 @@ return new class extends Migration
             $table->decimal('amount_received', 15, 2)->default(0);
             $table->timestamps();
         });
+
+        Schema::create('product_supplier_prices', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('supplier_id')->constrained()->cascadeOnDelete();
+            $table->decimal('unit_price', 15, 2)->default(0);
+            $table->string('unit')->nullable();
+            $table->boolean('is_default')->default(false);
+            $table->timestamps();
+            $table->unique(['product_id', 'supplier_id']);
+        });
     }
 
     /**
@@ -88,6 +102,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('purchase_receiving_links');
+        Schema::dropIfExists('product_supplier_prices');
         Schema::dropIfExists('inventory_receiving_items');
         Schema::dropIfExists('inventory_receivings');
         Schema::dropIfExists('purchase_details');

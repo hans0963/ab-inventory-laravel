@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('suppliers_email')->nullable();
             $table->string('suppliers_phone')->nullable();
             $table->text('suppliers_address')->nullable();
+            $table->text('items_supplied')->nullable();
+            $table->enum('payment_terms', ['Cash', 'Credit'])->default('Cash');
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
             $table->softDeletes();
@@ -31,6 +33,9 @@ return new class extends Migration
             $table->string('employee_phone')->nullable();
             $table->text('employee_address')->nullable();
             $table->string('position')->nullable();
+            $table->date('date_hired')->nullable();
+            $table->string('emergency_contact')->nullable();
+            $table->enum('status', ['Active', 'Inactive', 'Archived'])->default('Active');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -41,7 +46,11 @@ return new class extends Migration
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
-            $table->enum('customer_type', ['Regular', 'Walk-in', 'Senior', 'PWD', 'VIP'])->default('Regular');
+            $table->enum('customer_type', ['Regular', 'Walk-in', 'Senior', 'PWD', 'VIP', 'Credit/Loan Customer'])->default('Regular');
+            $table->decimal('credit_limit', 15, 2)->default(0);
+            $table->decimal('current_balance', 15, 2)->default(0);
+            $table->date('credit_due_date')->nullable();
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
             $table->softDeletes();
         });

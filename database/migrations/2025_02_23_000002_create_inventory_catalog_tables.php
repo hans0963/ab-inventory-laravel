@@ -28,7 +28,14 @@ return new class extends Migration
             $table->integer('quantity')->default(0);
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->integer('stock_alert_threshold')->default(10);
+            $table->integer('reorder_level')->default(0);
+            $table->integer('reorder_quantity')->default(0);
             $table->enum('inventory_type', ['Finished Product', 'Raw Material'])->default('Finished Product');
+            $table->string('unit')->nullable();
+            $table->date('expiration_date')->nullable();
+            $table->unsignedInteger('expiry_alert_days')->default(3);
+            $table->foreignId('default_supplier_id')->nullable()->constrained('suppliers')->nullOnDelete();
+            $table->decimal('supplier_unit_price', 15, 2)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -41,8 +48,11 @@ return new class extends Migration
             $table->integer('quantity')->default(0);
             $table->string('unit')->nullable(); // e.g., 'kg', 'L', 'pcs'
             $table->date('expiration_date')->nullable();
+            $table->unsignedInteger('expiry_alert_days')->default(3);
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->integer('stock_alert_threshold')->default(10);
+            $table->integer('reorder_level')->default(0);
+            $table->integer('reorder_quantity')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

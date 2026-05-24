@@ -6,6 +6,7 @@ use App\Models\StockWithdrawal;
 use App\Models\StockWithdrawalItem;
 use App\Models\Product;
 use App\Http\Requests\StoreStockWithdrawalRequest;
+use App\Services\SystemNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -48,9 +49,6 @@ class StockWithdrawalController extends Controller
     public function store(StoreStockWithdrawalRequest $request)
     {
         try {
-            DB::beginTransaction();
-
-            // Validate stock availability
             foreach ($request->items as $itemData) {
                 $product = Product::findOrFail($itemData['product_id']);
                 if ($product->quantity < $itemData['quantity']) {
@@ -58,6 +56,8 @@ class StockWithdrawalController extends Controller
                         ->with('error', "Insufficient stock for {$product->product_name}. Available: {$product->quantity}");
                 }
             }
+
+            DB::beginTransaction();
 
             $totalQuantity = 0;
             $totalValue = 0;
@@ -91,6 +91,14 @@ class StockWithdrawalController extends Controller
 
             DB::commit();
 
+            SystemNotificationService::notifyRoles(
+                ['manager'],
+                'stock_withdrawal_pending',
+                'Stock withdrawal needs approval',
+                "Stock Withdrawal {$withdrawal->withdrawal_no} was submitted for approval.",
+                route('stock-withdrawal.show', $withdrawal)
+            );
+
             return redirect()->route('stock-withdrawal.show', $withdrawal->id)
                            ->with('success', 'Stock Withdrawal created successfully. Reference: ' . $withdrawal->withdrawal_no);
         } catch (\Exception $e) {
@@ -118,6 +126,14 @@ class StockWithdrawalController extends Controller
 
             DB::commit();
 
+            SystemNotificationService::notifyUser(
+                $withdrawal->created_by,
+                'stock_withdrawal_approved',
+                'Stock withdrawal approved',
+                "Stock Withdrawal {$withdrawal->withdrawal_no} has been approved.",
+                route('stock-withdrawal.show', $withdrawal)
+            );
+
             return redirect()->route('stock-withdrawal.show', $withdrawal->id)
                            ->with('success', 'Stock Withdrawal approved and stock updated successfully.');
         } catch (\Exception $e) {
@@ -133,6 +149,14 @@ class StockWithdrawalController extends Controller
         }
 
         $withdrawal->reject(Auth::user());
+
+        SystemNotificationService::notifyUser(
+            $withdrawal->created_by,
+            'stock_withdrawal_rejected',
+            'Stock withdrawal rejected',
+            "Stock Withdrawal {$withdrawal->withdrawal_no} has been rejected.",
+            route('stock-withdrawal.show', $withdrawal)
+        );
 
         return redirect()->route('stock-withdrawal.show', $withdrawal->id)
                        ->with('success', 'Stock Withdrawal rejected.');

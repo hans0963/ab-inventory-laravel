@@ -40,11 +40,39 @@
                         <div class="mb-4">
                             <x-input-label for="customer_type" :value="__('Customer Type')" />
                             <select id="customer_type" name="customer_type" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                @foreach(['Regular','Senior','PWD','VIP'] as $type)
+                                @foreach(['Regular','Senior','PWD','VIP','Credit/Loan Customer'] as $type)
                                     <option value="{{ $type }}" {{ old('customer_type', $customer->customer_type) === $type ? 'selected' : '' }}>{{ $type }}</option>
                                 @endforeach
                             </select>
                             @error('customer_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label for="credit_limit" :value="__('Credit Limit')" />
+                            <x-text-input id="credit_limit" type="number" step="0.01" min="0" name="credit_limit" class="block mt-1 w-full" value="{{ old('credit_limit', $customer->credit_limit) }}" />
+                            @error('credit_limit') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label for="current_balance" :value="__('Current Balance')" />
+                            <x-text-input id="current_balance" type="number" step="0.01" min="0" name="current_balance" class="block mt-1 w-full" value="{{ old('current_balance', $customer->current_balance) }}" />
+                            @error('current_balance') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label for="credit_due_date" :value="__('Credit Due Date')" />
+                            <x-text-input id="credit_due_date" type="date" name="credit_due_date" class="block mt-1 w-full" value="{{ old('credit_due_date', optional($customer->credit_due_date)->format('Y-m-d')) }}" />
+                            @error('credit_due_date') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <x-input-label for="status" :value="__('Status')" />
+                            <select id="status" name="status" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                @foreach(['Active','Inactive'] as $status)
+                                    <option value="{{ $status }}" {{ old('status', $customer->status ?? 'Active') === $status ? 'selected' : '' }}>{{ $status }}</option>
+                                @endforeach
+                            </select>
+                            @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="text-end">

@@ -74,6 +74,7 @@
                                     <option value="Cash" selected>Cash</option>
                                     <option value="GCash">GCash</option>
                                     <option value="Card">Card</option>
+                                    <option value="Credit/Loan">Credit/Loan</option>
                                 </select>
                                 @error('payment_type') <p class="text-red-500 text-[10px] mt-1 font-bold uppercase">{{ $message }}</p> @enderror
                             </div>

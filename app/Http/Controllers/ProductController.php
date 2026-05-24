@@ -100,7 +100,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('products.create', compact('categories'));
+        $suppliers = \App\Models\Supplier::where('status', 'Active')->get();
+        return view('products.create', compact('categories', 'suppliers'));
     }
 
     public function store(StoreProductRequest $request)
@@ -119,7 +120,8 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::all();
-        return view('products.edit', compact('product', 'categories'));
+        $suppliers = \App\Models\Supplier::where('status', 'Active')->get();
+        return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
     public function update(UpdateProductRequest $request, Product $product)
@@ -140,17 +142,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Check if product has transactions (sales, inventory movements, etc.)
-        if ($product->orderDetails()->exists() || 
-            ($product->inventory_movements ?? collect())->count() > 0) {
-            return redirect()->route('products.index')->with('error', 
-                'Cannot delete "' . $product->product_name . '" because it has existing transactions. 
-                Please set status to Inactive instead for historical reporting.');
-        }
-
-        $product_name = $product->product_name;
-        $product->delete();
-        return redirect()->route('products.index')->with('success', 'Product "' . $product_name . '" deleted successfully.');
+        $product->update(['status' => 'Inactive']);
+        return redirect()->route('products.index')->with('success', 'Product "' . $product->product_name . '" archived successfully.');
     }
 }
-

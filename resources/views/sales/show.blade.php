@@ -11,6 +11,22 @@
                 <a href="{{ route('sales.print', $sale->id) }}" class="bg-sage hover:bg-sage-dark text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all flex items-center justify-center">
                     Print Receipt
                 </a>
+                @if($sale->void_status === 'Active')
+                    <form method="POST" action="{{ route('sales.request-void', $sale) }}">
+                        @csrf
+                        <input type="hidden" name="void_reason" value="Requested from sale details">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all">
+                            Request Void
+                        </button>
+                    </form>
+                @elseif($sale->void_status === 'Pending' && auth()->user()->hasRole(['admin', 'manager']))
+                    <form method="POST" action="{{ route('sales.approve-void', $sale) }}">
+                        @csrf
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all">
+                            Approve Void
+                        </button>
+                    </form>
+                @endif
                 <a href="{{ route('sales.index') }}" class="bg-cream hover:bg-sienna hover:text-cream text-sienna border border-sienna font-bold px-6 py-3 rounded-xl transition-all flex items-center justify-center text-[10px] uppercase tracking-widest">
                     Back to List
                 </a>
@@ -42,6 +58,10 @@
                             <span class="inline-block bg-terracotta bg-opacity-10 text-terracotta px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
                                 {{ $sale->payment_mode_label }}
                             </span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase tracking-widest text-sage font-black mb-1">Void Status</p>
+                            <p class="text-base font-bold text-sienna">{{ $sale->void_status }}</p>
                         </div>
                     </div>
                 </div>
@@ -103,7 +123,7 @@
                         @endif
 
                         <div class="flex justify-between text-green-600 font-medium uppercase text-[10px] tracking-widest">
-                            <span>VAT ({{ $sale->vat_rate }}%)</span>
+                            <span>VAT {{ $sale->vat_type }} ({{ $sale->vat_rate }}%)</span>
                             <span class="font-bold">+₱{{ number_format($sale->vat_amount, 2) }}</span>
                         </div>
 

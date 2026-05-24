@@ -45,10 +45,8 @@ class EmployeeController extends Controller
                 'email' => $validated['employee_email'],
                 'password' => Hash::make('arbees123'),
                 'role' => $validated['role'],
+                'email_verified_at' => now(),
             ]);
-
-            // Send email verification notification
-            $user->sendEmailVerificationNotification();
 
             Employee::create([
                 'user_id' => $user->id,
@@ -119,6 +117,7 @@ class EmployeeController extends Controller
                     'email' => $validated['employee_email'],
                     'password' => Hash::make('arbees123'),
                     'role' => $validated['role'],
+                    'email_verified_at' => now(),
                 ]);
 
                 $employee->update(['user_id' => $user->id]);

@@ -18,21 +18,34 @@ class Sale extends Model
         'customer_id',
         'date',
         'sold',
+        'unit_price',
         'discount_type_id',
         'discount_amount',
         'payment_type',
+        'credit_due_date',
         'vat_rate',
+        'vat_type',
         'vat_amount',
+        'subtotal_amount',
         'total_amount',
-        'receipt_number'
+        'receipt_number',
+        'void_status',
+        'void_reason',
+        'void_requested_by',
+        'void_approved_by',
+        'voided_at'
     ];
 
     protected $casts = [
         'date' => 'date',
+        'credit_due_date' => 'date',
+        'unit_price' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'vat_rate' => 'decimal:2',
         'vat_amount' => 'decimal:2',
+        'subtotal_amount' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'voided_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
@@ -91,4 +104,3 @@ class Sale extends Model
         return "RCP-{$timestamp}-{$random}";
     }
 }
-

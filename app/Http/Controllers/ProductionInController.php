@@ -6,6 +6,7 @@ use App\Models\ProductionIn;
 use App\Models\ProductionInItem;
 use App\Models\Product;
 use App\Http\Requests\StoreProductionInRequest;
+use App\Services\SystemNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,6 +74,14 @@ class ProductionInController extends Controller
 
             DB::commit();
 
+            SystemNotificationService::notifyRoles(
+                ['manager'],
+                'production_in_pending',
+                'Production IN needs approval',
+                "Production IN {$productionIn->production_in_no} was submitted for approval.",
+                route('production-in.show', $productionIn)
+            );
+
             return redirect()->route('production-in.show', $productionIn->id)
                            ->with('success', 'Production IN created successfully. Reference: ' . $productionIn->production_in_no);
         } catch (\Exception $e) {
@@ -100,6 +109,14 @@ class ProductionInController extends Controller
 
             DB::commit();
 
+            SystemNotificationService::notifyUser(
+                $productionIn->created_by,
+                'production_in_approved',
+                'Production IN approved',
+                "Production IN {$productionIn->production_in_no} has been approved.",
+                route('production-in.show', $productionIn)
+            );
+
             return redirect()->route('production-in.show', $productionIn->id)
                            ->with('success', 'Production IN approved successfully.');
         } catch (\Exception $e) {
@@ -115,6 +132,14 @@ class ProductionInController extends Controller
         }
 
         $productionIn->reject(Auth::user());
+
+        SystemNotificationService::notifyUser(
+            $productionIn->created_by,
+            'production_in_rejected',
+            'Production IN rejected',
+            "Production IN {$productionIn->production_in_no} has been rejected.",
+            route('production-in.show', $productionIn)
+        );
 
         return redirect()->route('production-in.show', $productionIn->id)
                        ->with('success', 'Production IN rejected.');

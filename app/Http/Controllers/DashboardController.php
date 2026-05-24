@@ -121,9 +121,14 @@ class DashboardController extends Controller
 
         // Cashier Dashboard
         if ($user->role === 'cashier') {
-            $todaysSales = $todaySales;
-            $transactionsCount = \App\Models\Sale::whereDate('created_at', today())->count();
-            $recentOrders = \App\Models\Sale::with('product', 'customer')->whereDate('created_at', today())->latest()->limit(5)->get();
+            $employee = Employee::where('user_id', $user->id)->first();
+            $cashierSales = \App\Models\Sale::query()
+                ->when($employee, fn ($query) => $query->where('employee_id', $employee->id))
+                ->when(! $employee, fn ($query) => $query->whereRaw('1 = 0'));
+
+            $todaysSales = (clone $cashierSales)->whereDate('created_at', today())->sum('total_amount');
+            $transactionsCount = (clone $cashierSales)->whereDate('created_at', today())->count();
+            $recentOrders = (clone $cashierSales)->with('product', 'customer')->whereDate('created_at', today())->latest()->limit(5)->get();
             $lowStockAlerts = Product::where('quantity', '<=', DB::raw('stock_alert_threshold'))->get();
 
             return view('dashboards.dashboard-cashier', compact(

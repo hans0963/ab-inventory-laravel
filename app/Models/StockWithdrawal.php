@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\StockMovementLogger;
 
 class StockWithdrawal extends Model
 {
@@ -87,9 +88,25 @@ class StockWithdrawal extends Model
             $this->approved_date = now();
             $this->save();
 
-            // Update product quantities (decrement)
-            foreach ($this->items as $item) {
+            foreach ($this->items()->with('product')->get() as $item) {
+                if ($item->product->quantity < $item->quantity) {
+                    throw new \RuntimeException("Insufficient stock. Current stock: {$item->product->quantity}, Requested: {$item->quantity}. Transaction cannot be completed.");
+                }
+            }
+
+            foreach ($this->items()->with('product')->get() as $item) {
+                $quantityBefore = $item->product->quantity;
                 $item->product->decrement('quantity', $item->quantity);
+                StockMovementLogger::record(
+                    $item->product,
+                    $quantityBefore,
+                    -$item->quantity,
+                    'OUT',
+                    $this->reason ?? 'STOCK WITHDRAWAL',
+                    $this,
+                    null,
+                    $user->id
+                );
             }
         }
     }

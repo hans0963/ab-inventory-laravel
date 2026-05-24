@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\StockMovementLogger;
 
 class ProductionIn extends Model
 {
@@ -84,9 +85,19 @@ class ProductionIn extends Model
             $this->approved_date = now();
             $this->save();
 
-            // Update product quantities
-            foreach ($this->items as $item) {
+            foreach ($this->items()->with('product')->get() as $item) {
+                $quantityBefore = $item->product->quantity;
                 $item->product->increment('quantity', $item->quantity);
+                StockMovementLogger::record(
+                    $item->product,
+                    $quantityBefore,
+                    $item->quantity,
+                    'IN',
+                    'PRODUCTION IN',
+                    $this,
+                    null,
+                    $user->id
+                );
             }
         }
     }

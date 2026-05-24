@@ -21,7 +21,23 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $fillable = ['name', 'email', 'phone', 'address', 'customer_type'];
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'address',
+        'customer_type',
+        'credit_limit',
+        'current_balance',
+        'credit_due_date',
+        'status',
+    ];
+
+    protected $casts = [
+        'credit_limit' => 'decimal:2',
+        'current_balance' => 'decimal:2',
+        'credit_due_date' => 'date',
+    ];
 
     public function orders()
     {
@@ -31,6 +47,21 @@ class Customer extends Model
     public function sales()
     {
         return $this->hasMany(Sale::class);
+    }
+
+    public function creditPayments()
+    {
+        return $this->hasMany(CustomerCreditPayment::class);
+    }
+
+    public function isCreditCustomer(): bool
+    {
+        return $this->customer_type === 'Credit/Loan Customer';
+    }
+
+    public function availableCredit(): float
+    {
+        return max(0, (float) $this->credit_limit - (float) $this->current_balance);
     }
 
     public function getTotalSpentAttribute()

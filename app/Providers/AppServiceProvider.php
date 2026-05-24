@@ -80,6 +80,10 @@ class AppServiceProvider extends ServiceProvider
             return $user->isCashier() || $user->isManager() || $user->isAdmin();
         });
 
+        Gate::define('view-cashier-reconciliations', function (User $user) {
+            return $user->isCashier() || $user->isManager() || $user->isAdmin();
+        });
+
         Gate::define('view-manager-sales-report', function (User $user) {
             return $user->isManager();
         });
@@ -98,6 +102,10 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('view-production-out', function (User $user) {
             return $user->isManager();
+        });
+
+        Gate::define('view-production-reports', function (User $user) {
+            return $user->can('view-production-in') || $user->can('view-production-out');
         });
 
         Gate::define('view-purchases', function (User $user) {

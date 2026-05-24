@@ -229,6 +229,33 @@ class ReportController extends Controller
             ->sortBy('date')
             ->values();
 
+        $totalHandled = $totalProductionIn + $totalProductionOut;
+        $netProduction = $totalProductionIn - $totalProductionOut;
+        $outflowRate = $totalProductionIn > 0 ? round(($totalProductionOut / $totalProductionIn) * 100, 1) : 0;
+        $activeDays = $productionByPeriod->pluck('date')->unique()->count();
+        $topProducedProduct = $productionPerProduct->where('type', 'IN')->sortByDesc('quantity')->first();
+        $topOutProduct = $productionPerProduct->where('type', 'OUT')->sortByDesc('quantity')->first();
+        $topConsumedMaterial = $rawMaterialsConsumed->sortByDesc('quantity')->first();
+        $topWithdrawalReason = $withdrawalReasons->sortByDesc('quantity')->first();
+        $recentProductionActivity = collect()
+            ->merge($productionIn->map(fn ($batch) => (object) [
+                'date' => $batch->date,
+                'reference' => $batch->production_in_no,
+                'type' => 'IN',
+                'quantity' => $batch->items->sum('quantity'),
+                'employee' => $batch->createdBy->name ?? 'Unassigned',
+            ]))
+            ->merge($productionOut->map(fn ($batch) => (object) [
+                'date' => $batch->date,
+                'reference' => $batch->production_out_no,
+                'type' => 'OUT',
+                'quantity' => $batch->items->sum('quantity'),
+                'employee' => $batch->createdBy->name ?? 'Unassigned',
+            ]))
+            ->sortByDesc('date')
+            ->take(8)
+            ->values();
+
         if ($request->input('export') === 'excel') {
             return $this->exportHtmlTable('production-report.xls', 'Production Report', [
                 ['Date', 'Type', 'Quantity'],
@@ -242,6 +269,15 @@ class ReportController extends Controller
             'dateTo',
             'totalProductionIn',
             'totalProductionOut',
+            'totalHandled',
+            'netProduction',
+            'outflowRate',
+            'activeDays',
+            'topProducedProduct',
+            'topOutProduct',
+            'topConsumedMaterial',
+            'topWithdrawalReason',
+            'recentProductionActivity',
             'productionPerProduct',
             'rawMaterialsConsumed',
             'withdrawalReasons',

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\StockMovementLogger;
 
 class InventoryReceiving extends Model
 {
@@ -129,8 +130,19 @@ class InventoryReceiving extends Model
         // Update product quantities for items with "Good" condition
         foreach ($this->items()->where('condition', 'Good')->get() as $item) {
             $product = $item->product;
+            $quantityBefore = $product->quantity;
             $product->quantity += $item->quantity_received;
             $product->save();
+            StockMovementLogger::record(
+                $product,
+                $quantityBefore,
+                $item->quantity_received,
+                'IN',
+                'INVENTORY RECEIVING',
+                $this,
+                null,
+                $user->id
+            );
         }
 
         return true;

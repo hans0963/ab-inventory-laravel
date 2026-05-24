@@ -8,22 +8,15 @@
                 document.documentElement.classList.remove('dark');
             }
         </script>
-        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <script>
-            document.addEventListener('htmx:configRequest', (event) => {
-                event.detail.headers['X-CSRF-Token'] = '{{ csrf_token() }}';
-            });
-        </script>
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@400;500;600&family=Pacifico&display=swap" rel="stylesheet">
+        <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700|lora:400,500,600|pacifico:400&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -33,6 +33,34 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('stock_movement_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('employee_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('source_type')->nullable();
+            $table->unsignedBigInteger('source_id')->nullable();
+            $table->dateTime('movement_date');
+            $table->integer('quantity_before');
+            $table->integer('quantity_changed');
+            $table->integer('quantity_after');
+            $table->enum('movement_type', ['IN', 'OUT', 'ADJUSTMENT']);
+            $table->string('reason')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('stock_reconciliations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->integer('system_quantity');
+            $table->integer('counted_quantity');
+            $table->integer('variance');
+            $table->text('reason')->nullable();
+            $table->foreignId('counted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('counted_at');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -40,6 +68,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('stock_reconciliations');
+        Schema::dropIfExists('stock_movement_logs');
         Schema::dropIfExists('raw_material_movements');
         Schema::dropIfExists('inventory_movements');
     }

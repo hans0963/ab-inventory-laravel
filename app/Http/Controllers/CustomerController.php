@@ -42,10 +42,24 @@ class CustomerController extends Controller
             'email' => 'nullable|email|unique:customers,email',
             'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string',
-            'customer_type' => 'required|in:Regular,Senior,PWD,VIP',
+            'customer_type' => 'required|in:Regular,Senior,PWD,VIP,Credit/Loan Customer',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'current_balance' => 'nullable|numeric|min:0',
+            'credit_due_date' => 'nullable|date',
+            'status' => 'nullable|in:Active,Inactive',
         ]);
 
-        Customer::create($request->only(['name', 'email', 'phone', 'address', 'customer_type']));
+        Customer::create($request->only([
+            'name',
+            'email',
+            'phone',
+            'address',
+            'customer_type',
+            'credit_limit',
+            'current_balance',
+            'credit_due_date',
+            'status',
+        ]));
 
         return redirect()->route('customers.index')->with('success', 'Customer added successfully');
     }
@@ -62,10 +76,24 @@ class CustomerController extends Controller
             'email' => 'nullable|email|unique:customers,email,' . $customer->id,
             'phone' => 'nullable|string|max:15',
             'address' => 'nullable|string',
-            'customer_type' => 'required|in:Regular,Senior,PWD,VIP',
+            'customer_type' => 'required|in:Regular,Senior,PWD,VIP,Credit/Loan Customer',
+            'credit_limit' => 'nullable|numeric|min:0',
+            'current_balance' => 'nullable|numeric|min:0',
+            'credit_due_date' => 'nullable|date',
+            'status' => 'nullable|in:Active,Inactive',
         ]);
 
-        $customer->update($request->only(['name', 'email', 'phone', 'address', 'customer_type']));
+        $customer->update($request->only([
+            'name',
+            'email',
+            'phone',
+            'address',
+            'customer_type',
+            'credit_limit',
+            'current_balance',
+            'credit_due_date',
+            'status',
+        ]));
 
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully');
     }
@@ -100,7 +128,7 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer)
     {
-        $customer->delete();
-        return redirect()->route('customers.index')->with('success', 'Customer deleted successfully');
+        $customer->update(['status' => 'Inactive']);
+        return redirect()->route('customers.index')->with('success', 'Customer deactivated successfully');
     }
 }

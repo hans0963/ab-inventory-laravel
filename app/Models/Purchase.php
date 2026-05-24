@@ -24,6 +24,9 @@ class Purchase extends Model
         'created_date',
         'approved_by',
         'approved_date',
+        'rejected_by',
+        'rejected_date',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -31,6 +34,7 @@ class Purchase extends Model
         'expected_delivery_date' => 'date',
         'created_date' => 'datetime',
         'approved_date' => 'datetime',
+        'rejected_date' => 'datetime',
         'total_amount' => 'float',
     ];
 
@@ -158,7 +162,7 @@ class Purchase extends Model
         $received = $this->getTotalQuantityReceived();
 
         if ($received === 0) {
-            $this->status = 'Pending';
+            $this->status = in_array($this->status, ['Approved', 'Ordered'], true) ? $this->status : 'Pending Approval';
         } elseif ($received >= $ordered) {
             $this->status = 'Complete';
         } else {
@@ -199,4 +203,3 @@ class Purchase extends Model
         $this->updateStatus();
     }
 }
-

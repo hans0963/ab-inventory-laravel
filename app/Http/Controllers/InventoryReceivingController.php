@@ -8,6 +8,7 @@ use App\Models\InventoryReceivingItem;
 use App\Models\Supplier;
 use App\Models\Purchase;
 use App\Models\Product;
+use App\Services\SystemNotificationService;
 use Illuminate\Http\Request;
 
 class InventoryReceivingController extends Controller
@@ -52,7 +53,7 @@ class InventoryReceivingController extends Controller
         $products = Product::where('status', 'Active')
             ->where('inventory_type', 'Raw Material')
             ->get();
-        $purchases = Purchase::where('status', 'Pending')->orWhere('status', 'Partial')->get();
+        $purchases = Purchase::whereIn('status', ['Approved', 'Ordered', 'Partial'])->get();
 
         return view('inventory-receiving.create', compact('suppliers', 'products', 'purchases'));
     }
@@ -102,6 +103,14 @@ class InventoryReceivingController extends Controller
             'total_items' => $totalItems
         ]);
 
+        SystemNotificationService::notifyRoles(
+            ['manager'],
+            'inventory_receiving_pending',
+            'Receiving needs approval',
+            "Inventory Receiving {$receiving->receiving_no} was submitted for approval.",
+            route('inventory-receiving.show', $receiving)
+        );
+
         return redirect()->route('inventory-receiving.show', $receiving)
             ->with('success', 'Inventory receiving recorded successfully.');
     }
@@ -129,7 +138,7 @@ class InventoryReceivingController extends Controller
         $receiving = $inventoryReceiving->load('items');
         $suppliers = Supplier::where('status', 'Active')->get();
         $products = Product::where('status', 'Active')->get();
-        $purchases = Purchase::where('status', 'Pending')->orWhere('status', 'Partial')->get();
+        $purchases = Purchase::whereIn('status', ['Approved', 'Ordered', 'Partial'])->get();
 
         return view('inventory-receiving.edit', compact('receiving', 'suppliers', 'products', 'purchases'));
     }
@@ -213,6 +222,14 @@ class InventoryReceivingController extends Controller
 
         $inventoryReceiving->approve(auth()->user());
 
+        SystemNotificationService::notifyUser(
+            $inventoryReceiving->created_by,
+            'inventory_receiving_approved',
+            'Receiving approved',
+            "Inventory Receiving {$inventoryReceiving->receiving_no} has been approved.",
+            route('inventory-receiving.show', $inventoryReceiving)
+        );
+
         return redirect()->route('inventory-receiving.show', $inventoryReceiving)
             ->with('success', 'Inventory receiving approved. Product quantities updated.');
     }
@@ -228,6 +245,14 @@ class InventoryReceivingController extends Controller
         }
 
         $inventoryReceiving->reject(auth()->user());
+
+        SystemNotificationService::notifyUser(
+            $inventoryReceiving->created_by,
+            'inventory_receiving_rejected',
+            'Receiving rejected',
+            "Inventory Receiving {$inventoryReceiving->receiving_no} has been rejected.",
+            route('inventory-receiving.show', $inventoryReceiving)
+        );
 
         return redirect()->route('inventory-receiving.show', $inventoryReceiving)
             ->with('success', 'Inventory receiving rejected.');

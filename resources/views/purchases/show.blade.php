@@ -10,15 +10,26 @@
                 </p>
             </div>
             <div class="flex gap-3">
-                @if($purchase->status === 'Pending')
+                @if(in_array($purchase->status, ['Pending', 'Pending Approval', 'Rejected']))
                     <a href="{{ route('purchases.edit', $purchase->id) }}" class="btn-sage">
                         Edit Record
                     </a>
                     <form action="{{ route('purchases.destroy', $purchase->id) }}" method="POST" class="inline">
                         @csrf @method('DELETE')
-                        <button type="submit" onclick="return confirm('Are you sure you want to remove this record?')" class="btn-terracotta bg-red-600 hover:bg-red-700">
-                            Delete
+                        <button type="submit" onclick="return confirm('Cancel this purchase order?')" class="btn-terracotta bg-red-600 hover:bg-red-700">
+                            Cancel
                         </button>
+                    </form>
+                @endif
+                @if($purchase->status === 'Pending Approval' && auth()->user()->hasRole(['admin']))
+                    <form action="{{ route('purchases.approve', $purchase) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="btn-sage">Approve</button>
+                    </form>
+                    <form action="{{ route('purchases.reject', $purchase) }}" method="POST" class="inline">
+                        @csrf
+                        <input type="hidden" name="rejection_reason" value="Rejected by owner review">
+                        <button type="submit" class="btn-terracotta">Reject</button>
                     </form>
                 @endif
                 <a href="{{ route('purchases.index') }}" class="btn-sienna">
@@ -148,7 +159,7 @@
         @endif
 
         <!-- Link Receiving Button -->
-        @if($purchase->canReceive())
+        @if($purchase->canReceive() && in_array($purchase->status, ['Approved', 'Ordered', 'Partial']))
             <div class="flex justify-center py-4">
                 <a href="{{ route('purchases.receiving-matching', $purchase->id) }}" class="btn-terracotta text-lg px-10 py-4 shadow-rustic-lg">
                     Link Artisan Shipment

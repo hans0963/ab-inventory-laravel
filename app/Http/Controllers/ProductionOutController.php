@@ -6,6 +6,7 @@ use App\Models\ProductionOut;
 use App\Models\ProductionOutItem;
 use App\Models\Product;
 use App\Http\Requests\StoreProductionOutRequest;
+use App\Services\SystemNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -44,9 +45,6 @@ class ProductionOutController extends Controller
     public function store(StoreProductionOutRequest $request)
     {
         try {
-            DB::beginTransaction();
-
-            // Validate stock availability
             foreach ($request->items as $itemData) {
                 $product = Product::findOrFail($itemData['product_id']);
                 if ($product->quantity < $itemData['quantity']) {
@@ -54,6 +52,8 @@ class ProductionOutController extends Controller
                         ->with('error', "Insufficient stock for {$product->product_name}. Available: {$product->quantity}");
                 }
             }
+
+            DB::beginTransaction();
 
             $productionOut = ProductionOut::create([
                 'production_out_no' => ProductionOut::generateProductionOutNo(),
@@ -78,6 +78,14 @@ class ProductionOutController extends Controller
             }
 
             DB::commit();
+
+            SystemNotificationService::notifyRoles(
+                ['manager'],
+                'production_out_pending',
+                'Production OUT needs approval',
+                "Production OUT {$productionOut->production_out_no} was submitted for approval.",
+                route('production-out.show', $productionOut)
+            );
 
             return redirect()->route('production-out.show', $productionOut->id)
                            ->with('success', 'Production OUT created successfully. Reference: ' . $productionOut->production_out_no);
@@ -106,6 +114,14 @@ class ProductionOutController extends Controller
 
             DB::commit();
 
+            SystemNotificationService::notifyUser(
+                $productionOut->created_by,
+                'production_out_approved',
+                'Production OUT approved',
+                "Production OUT {$productionOut->production_out_no} has been approved.",
+                route('production-out.show', $productionOut)
+            );
+
             return redirect()->route('production-out.show', $productionOut->id)
                            ->with('success', 'Production OUT approved and stock updated successfully.');
         } catch (\Exception $e) {
@@ -121,6 +137,14 @@ class ProductionOutController extends Controller
         }
 
         $productionOut->reject(Auth::user());
+
+        SystemNotificationService::notifyUser(
+            $productionOut->created_by,
+            'production_out_rejected',
+            'Production OUT rejected',
+            "Production OUT {$productionOut->production_out_no} has been rejected.",
+            route('production-out.show', $productionOut)
+        );
 
         return redirect()->route('production-out.show', $productionOut->id)
                        ->with('success', 'Production OUT rejected.');

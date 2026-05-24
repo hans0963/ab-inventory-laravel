@@ -11,6 +11,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\CashierReconciliationController;
+use App\Http\Controllers\SystemNotificationController;
 use App\Http\Controllers\DiscountTypeController;
 
 use App\Http\Controllers\InventoryStatusController;
@@ -39,6 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/notifications/{notification}/read', [SystemNotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/notifications/read-all', [SystemNotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });
 
 // Manager & Admin Routes
@@ -63,6 +67,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('purchases-receiving-progress', [PurchaseController::class, 'receivingProgress'])->name('purchases.receiving-progress');
         Route::post('purchases/{purchase}/mark-received', [PurchaseController::class, 'markAsReceived'])->name('purchases.mark-received');
         Route::post('purchases/{purchase}/cancel', [PurchaseController::class, 'cancel'])->name('purchases.cancel');
+        Route::post('purchases/{purchase}/approve', [PurchaseController::class, 'approve'])->name('purchases.approve');
+        Route::post('purchases/{purchase}/reject', [PurchaseController::class, 'reject'])->name('purchases.reject');
     });
 
     Route::middleware(['can:view-inventory'])->group(function () {
@@ -87,6 +93,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Phase 1: Enhanced Sales Routes
         Route::resource('sales', SaleController::class);
         Route::get('/sales/{sale}/print', [SaleController::class, 'printReceipt'])->name('sales.print');
+        Route::post('/sales/{sale}/request-void', [SaleController::class, 'requestVoid'])->name('sales.request-void');
+        Route::post('/sales/{sale}/approve-void', [SaleController::class, 'approveVoid'])->name('sales.approve-void');
+    });
+
+    Route::middleware(['can:view-cashier-reconciliations'])->group(function () {
+        Route::get('cashier-reconciliations', [CashierReconciliationController::class, 'index'])->name('cashier-reconciliations.index');
+        Route::get('cashier-reconciliations/create', [CashierReconciliationController::class, 'create'])->name('cashier-reconciliations.create');
+        Route::post('cashier-reconciliations', [CashierReconciliationController::class, 'store'])->name('cashier-reconciliations.store');
+        Route::get('cashier-reconciliations/{cashierReconciliation}', [CashierReconciliationController::class, 'show'])->name('cashier-reconciliations.show');
+        Route::patch('cashier-reconciliations/{cashierReconciliation}/review', [CashierReconciliationController::class, 'review'])->name('cashier-reconciliations.review');
     });
 
     // Phase 1: Discount Types Management (Manager/Admin)
@@ -102,7 +118,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::get('/sales-report', [ReportController::class, 'salesReport'])->middleware(['auth', 'verified', 'can:view-manager-sales-report'])->name('inventory.sales');
 Route::get('/inventory-report', [ReportController::class, 'inventoryReport'])->middleware(['auth', 'verified', 'can:view-inventory'])->name('reports.inventory');
-Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth', 'verified', 'can:view-production-in'])->name('reports.production');
+Route::get('/production-reports', [ReportController::class, 'productionReports'])->middleware(['auth', 'verified', 'can:view-production-reports'])->name('reports.production');
 Route::get('/financial-overview', [FinancialOverviewController::class, 'index'])->middleware(['auth', 'verified', 'can:view-reports'])->name('financial.overview');
 
 // Cashier Module Routes
