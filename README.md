@@ -17,9 +17,10 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 
 Seeders:
-1. admin@example.com	password
-2. manager@example.com	password
-3. cashier@example.com	password
+1. admin@example.com
+2. hr@example.com
+3. manager@example.com
+4. cashier@example.com
 
 Installers needed:
 composer install

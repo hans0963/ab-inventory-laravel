@@ -42,7 +42,14 @@ class SaleController extends Controller
         
         $employees = Employee::all();
         $customers = Customer::all();
-        $discountTypes = DiscountType::where('status', 'Active')->get();
+        $discountTypes = DiscountType::where('status', 'Active')
+            ->where(function ($query) {
+                $query->whereNull('start_date')->orWhereDate('start_date', '<=', today());
+            })
+            ->where(function ($query) {
+                $query->whereNull('end_date')->orWhereDate('end_date', '>=', today());
+            })
+            ->get();
         
         // Get or create "Walk-in" customer
         $walkInCustomer = Customer::firstOrCreate(
@@ -107,7 +114,22 @@ class SaleController extends Controller
         $subtotal = $product->selling_price * $validated['sold'];
         if ($validated['discount_type_id']) {
             $discountType = DiscountType::find($validated['discount_type_id']);
-            $validated['discount_amount'] = $subtotal * ($discountType->discount_percentage / 100);
+            $applicableIds = $discountType->applicable_ids ?? [];
+            $isInDateRange = (!$discountType->start_date || $discountType->start_date->lte(today()))
+                && (!$discountType->end_date || $discountType->end_date->gte(today()));
+            $isApplicable = $discountType->applicable_to === 'All'
+                || ($discountType->applicable_to === 'Category' && in_array($product->category_id, $applicableIds))
+                || ($discountType->applicable_to === 'Product' && in_array($product->id, $applicableIds));
+
+            if ($discountType->status !== 'Active' || !$isInDateRange || !$isApplicable || $subtotal < $discountType->minimum_purchase_amount) {
+                return redirect()->back()->with('error', 'Selected discount is not applicable to this sale.');
+            }
+
+            if ($discountType->discount_type === 'Fixed Amount') {
+                $validated['discount_amount'] = min($subtotal, (float) $discountType->discount_value);
+            } else {
+                $validated['discount_amount'] = $subtotal * ((float) $discountType->discount_value / 100);
+            }
         } else {
             $validated['discount_amount'] = 0;
         }

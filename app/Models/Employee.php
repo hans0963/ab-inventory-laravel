@@ -26,10 +26,37 @@ class Employee extends Model
         'employee_email',
         'employee_phone',
         'position',
+        'date_hired',
+        'emergency_contact',
+        'status',
+    ];
+
+    protected $casts = [
+        'date_hired' => 'date',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    public function inventoryMovements()
+    {
+        return $this->hasMany(InventoryMovement::class);
     }
 }

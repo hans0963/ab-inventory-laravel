@@ -17,6 +17,9 @@ class SupplierFactory extends Factory
             'suppliers_email' => $this->faker->unique()->safeEmail,
             'suppliers_phone' => $this->faker->phoneNumber,
             'suppliers_address' => $this->faker->address,
+            'items_supplied' => $this->faker->words(5, true),
+            'payment_terms' => 'Cash',
+            'status' => 'Active',
         ];
     }
 }

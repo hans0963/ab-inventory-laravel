@@ -85,8 +85,8 @@
                                         id="discountTypeSelect" onchange="calculateTotals()">
                                     <option value="">No Discount</option>
                                     @foreach($discountTypes as $discount)
-                                        <option value="{{ $discount->id }}" data-percentage="{{ $discount->discount_percentage }}">
-                                            {{ $discount->discount_name }} ({{ (int)$discount->discount_percentage }}%)
+                                        <option value="{{ $discount->id }}" data-type="{{ $discount->discount_type }}" data-value="{{ $discount->discount_value }}" data-percentage="{{ $discount->discount_percentage }}">
+                                            {{ $discount->discount_name }} ({{ $discount->display_value }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -174,7 +174,8 @@
             const price = parseFloat(productSelect.options[productSelect.selectedIndex].dataset.price) || 0;
             const quantity = parseInt(quantityInput.value) || 0;
             const discountOption = discountTypeSelect.options[discountTypeSelect.selectedIndex];
-            const discountPercentage = parseFloat(discountOption.dataset.percentage) || 0;
+            const discountType = discountOption.dataset.type || 'Percentage';
+            const discountValue = parseFloat(discountOption.dataset.value || discountOption.dataset.percentage) || 0;
             const vatRate = parseFloat(vatRateInput.value) || 0;
 
             // Calculate subtotal
@@ -182,9 +183,13 @@
             document.getElementById('subtotal').textContent = subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             // Calculate discount
-            const discount = subtotal * (discountPercentage / 100);
+            const discount = discountType === 'Fixed Amount'
+                ? Math.min(subtotal, discountValue)
+                : subtotal * (discountValue / 100);
             document.getElementById('discountDisplay').textContent = discount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('discountTag').textContent = discountPercentage > 0 ? `(${Math.round(discountPercentage)}%)` : '';
+            document.getElementById('discountTag').textContent = discountValue > 0
+                ? (discountType === 'Fixed Amount' ? `(PHP ${discountValue.toFixed(2)})` : `(${Math.round(discountValue)}%)`)
+                : '';
 
             // After discount
             const afterDiscount = subtotal - discount;

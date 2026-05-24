@@ -18,106 +18,89 @@ use App\Models\ProductionOutItem;
 use App\Models\InventoryReceivingItem;
 use App\Models\StockWithdrawalItem;
 use Carbon\Carbon;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReportController extends Controller
 {
     public function salesReport(Request $request)
     {
-        $user = auth()->user();
-        $period = $request->input('period', 'all'); // today, month, year, all
+        $dateFrom = $request->input('date_from', now()->startOfMonth()->toDateString());
+        $dateTo = $request->input('date_to', now()->toDateString());
+        $groupBy = $request->input('group_by', 'day');
 
-        $query = DB::table('sales');
+        $query = DB::table('sales')
+            ->whereBetween('sales.created_at', [
+                Carbon::parse($dateFrom)->startOfDay(),
+                Carbon::parse($dateTo)->endOfDay(),
+            ]);
 
-        if ($period === 'today') {
-            $query->whereDate('sales.created_at', today());
-            $chartDays = 1;
-        } elseif ($period === 'month') {
-            $query->whereMonth('sales.created_at', now()->month)
-                  ->whereYear('sales.created_at', now()->year);
-            $chartDays = 30;
-        } elseif ($period === 'year') {
-            $query->whereYear('sales.created_at', now()->year);
-            $chartDays = 365;
-        } else {
-            $chartDays = 7;
-        }
-
-        // Summary Metrics for the selected period
         $totalSales = (clone $query)->sum('total_amount');
         $totalOrders = (clone $query)->count();
         $averageOrder = $totalOrders > 0 ? $totalSales / $totalOrders : 0;
-        $discounts = (clone $query)->sum('discount_amount'); 
+        $discounts = (clone $query)->sum('discount_amount');
 
-        // Top Selling Products for the period
-        $topProductsData = (clone $query)
+        $periodExpression = match ($groupBy) {
+            'week' => 'YEARWEEK(sales.created_at, 1)',
+            'month' => 'DATE_FORMAT(sales.created_at, "%Y-%m")',
+            default => 'DATE(sales.created_at)',
+        };
+
+        $salesByPeriod = (clone $query)
+            ->select(DB::raw($periodExpression . ' as label'), DB::raw('SUM(total_amount) as total'), DB::raw('COUNT(*) as transactions'))
+            ->groupBy(DB::raw($periodExpression))
+            ->orderBy('label')
+            ->get();
+
+        $salesPerProduct = (clone $query)
             ->join('products', 'sales.product_id', '=', 'products.id')
             ->select('products.product_name as name', DB::raw('SUM(sales.sold) as units_sold'), DB::raw('SUM(sales.total_amount) as revenue'))
             ->groupBy('products.id', 'products.product_name')
             ->orderByDesc('revenue')
-            ->limit(5)
             ->get();
 
-        $maxRevenue = $topProductsData->max(function($item) {
-            return (float)$item->revenue;
-        }) ?: 1;
-        
-        $topProducts = $topProductsData->map(function($product) use ($maxRevenue) {
-            $revenue = (float)$product->revenue;
-            return (object)[
-                'name' => $product->name,
-                'units_sold' => $product->units_sold,
-                'revenue' => $revenue,
-                'performance' => $maxRevenue > 0 ? ($revenue / $maxRevenue) * 100 : 0
-            ];
-        });
-
-        // Chart Data based on period
-        if ($period === 'year') {
-            // Monthly grouping for year view
-            $chartData = DB::table('sales')
-                ->select(DB::raw('MONTHNAME(sales.created_at) as label'), DB::raw('SUM(sales.total_amount) as total'))
-                ->whereYear('sales.created_at', now()->year)
-                ->groupBy(DB::raw('MONTH(sales.created_at)'), DB::raw('MONTHNAME(sales.created_at)'))
-                ->orderBy(DB::raw('MONTH(sales.created_at)'))
-                ->get();
-        } else {
-            // Daily grouping
-            $days = $period === 'today' ? 0 : ($period === 'month' ? 30 : 7);
-            $chartData = DB::table('sales')
-                ->select(DB::raw('DATE(sales.created_at) as label'), DB::raw('SUM(sales.total_amount) as total'))
-                ->where('sales.created_at', '>=', now()->subDays($days))
-                ->groupBy(DB::raw('DATE(sales.created_at)'))
-                ->orderBy('label', 'asc')
-                ->get();
-        }
-
-        $chartLabels = $chartData->pluck('label');
-        $chartValues = $chartData->pluck('total');
-
-        // Chart Data: Sales by Category (for the period)
-        $salesByCategory = (clone $query)
+        $salesPerCategory = (clone $query)
             ->join('products', 'sales.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
             ->select(DB::raw('COALESCE(categories.category_name, "Uncategorized") as category_name'), DB::raw('SUM(sales.total_amount) as revenue'))
             ->groupBy('categories.category_name')
             ->get();
 
-        $categoryLabels = $salesByCategory->pluck('category_name');
-        $categorySalesData = $salesByCategory->pluck('revenue');
+        $salesPerCashier = (clone $query)
+            ->leftJoin('employees', 'sales.employee_id', '=', 'employees.id')
+            ->select(DB::raw('COALESCE(employees.employee_name, "Unassigned") as cashier'), DB::raw('COUNT(*) as transactions'), DB::raw('SUM(sales.total_amount) as revenue'))
+            ->groupBy('employees.employee_name')
+            ->orderByDesc('revenue')
+            ->get();
 
-        $view = $user->role === 'admin' ? 'sales-report.index' : 'manager-sales-report.index';
+        $paymentBreakdown = (clone $query)
+            ->select(DB::raw('COALESCE(payment_type, "Cash") as payment_type'), DB::raw('COUNT(*) as transactions'), DB::raw('SUM(total_amount) as revenue'))
+            ->groupBy('payment_type')
+            ->orderByDesc('revenue')
+            ->get();
 
-        return view($view, compact(
-            'totalSales', 
-            'averageOrder', 
-            'totalOrders', 
-            'discounts', 
-            'topProducts',
-            'chartLabels',
-            'chartValues',
-            'categoryLabels',
-            'categorySalesData',
-            'period'
+        $bestSellingProducts = $salesPerProduct->sortByDesc('units_sold')->take(10)->values();
+
+        if ($request->input('export') === 'excel') {
+            return $this->exportHtmlTable('sales-summary.xls', 'Sales Summary', [
+                ['Period', 'Transactions', 'Total Sales'],
+                ...$salesByPeriod->map(fn ($row) => [$row->label, $row->transactions, number_format($row->total, 2)])->toArray(),
+            ]);
+        }
+
+        return view($request->input('export') === 'pdf' ? 'reports.sales-summary-print' : 'reports.sales-summary', compact(
+            'dateFrom',
+            'dateTo',
+            'groupBy',
+            'totalSales',
+            'averageOrder',
+            'totalOrders',
+            'discounts',
+            'salesByPeriod',
+            'salesPerProduct',
+            'salesPerCategory',
+            'salesPerCashier',
+            'paymentBreakdown',
+            'bestSellingProducts'
         ));
     }
 
@@ -175,34 +158,114 @@ class ReportController extends Controller
 
     public function productionReports(Request $request)
     {
-        $type = $request->input('type', 'in');
-        $viewType = $request->input('view', 'summary');
+        $type = $request->input('type', 'all');
         $dateFrom = $request->input('date_from', now()->startOfMonth()->toDateString());
         $dateTo = $request->input('date_to', now()->toDateString());
 
+        $productionIn = ProductionIn::with(['createdBy', 'items.product'])
+            ->whereBetween('date', [$dateFrom, $dateTo])
+            ->where('status', 'Approved')
+            ->get();
+
+        $productionOut = ProductionOut::with(['createdBy', 'items.product'])
+            ->whereBetween('date', [$dateFrom, $dateTo])
+            ->where('status', 'Approved')
+            ->get();
+
         if ($type === 'in') {
-            $query = ProductionIn::with(['createdBy', 'approvedBy'])
-                ->whereBetween('date', [$dateFrom, $dateTo])
-                ->where('status', 'Approved');
-            
-            if ($viewType === 'detailed') {
-                $query->with('items.product');
-            }
-            
-            $data = $query->get();
-            return view('reports.production-in', compact('data', 'viewType', 'dateFrom', 'dateTo'));
-        } else {
-            $query = ProductionOut::with(['createdBy', 'approvedBy'])
-                ->whereBetween('date', [$dateFrom, $dateTo])
-                ->where('status', 'Approved');
-            
-            if ($viewType === 'detailed') {
-                $query->with('items.product');
-            }
-            
-            $data = $query->get();
-            return view('reports.production-out', compact('data', 'viewType', 'dateFrom', 'dateTo'));
+            $productionOut = collect();
+        } elseif ($type === 'out') {
+            $productionIn = collect();
         }
+
+        $totalProductionIn = $productionIn->sum(fn ($batch) => $batch->items->sum('quantity'));
+        $totalProductionOut = $productionOut->sum(fn ($batch) => $batch->items->sum('quantity'));
+
+        $productionPerProduct = collect()
+            ->merge($productionIn->flatMap(fn ($batch) => $batch->items->map(fn ($item) => [
+                'product' => $item->product->product_name ?? 'Unknown',
+                'type' => 'IN',
+                'quantity' => $item->quantity,
+            ])))
+            ->merge($productionOut->flatMap(fn ($batch) => $batch->items->map(fn ($item) => [
+                'product' => $item->product->product_name ?? 'Unknown',
+                'type' => 'OUT',
+                'quantity' => $item->quantity,
+            ])))
+            ->groupBy(fn ($row) => $row['product'] . '|' . $row['type'])
+            ->map(fn ($rows) => (object) [
+                'product' => $rows->first()['product'],
+                'type' => $rows->first()['type'],
+                'quantity' => $rows->sum('quantity'),
+            ])
+            ->values();
+
+        $rawMaterialsConsumed = StockWithdrawalItem::with(['product', 'stockWithdrawal'])
+            ->whereHas('stockWithdrawal', function ($query) use ($dateFrom, $dateTo) {
+                $query->whereBetween('date', [$dateFrom, $dateTo])->where('status', 'Approved');
+            })
+            ->get()
+            ->groupBy(fn ($item) => $item->product->product_name ?? 'Unknown')
+            ->map(fn ($items, $name) => (object) ['product' => $name, 'quantity' => $items->sum('quantity')])
+            ->values();
+
+        $withdrawalReasons = $productionOut
+            ->groupBy(fn ($batch) => $batch->reason ?: 'Unspecified')
+            ->map(fn ($rows, $reason) => (object) ['reason' => $reason, 'count' => $rows->count(), 'quantity' => $rows->sum(fn ($row) => $row->items->sum('quantity'))])
+            ->values();
+
+        $productionByEmployee = collect()
+            ->merge($productionIn->map(fn ($batch) => ['employee' => $batch->createdBy->name ?? 'Unassigned', 'quantity' => $batch->items->sum('quantity')]))
+            ->merge($productionOut->map(fn ($batch) => ['employee' => $batch->createdBy->name ?? 'Unassigned', 'quantity' => $batch->items->sum('quantity')]))
+            ->groupBy('employee')
+            ->map(fn ($rows, $employee) => (object) ['employee' => $employee, 'quantity' => $rows->sum('quantity')])
+            ->values();
+
+        $productionByPeriod = collect()
+            ->merge($productionIn->map(fn ($batch) => ['date' => $batch->date->toDateString(), 'type' => 'IN', 'quantity' => $batch->items->sum('quantity')]))
+            ->merge($productionOut->map(fn ($batch) => ['date' => $batch->date->toDateString(), 'type' => 'OUT', 'quantity' => $batch->items->sum('quantity')]))
+            ->groupBy(fn ($row) => $row['date'] . '|' . $row['type'])
+            ->map(fn ($rows) => (object) ['date' => $rows->first()['date'], 'type' => $rows->first()['type'], 'quantity' => $rows->sum('quantity')])
+            ->sortBy('date')
+            ->values();
+
+        if ($request->input('export') === 'excel') {
+            return $this->exportHtmlTable('production-report.xls', 'Production Report', [
+                ['Date', 'Type', 'Quantity'],
+                ...$productionByPeriod->map(fn ($row) => [$row->date, $row->type, $row->quantity])->toArray(),
+            ]);
+        }
+
+        return view($request->input('export') === 'pdf' ? 'reports.production-print' : 'reports.production', compact(
+            'type',
+            'dateFrom',
+            'dateTo',
+            'totalProductionIn',
+            'totalProductionOut',
+            'productionPerProduct',
+            'rawMaterialsConsumed',
+            'withdrawalReasons',
+            'productionByEmployee',
+            'productionByPeriod'
+        ));
+    }
+
+    private function exportHtmlTable(string $filename, string $title, array $rows): Response
+    {
+        $html = '<table><caption>' . e($title) . '</caption>';
+        foreach ($rows as $row) {
+            $html .= '<tr>';
+            foreach ($row as $cell) {
+                $html .= '<td>' . e((string) $cell) . '</td>';
+            }
+            $html .= '</tr>';
+        }
+        $html .= '</table>';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/vnd.ms-excel',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function adminReports()

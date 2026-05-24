@@ -131,6 +131,22 @@ class DashboardController extends Controller
             ));
         }
 
+        // Baker Dashboard
+        if ($user->role === 'baker') {
+            $totalOrders = \App\Models\Sale::count();
+            $totalProducts = Product::count();
+            $totalCustomers = Customer::count();
+
+            $recentOrders = \App\Models\Sale::with('product', 'customer')->latest()->limit(5)->get();
+            $lowStockAlerts = Product::where('quantity', '<=', DB::raw('stock_alert_threshold'))->get();
+
+            return view('dashboards.dashboard-manager', compact(
+                'todaySales', 'monthlySales', 'yearlySales', 'totalOrders', 'totalProducts', 'totalCustomers', 'recentOrders', 'lowStockAlerts',
+                'fastMovingProducts', 'slowMovingProducts', 'salesByCategory',
+                'totalOrdersToday', 'lowStockItemCount', 'dailySalesLabels', 'dailySalesData', 'revenueTrendLabels', 'revenueTrendData', 'recentStockUpdates'
+            ));
+        }
+
         // HR Dashboard
         if ($user->role === 'hr') {
             $totalEmployees = Employee::count();

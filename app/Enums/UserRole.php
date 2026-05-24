@@ -7,6 +7,7 @@ enum UserRole: string
     case ADMIN = 'admin';
     case MANAGER = 'manager';
     case CASHIER = 'cashier';
+    case BAKER = 'baker';
     case HR = 'hr';
 
     /**

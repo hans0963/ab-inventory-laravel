@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\DiscountType;
+use App\Models\Category;
+use App\Models\Product;
 use App\Http\Requests\StoreDiscountTypeRequest;
 use App\Http\Requests\UpdateDiscountTypeRequest;
 use Illuminate\Http\Request;
@@ -14,7 +16,7 @@ class DiscountTypeController extends Controller
      */
     public function index()
     {
-        $discountTypes = DiscountType::paginate(10);
+        $discountTypes = DiscountType::latest()->paginate(10);
         return view('discounts.index', compact('discountTypes'));
     }
 
@@ -23,7 +25,10 @@ class DiscountTypeController extends Controller
      */
     public function create()
     {
-        return view('discounts.create');
+        $categories = Category::orderBy('category_name')->get();
+        $products = Product::orderBy('product_name')->get();
+
+        return view('discounts.create', compact('categories', 'products'));
     }
 
     /**
@@ -31,7 +36,7 @@ class DiscountTypeController extends Controller
      */
     public function store(StoreDiscountTypeRequest $request)
     {
-        $validated = $request->validated();
+        $validated = $this->normalizeDiscountData($request->validated());
         DiscountType::create($validated);
 
         return redirect()->route('discounts.index')->with('success', 'Discount type created successfully.');
@@ -42,7 +47,15 @@ class DiscountTypeController extends Controller
      */
     public function edit(DiscountType $discount)
     {
-        return view('discounts.edit', compact('discount'));
+        $categories = Category::orderBy('category_name')->get();
+        $products = Product::orderBy('product_name')->get();
+
+        return view('discounts.edit', compact('discount', 'categories', 'products'));
+    }
+
+    public function show(DiscountType $discount)
+    {
+        return redirect()->route('discounts.edit', $discount);
     }
 
     /**
@@ -50,7 +63,7 @@ class DiscountTypeController extends Controller
      */
     public function update(UpdateDiscountTypeRequest $request, DiscountType $discount)
     {
-        $validated = $request->validated();
+        $validated = $this->normalizeDiscountData($request->validated());
         $discount->update($validated);
 
         return redirect()->route('discounts.index')->with('success', 'Discount type updated successfully.');
@@ -72,5 +85,18 @@ class DiscountTypeController extends Controller
         $discount->delete();
 
         return redirect()->route('discounts.index')->with('success', 'Discount type "' . $name . '" deleted successfully.');
+    }
+
+    private function normalizeDiscountData(array $validated): array
+    {
+        $validated['minimum_purchase_amount'] = $validated['minimum_purchase_amount'] ?? 0;
+        $validated['applicable_ids'] = $validated['applicable_to'] === 'All'
+            ? null
+            : array_values($validated['applicable_ids'] ?? []);
+        $validated['discount_percentage'] = $validated['discount_type'] === 'Percentage'
+            ? $validated['discount_value']
+            : 0;
+
+        return $validated;
     }
 }

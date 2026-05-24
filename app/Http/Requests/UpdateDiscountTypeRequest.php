@@ -23,9 +23,17 @@ class UpdateDiscountTypeRequest extends FormRequest
     {
         return [
             'discount_name' => 'required|string|max:50|unique:discount_types,discount_name,' . $this->discount->id . ',id',
-            'discount_percentage' => 'required|numeric|min:0|max:100',
+            'discount_type' => 'required|in:Percentage,Fixed Amount',
+            'discount_value' => 'required|numeric|min:0',
+            'discount_percentage' => 'nullable|numeric|min:0|max:100',
+            'minimum_purchase_amount' => 'nullable|numeric|min:0',
+            'applicable_to' => 'required|in:All,Category,Product',
+            'applicable_ids' => 'nullable|array',
+            'applicable_ids.*' => 'integer',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'description' => 'nullable|string|max:255',
-            'status' => 'required|in:Active,Inactive',
+            'status' => 'required|in:Active,Inactive,Expired',
         ];
     }
 
@@ -37,11 +45,10 @@ class UpdateDiscountTypeRequest extends FormRequest
         return [
             'discount_name.required' => 'Discount name is required.',
             'discount_name.unique' => 'Discount name already exists.',
-            'discount_percentage.required' => 'Discount percentage is required.',
-            'discount_percentage.numeric' => 'Discount percentage must be a valid number.',
-            'discount_percentage.max' => 'Discount percentage cannot exceed 100%.',
+            'discount_value.required' => 'Discount value is required.',
+            'discount_value.numeric' => 'Discount value must be a valid number.',
             'status.required' => 'Status is required.',
-            'status.in' => 'Status must be Active or Inactive.',
+            'status.in' => 'Status must be Active, Inactive, or Expired.',
         ];
     }
 }

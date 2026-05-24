@@ -74,6 +74,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if user is Baker
+     */
+    public function isBaker(): bool
+    {
+        return $this->role === 'baker';
+    }
+
+    /**
      * Check if user is HR
      */
     public function isHR(): bool

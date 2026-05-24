@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Supplier;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SupplierController extends Controller
 {
@@ -13,11 +15,15 @@ class SupplierController extends Controller
     {
         $query = Supplier::query();
 
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('suppliers_name', 'LIKE', "%{$search}%")
-                  ->orWhere('suppliers_company', 'LIKE', "%{$search}%")
-                  ->orWhere('suppliers_email', 'LIKE', "%{$search}%");
+            $query->where(function ($query) use ($search) {
+                $query->where('suppliers_name', 'LIKE', "%{$search}%")
+                    ->orWhere('suppliers_company', 'LIKE', "%{$search}%")
+                    ->orWhere('suppliers_email', 'LIKE', "%{$search}%")
+                    ->orWhere('suppliers_phone', 'LIKE', "%{$search}%")
+                    ->orWhere('items_supplied', 'LIKE', "%{$search}%");
+            });
         }
 
         $suppliers = $query->latest()->paginate(10);
@@ -38,13 +44,7 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
-        $validatedData = $request->validate([
-            'suppliers_name' => 'required|string|max:255',
-            'suppliers_company' => 'nullable|string|max:255',
-            'suppliers_email' => 'nullable|email|unique:suppliers,suppliers_email',
-            'suppliers_phone' => 'nullable|string|max:20',
-            'suppliers_address' => 'nullable|string|max:255',
-        ]);
+        $validatedData = $this->validateSupplier($request);
 
         Supplier::create($validatedData);
 
@@ -57,7 +57,26 @@ class SupplierController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $supplier = Supplier::with(['purchases' => function ($query) {
+            $query->with('details.product')->latest('purchase_date');
+        }])->findOrFail($id);
+
+        $purchaseHistory = $supplier->purchases()->with('details.product')->latest('purchase_date')->paginate(10);
+        $totalAmountPurchased = $supplier->purchases()
+            ->where('status', '!=', 'Cancelled')
+            ->sum('total_amount');
+        $outstandingPayments = $supplier->payment_terms === 'Credit'
+            ? $supplier->purchases()
+                ->whereIn('status', ['Pending', 'Approved', 'Partial'])
+                ->sum('total_amount')
+            : 0;
+
+        return view('suppliers.show', compact(
+            'supplier',
+            'purchaseHistory',
+            'totalAmountPurchased',
+            'outstandingPayments'
+        ));
     }
 
     /**
@@ -73,13 +92,7 @@ class SupplierController extends Controller
      */
     public function update(Request $request, Supplier $supplier)
     {
-        $validatedData = $request->validate([
-            'suppliers_name' => 'required|string|max:255',
-            'suppliers_company' => 'nullable|string|max:255',
-            'suppliers_email' => 'nullable|email|unique:suppliers,suppliers_email,' . $supplier->id,
-            'suppliers_phone' => 'nullable|string|max:20',
-            'suppliers_address' => 'nullable|string|max:255',
-        ]);
+        $validatedData = $this->validateSupplier($request, $supplier);
 
         $supplier->update($validatedData);
 
@@ -93,5 +106,23 @@ class SupplierController extends Controller
     {
         $supplier->delete();
         return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully.');
+    }
+
+    private function validateSupplier(Request $request, ?Supplier $supplier = null): array
+    {
+        return $request->validate([
+            'suppliers_company' => ['required', 'string', 'max:255'],
+            'suppliers_name' => ['required', 'string', 'max:255'],
+            'suppliers_email' => [
+                'nullable',
+                'email',
+                Rule::unique('suppliers', 'suppliers_email')->ignore($supplier?->id),
+            ],
+            'suppliers_phone' => ['nullable', 'string', 'max:20'],
+            'suppliers_address' => ['nullable', 'string', 'max:1000'],
+            'items_supplied' => ['nullable', 'string', 'max:1000'],
+            'payment_terms' => ['required', Rule::in(['Cash', 'Credit'])],
+            'status' => ['required', Rule::in(['Active', 'Inactive'])],
+        ]);
     }
 }
