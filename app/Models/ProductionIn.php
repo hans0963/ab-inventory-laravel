@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Services\StockMovementLogger;
+use App\Models\RawMaterial;
+use App\Models\RawMaterialMovement;
 
 class ProductionIn extends Model
 {
@@ -80,6 +82,16 @@ class ProductionIn extends Model
     public function approve(User $user): void
     {
         if ($this->canBeApproved()) {
+            $materialUsage = $this->calculateMaterialUsage();
+
+            foreach ($materialUsage as $rawMaterialId => $quantityNeeded) {
+                $material = RawMaterial::findOrFail($rawMaterialId);
+
+                if ($material->quantity < $quantityNeeded) {
+                    throw new \RuntimeException("Insufficient raw material stock for {$material->material_name}. Current stock: {$material->quantity} {$material->unit}, Required: {$quantityNeeded} {$material->unit}.");
+                }
+            }
+
             $this->status = 'Approved';
             $this->approved_by = $user->id;
             $this->approved_date = now();
@@ -99,7 +111,40 @@ class ProductionIn extends Model
                     $user->id
                 );
             }
+
+            foreach ($materialUsage as $rawMaterialId => $quantityNeeded) {
+                $material = RawMaterial::findOrFail($rawMaterialId);
+                $material->decrement('quantity', $quantityNeeded);
+
+                RawMaterialMovement::create([
+                    'raw_material_id' => $material->id,
+                    'quantity' => -$quantityNeeded,
+                    'type' => 'Out',
+                    'notes' => "Recipe consumption for Production IN {$this->production_in_no}",
+                    'date' => now()->toDateString(),
+                ]);
+            }
         }
+    }
+
+    private function calculateMaterialUsage(): array
+    {
+        $usage = [];
+
+        foreach ($this->items()->with('product.recipe.ingredients')->get() as $item) {
+            $recipe = $item->product->recipe;
+
+            if (!$recipe || !$recipe->is_active) {
+                continue;
+            }
+
+            foreach ($recipe->ingredients as $ingredient) {
+                $requiredQuantity = (float) $ingredient->quantity_per_unit * $item->quantity;
+                $usage[$ingredient->raw_material_id] = ($usage[$ingredient->raw_material_id] ?? 0) + $requiredQuantity;
+            }
+        }
+
+        return array_map(fn ($quantity) => round($quantity, 3), $usage);
     }
 
     // Reject production in

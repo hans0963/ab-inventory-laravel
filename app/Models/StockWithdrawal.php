@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Services\StockMovementLogger;
 
 class StockWithdrawal extends Model
 {
@@ -88,25 +87,25 @@ class StockWithdrawal extends Model
             $this->approved_date = now();
             $this->save();
 
-            foreach ($this->items()->with('product')->get() as $item) {
-                if ($item->product->quantity < $item->quantity) {
-                    throw new \RuntimeException("Insufficient stock. Current stock: {$item->product->quantity}, Requested: {$item->quantity}. Transaction cannot be completed.");
+            foreach ($this->items()->with('rawMaterial')->get() as $item) {
+                if (!$item->rawMaterial || $item->rawMaterial->quantity < $item->quantity) {
+                    $name = $item->rawMaterial?->material_name ?? 'Unknown material';
+                    $current = $item->rawMaterial?->quantity ?? 0;
+                    throw new \RuntimeException("Insufficient stock for {$name}. Current stock: {$current}, Requested: {$item->quantity}. Transaction cannot be completed.");
                 }
             }
 
-            foreach ($this->items()->with('product')->get() as $item) {
-                $quantityBefore = $item->product->quantity;
-                $item->product->decrement('quantity', $item->quantity);
-                StockMovementLogger::record(
-                    $item->product,
-                    $quantityBefore,
-                    -$item->quantity,
-                    'OUT',
-                    $this->reason ?? 'STOCK WITHDRAWAL',
-                    $this,
-                    null,
-                    $user->id
-                );
+            foreach ($this->items()->with('rawMaterial')->get() as $item) {
+                $item->rawMaterial->decrement('quantity', $item->quantity);
+
+                RawMaterialMovement::create([
+                    'raw_material_id' => $item->raw_material_id,
+                    'employee_id' => null,
+                    'quantity' => -$item->quantity,
+                    'type' => 'Out',
+                    'notes' => $this->reason ?? 'Stock withdrawal',
+                    'date' => now()->toDateString(),
+                ]);
             }
         }
     }

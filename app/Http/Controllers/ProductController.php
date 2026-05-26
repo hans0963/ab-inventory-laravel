@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\RawMaterial;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -16,9 +18,9 @@ class ProductController extends Controller
         $query = $this->productQuery($request);
         $products = $query->latest()->paginate(10)->withQueryString();
         $categories = Category::all();
-        $totalProducts = Product::count();
-        $outOfStockCount = Product::where('quantity', '<=', 0)->count();
-        $lowStockCount = Product::whereColumn('quantity', '<=', 'stock_alert_threshold')->where('quantity', '>', 0)->count();
+        $totalProducts = Product::where('inventory_type', 'Finished Product')->count();
+        $outOfStockCount = Product::where('inventory_type', 'Finished Product')->where('quantity', '<=', 0)->count();
+        $lowStockCount = Product::where('inventory_type', 'Finished Product')->whereColumn('quantity', '<=', 'stock_alert_threshold')->where('quantity', '>', 0)->count();
         return view('products.index', compact('products', 'categories', 'totalProducts', 'outOfStockCount', 'lowStockCount'));
     }
 
@@ -57,12 +59,13 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
+        $product->load('category', 'recipe.ingredients.rawMaterial');
         return view('products.show', compact('product'));
     }
 
     private function productQuery(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with('category')->where('inventory_type', 'Finished Product');
 
         if ($request->filled('search')) {
             $query->where(function ($query) use ($request) {
@@ -101,7 +104,8 @@ class ProductController extends Controller
     {
         $categories = Category::all();
         $suppliers = \App\Models\Supplier::where('status', 'Active')->get();
-        return view('products.create', compact('categories', 'suppliers'));
+        $rawMaterials = RawMaterial::where('status', 'Active')->orderBy('material_name')->get();
+        return view('products.create', compact('categories', 'suppliers', 'rawMaterials'));
     }
 
     public function store(StoreProductRequest $request)
@@ -112,16 +116,21 @@ class ProductController extends Controller
             $validated['image_path'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create($validated);
+        DB::transaction(function () use ($request, $validated) {
+            $product = Product::create($this->productData($validated));
+            $this->syncRecipe($product, $request);
+        });
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
     public function edit(Product $product)
     {
+        $product->load('recipe.ingredients');
         $categories = Category::all();
         $suppliers = \App\Models\Supplier::where('status', 'Active')->get();
-        return view('products.edit', compact('product', 'categories', 'suppliers'));
+        $rawMaterials = RawMaterial::where('status', 'Active')->orderBy('material_name')->get();
+        return view('products.edit', compact('product', 'categories', 'suppliers', 'rawMaterials'));
     }
 
     public function update(UpdateProductRequest $request, Product $product)
@@ -135,7 +144,10 @@ class ProductController extends Controller
             $validated['image_path'] = $request->file('image')->store('products', 'public');
         }
 
-        $product->update($validated);
+        DB::transaction(function () use ($request, $product, $validated) {
+            $product->update($this->productData($validated));
+            $this->syncRecipe($product, $request);
+        });
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
@@ -144,5 +156,48 @@ class ProductController extends Controller
     {
         $product->update(['status' => 'Inactive']);
         return redirect()->route('products.index')->with('success', 'Product "' . $product->product_name . '" archived successfully.');
+    }
+
+    private function productData(array $validated): array
+    {
+        return collect($validated)
+            ->except(['recipe_enabled', 'recipe_notes', 'recipe_ingredients'])
+            ->merge(['inventory_type' => 'Finished Product'])
+            ->all();
+    }
+
+    private function syncRecipe(Product $product, Request $request): void
+    {
+        if ($product->inventory_type !== 'Finished Product' || !$request->boolean('recipe_enabled')) {
+            $product->recipe?->delete();
+            return;
+        }
+
+        $ingredients = collect($request->input('recipe_ingredients', []))
+            ->filter(fn ($ingredient) => !empty($ingredient['raw_material_id']) && !empty($ingredient['quantity_per_unit']))
+            ->unique('raw_material_id')
+            ->values();
+
+        if ($ingredients->isEmpty()) {
+            $product->recipe?->delete();
+            return;
+        }
+
+        $recipe = $product->recipe()->updateOrCreate(
+            ['product_id' => $product->id],
+            [
+                'is_active' => true,
+                'notes' => $request->input('recipe_notes'),
+            ]
+        );
+
+        $recipe->ingredients()->delete();
+
+        foreach ($ingredients as $ingredient) {
+            $recipe->ingredients()->create([
+                'raw_material_id' => $ingredient['raw_material_id'],
+                'quantity_per_unit' => $ingredient['quantity_per_unit'],
+            ]);
+        }
     }
 }

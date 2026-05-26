@@ -34,9 +34,15 @@
         </div>
     </x-slot>
 
+    @php
+        $subtotal = $receiptLines->sum(fn ($line) => (float) $line->unit_price * $line->sold);
+        $discount = $receiptLines->sum('discount_amount');
+        $vat = $receiptLines->sum('vat_amount');
+        $total = $receiptLines->sum('total_amount');
+    @endphp
+
     <div class="space-y-8 max-w-5xl mx-auto mt-8 px-4 sm:px-0">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {{-- Left Column: Details --}}
             <div class="lg:col-span-2 space-y-8">
                 <div class="card-rustic border-sienna p-6 md:p-8">
                     <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2 uppercase tracking-tighter">Transaction Information</h3>
@@ -67,24 +73,30 @@
                 </div>
 
                 <div class="card-rustic border-sage p-6 md:p-8">
-                    <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2 uppercase tracking-tighter">Product Details</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                        <div class="sm:col-span-2">
-                            <p class="text-[10px] uppercase tracking-widest text-sage font-black mb-1">Product Name</p>
-                            <p class="text-xl font-black text-sienna">{{ $sale->product->product_name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-widest text-sage font-black mb-1">Category</p>
-                            <p class="text-base font-bold text-sienna">{{ $sale->product->category->category_name ?? 'N/A' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-widest text-sage font-black mb-1">Quantity Sold</p>
-                            <p class="text-base font-bold text-sienna">{{ $sale->sold }} units</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] uppercase tracking-widest text-sage font-black mb-1">Unit Price</p>
-                            <p class="text-base font-bold text-sienna">₱{{ number_format($sale->product->selling_price, 2) }}</p>
-                        </div>
+                    <h3 class="text-xl font-lora font-bold text-sienna mb-6 border-b border-sienna border-opacity-10 pb-2 uppercase tracking-tighter">Products</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead>
+                                <tr class="bg-sienna text-cream uppercase text-[10px] tracking-widest">
+                                    <th class="px-4 py-3 text-left">Product</th>
+                                    <th class="px-4 py-3 text-left">Category</th>
+                                    <th class="px-4 py-3 text-right">Qty</th>
+                                    <th class="px-4 py-3 text-right">Unit Price</th>
+                                    <th class="px-4 py-3 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-sienna divide-opacity-10">
+                                @foreach($receiptLines as $line)
+                                    <tr>
+                                        <td class="px-4 py-3 font-black text-sienna">{{ $line->product->product_name }}</td>
+                                        <td class="px-4 py-3 text-sage font-bold">{{ $line->product->category->category_name ?? 'N/A' }}</td>
+                                        <td class="px-4 py-3 text-right font-bold text-sienna">{{ $line->sold }}</td>
+                                        <td class="px-4 py-3 text-right font-bold text-sienna">PHP {{ number_format($line->unit_price, 2) }}</td>
+                                        <td class="px-4 py-3 text-right font-black text-terracotta">PHP {{ number_format($line->unit_price * $line->sold, 2) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -103,7 +115,6 @@
                 </div>
             </div>
 
-            {{-- Right Column: Summary --}}
             <div class="lg:col-span-1">
                 <div class="card-rustic border-terracotta bg-cream bg-opacity-20 sticky top-24 overflow-hidden">
                     <div class="bg-terracotta p-4">
@@ -112,25 +123,25 @@
                     <div class="p-6 space-y-4">
                         <div class="flex justify-between text-sage font-medium uppercase text-[10px] tracking-widest">
                             <span>Subtotal</span>
-                            <span class="text-sienna font-bold">₱{{ number_format($sale->product->selling_price * $sale->sold, 2) }}</span>
+                            <span class="text-sienna font-bold">PHP {{ number_format($subtotal, 2) }}</span>
                         </div>
-                        
-                        @if($sale->discount_amount > 0)
+
+                        @if($discount > 0)
                             <div class="flex justify-between text-red-600 font-medium uppercase text-[10px] tracking-widest">
                                 <span>Discount @if($sale->discountType) ({{ $sale->discountType->discount_name }}) @endif</span>
-                                <span class="font-bold">-₱{{ number_format($sale->discount_amount, 2) }}</span>
+                                <span class="font-bold">-PHP {{ number_format($discount, 2) }}</span>
                             </div>
                         @endif
 
                         <div class="flex justify-between text-green-600 font-medium uppercase text-[10px] tracking-widest">
                             <span>VAT {{ $sale->vat_type }} ({{ $sale->vat_rate }}%)</span>
-                            <span class="font-bold">+₱{{ number_format($sale->vat_amount, 2) }}</span>
+                            <span class="font-bold">+PHP {{ number_format($vat, 2) }}</span>
                         </div>
 
                         <div class="pt-4 border-t-2 border-sienna border-dashed mt-4">
-                            <div class="flex justify-between items-end">
+                            <div class="flex justify-between items-end gap-4">
                                 <span class="font-formal text-2xl text-sienna leading-none">Total</span>
-                                <span class="font-black text-3xl text-terracotta leading-none">₱{{ number_format($sale->total_amount, 2) }}</span>
+                                <span class="font-black text-2xl text-terracotta leading-none">PHP {{ number_format($total, 2) }}</span>
                             </div>
                         </div>
 

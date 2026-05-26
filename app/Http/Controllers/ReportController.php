@@ -17,6 +17,7 @@ use App\Models\ProductionInItem;
 use App\Models\ProductionOutItem;
 use App\Models\InventoryReceivingItem;
 use App\Models\StockWithdrawalItem;
+use App\Models\RawMaterial;
 use Carbon\Carbon;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -389,8 +390,7 @@ class ReportController extends Controller
         $wastePercent = $weeklyProduction > 0 ? round(($weeklyWaste / $weeklyProduction) * 100, 1) : 0;
 
         // 6. Raw Materials Stock Level
-        $materials = Product::where('inventory_type', 'Raw Material')
-            ->select('product_name as name', 'quantity as stock', 'stock_alert_threshold')
+        $materials = RawMaterial::select('material_name as name', 'quantity as stock', 'stock_alert_threshold')
             ->get()
             ->map(function($item) {
                 $status = 'Good';

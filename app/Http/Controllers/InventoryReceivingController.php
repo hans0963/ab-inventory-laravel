@@ -104,7 +104,7 @@ class InventoryReceivingController extends Controller
         ]);
 
         SystemNotificationService::notifyRoles(
-            ['manager'],
+            ['admin', 'manager'],
             'inventory_receiving_pending',
             'Receiving needs approval',
             "Inventory Receiving {$receiving->receiving_no} was submitted for approval.",

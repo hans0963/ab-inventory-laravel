@@ -59,7 +59,7 @@
                         @endif
                     </div>
 
-                    @if($receiving->status === 'Pending' && auth()->user()->isManager())
+                    @if($receiving->status === 'Pending' && auth()->user()->hasRole(['admin', 'manager']))
                         <div class="mt-8 flex flex-col gap-3">
                             <form action="{{ route('inventory-receiving.approve', $receiving->id) }}" method="POST">
                                 @csrf

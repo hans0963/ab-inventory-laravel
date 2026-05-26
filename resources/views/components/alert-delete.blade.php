@@ -1,7 +1,12 @@
+@props([
+    'buttonLabel' => 'Delete',
+    'confirmLabel' => null,
+])
+
 <div x-data="{ open: false }">
     <!-- Delete Button -->
     <button type="submit" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm" @click="open = true">
-        {{ __('Delete') }}
+        {{ __($buttonLabel) }}
     </button>
 
     <!-- Modal Overlay -->
@@ -26,7 +31,7 @@
                     @csrf
                     @method('DELETE')
                     <x-primary-button type="submit" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm">
-                        {{ __('Delete') }}
+                        {{ __($confirmLabel ?? $buttonLabel) }}
                     </x-primary-button>
                 </form>
             </div>

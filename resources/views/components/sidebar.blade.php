@@ -1,6 +1,6 @@
 @php
     $activeGroup = match (true) {
-        request()->routeIs('products.*', 'categories.*', 'stock-withdrawal.*') => 'inventory',
+        request()->routeIs('products.*', 'categories.*', 'raw-materials.*', 'stock-withdrawal.*') => 'inventory',
         request()->routeIs('sales.*', 'customers.*', 'discounts.*', 'cashier-reconciliations.*') => 'sales',
         request()->routeIs('production-management.*') => 'production',
         request()->routeIs('purchases.*', 'inventory-receiving.*', 'suppliers.*') => 'procurement',
@@ -47,6 +47,12 @@
                     @can('view-categories')
                         <x-sidebar-link :href="route('categories.index')" :active="request()->routeIs('categories.*')">
                             Categories
+                        </x-sidebar-link>
+                    @endcan
+
+                    @can('view-inventory')
+                        <x-sidebar-link :href="route('raw-materials.index')" :active="request()->routeIs('raw-materials.*')">
+                            Raw Materials
                         </x-sidebar-link>
                     @endcan
 

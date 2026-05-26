@@ -54,7 +54,7 @@
                         @endif
                     </div>
 
-                    @if($productionOut->status === 'Pending' && auth()->user()->isManager())
+                    @if($productionOut->status === 'Pending' && auth()->user()->hasRole(['admin', 'manager']))
                         <div class="mt-8 flex flex-col gap-3">
                             <form action="{{ route('production-out.approve', $productionOut->id) }}" method="POST">
                                 @csrf

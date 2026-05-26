@@ -31,8 +31,14 @@
         .item-row {
             display: flex;
             justify-content: space-between;
-            margin: 5px 0;
+            gap: 10px;
+            margin: 7px 0;
             font-size: 12px;
+            text-align: left;
+        }
+        .item-total {
+            min-width: 70px;
+            text-align: right;
         }
         .total-section {
             border-top: 1px solid #333;
@@ -49,6 +55,7 @@
         .grand-total {
             font-size: 16px;
             margin: 10px 0;
+            font-weight: bold;
         }
         .footer {
             margin-top: 20px;
@@ -64,6 +71,13 @@
     </style>
 </head>
 <body>
+    @php
+        $subtotal = $receiptLines->sum(fn ($line) => (float) $line->unit_price * $line->sold);
+        $discount = $receiptLines->sum('discount_amount');
+        $vat = $receiptLines->sum('vat_amount');
+        $total = $receiptLines->sum('total_amount');
+    @endphp
+
     <div class="receipt">
         <div class="header">
             <div style="font-size: 16px; font-weight: bold;">{{ config('app.name', 'AB Inventory') }}</div>
@@ -71,37 +85,39 @@
             <div class="date">{{ $sale->created_at->format('M d, Y h:i A') }}</div>
         </div>
 
-        <div style="text-align: left; margin: 15px 0;">
-            <div class="item-row">
-                <div>
-                    <strong>{{ $sale->product->product_name }}</strong><br>
-                    {{ $sale->sold }} × ₱{{ number_format($sale->product->selling_price, 2) }}
+        <div style="margin: 15px 0;">
+            @foreach($receiptLines as $line)
+                <div class="item-row">
+                    <div>
+                        <strong>{{ $line->product->product_name }}</strong><br>
+                        {{ $line->sold }} x PHP {{ number_format($line->unit_price, 2) }}
+                    </div>
+                    <div class="item-total">
+                        PHP {{ number_format($line->unit_price * $line->sold, 2) }}
+                    </div>
                 </div>
-                <div style="text-align: right;">
-                    ₱{{ number_format($sale->product->selling_price * $sale->sold, 2) }}
-                </div>
-            </div>
+            @endforeach
         </div>
 
         <div class="total-section">
             <div class="total-row">
                 <span>Subtotal</span>
-                <span>₱{{ number_format($sale->product->selling_price * $sale->sold, 2) }}</span>
+                <span>PHP {{ number_format($subtotal, 2) }}</span>
             </div>
-            @if($sale->discount_amount > 0)
+            @if($discount > 0)
                 <div class="total-row">
                     <span>Discount</span>
-                    <span>-₱{{ number_format($sale->discount_amount, 2) }}</span>
+                    <span>-PHP {{ number_format($discount, 2) }}</span>
                 </div>
             @endif
             <div class="total-row">
                 <span>VAT ({{ $sale->vat_rate }}%)</span>
-                <span>₱{{ number_format($sale->vat_amount, 2) }}</span>
+                <span>PHP {{ number_format($vat, 2) }}</span>
             </div>
         </div>
 
         <div class="grand-total">
-            TOTAL: ₱{{ number_format($sale->total_amount, 2) }}
+            TOTAL: PHP {{ number_format($total, 2) }}
         </div>
 
         <div style="margin: 15px 0; font-size: 12px;">

@@ -53,9 +53,13 @@
                                 <td class="px-6 py-4 font-mono text-xs text-sienna font-bold">{{ $sale->receipt_number }}</td>
                                 <td class="px-6 py-4 text-sage font-medium">{{ $sale->date->format('M d, Y h:i A') }}</td>
                                 <td class="px-6 py-4 text-sienna font-medium">{{ $sale->customer->name ?? 'Walk-in' }}</td>
-                                <td class="px-6 py-4 font-bold text-sienna">{{ $sale->product->product_name }} × {{ $sale->sold }}</td>
+                                <td class="px-6 py-4 font-bold text-sienna">
+                                    @foreach($sale->receiptLines as $line)
+                                        <div>{{ $line->product->product_name }} x {{ $line->sold }}</div>
+                                    @endforeach
+                                </td>
                                 <td class="px-6 py-4 text-sage font-medium">{{ $sale->payment_mode_label }}</td>
-                                <td class="px-6 py-4 text-right font-black text-terracotta text-base">₱{{ number_format($sale->total_amount, 2) }}</td>
+                                <td class="px-6 py-4 text-right font-black text-terracotta text-base">PHP {{ number_format($sale->receiptLines->sum('total_amount'), 2) }}</td>
                                 <td class="px-6 py-4 text-sage text-[10px] uppercase font-bold tracking-tighter">{{ $sale->employee->user->name ?? $sale->employee->employee_name }}</td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center space-x-3">

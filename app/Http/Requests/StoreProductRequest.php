@@ -24,7 +24,6 @@ class StoreProductRequest extends FormRequest
         return [
             'product_name' => 'required|string|max:255|unique:products,product_name',
             'category_id' => 'required|integer|exists:categories,id',
-            'inventory_type' => 'required|in:Finished Product,Raw Material',
             'selling_price' => 'required|numeric|min:0|max:999999.99',
             'quantity' => 'required|integer|min:0|max:999999',
             'status' => 'required|in:Active,Inactive',
@@ -36,6 +35,11 @@ class StoreProductRequest extends FormRequest
             'reorder_quantity' => 'nullable|integer|min:0|max:999999',
             'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
             'supplier_unit_price' => 'nullable|numeric|min:0|max:999999.99',
+            'recipe_enabled' => 'nullable|boolean',
+            'recipe_notes' => 'nullable|string|max:1000',
+            'recipe_ingredients' => 'nullable|array',
+            'recipe_ingredients.*.raw_material_id' => 'nullable|integer|exists:raw_materials,id',
+            'recipe_ingredients.*.quantity_per_unit' => 'nullable|numeric|min:0.001|max:999999',
         ];
     }
 
@@ -49,8 +53,6 @@ class StoreProductRequest extends FormRequest
             'product_name.unique' => 'Product name already exists.',
             'category_id.required' => 'Category selection is required.',
             'category_id.exists' => 'Selected category is invalid.',
-            'inventory_type.required' => 'Inventory type is required.',
-            'inventory_type.in' => 'Inventory type must be Finished Product or Raw Material.',
             'selling_price.required' => 'Selling price is required.',
             'selling_price.numeric' => 'Selling price must be a valid number.',
             'quantity.required' => 'Quantity is required.',

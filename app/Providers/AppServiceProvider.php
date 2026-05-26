@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-inventory', function (User $user) {
-            return $user->isManager();
+            return $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-sales-orders', function (User $user) {
@@ -85,7 +85,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-manager-sales-report', function (User $user) {
-            return $user->isManager();
+            return $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-customers', function (User $user) {
@@ -93,15 +93,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-raw-materials', function (User $user) {
-            return $user->isManager();
+            return $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-production-in', function (User $user) {
-            return $user->isManager();
+            return $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-production-out', function (User $user) {
-            return $user->isManager();
+            return $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-production-reports', function (User $user) {
@@ -113,7 +113,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('view-manager-reports', function (User $user) {
-            return $user->isManager();
+            return $user->isManager() || $user->isAdmin();
         });
 
         Gate::define('view-discounts', function (User $user) {

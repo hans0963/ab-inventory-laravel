@@ -80,7 +80,7 @@ class ProductionOutController extends Controller
             DB::commit();
 
             SystemNotificationService::notifyRoles(
-                ['manager'],
+                ['admin', 'manager'],
                 'production_out_pending',
                 'Production OUT needs approval',
                 "Production OUT {$productionOut->production_out_no} was submitted for approval.",

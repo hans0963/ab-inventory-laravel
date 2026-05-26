@@ -58,7 +58,7 @@
                         @endif
                     </div>
 
-                    @if($withdrawal->status === 'Pending' && auth()->user()->isManager())
+                    @if($withdrawal->status === 'Pending' && auth()->user()->hasRole(['admin', 'manager']))
                         <div class="mt-8 flex flex-col gap-3">
                             <form action="{{ route('stock-withdrawal.approve', $withdrawal->id) }}" method="POST">
                                 @csrf
@@ -86,7 +86,7 @@
                     <table class="min-w-full text-sm">
                         <thead>
                             <tr class="bg-cream bg-opacity-50 text-sienna uppercase text-[10px] tracking-widest font-black">
-                                <th class="px-6 py-4 text-left">Product</th>
+                                <th class="px-6 py-4 text-left">Raw Material</th>
                                 <th class="px-6 py-4 text-center">Qty</th>
                                 <th class="px-6 py-4 text-right">Unit Price</th>
                                 <th class="px-6 py-4 text-right">Total Value</th>
@@ -95,7 +95,7 @@
                         <tbody class="divide-y divide-sienna divide-opacity-10 bg-white">
                             @foreach($withdrawal->items as $item)
                                 <tr class="hover:bg-cream hover:bg-opacity-20 transition-colors">
-                                    <td class="px-6 py-4 font-bold text-sienna">{{ $item->product->product_name }}</td>
+                                    <td class="px-6 py-4 font-bold text-sienna">{{ $item->rawMaterial->material_name ?? 'N/A' }}</td>
                                     <td class="px-6 py-4 text-center font-black">{{ number_format($item->quantity) }}</td>
                                     <td class="px-6 py-4 text-right">₱{{ number_format($item->unit_price, 2) }}</td>
                                     <td class="px-6 py-4 text-right font-bold text-terracotta">₱{{ number_format($item->total_value, 2) }}</td>

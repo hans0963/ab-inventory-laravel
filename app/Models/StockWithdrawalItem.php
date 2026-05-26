@@ -15,6 +15,7 @@ class StockWithdrawalItem extends Model
     protected $fillable = [
         'stock_withdrawal_id',
         'product_id',
+        'raw_material_id',
         'quantity',
         'unit_price',
         'total_value'
@@ -36,6 +37,11 @@ class StockWithdrawalItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function rawMaterial()
+    {
+        return $this->belongsTo(RawMaterial::class);
     }
 
     // Calculate total value

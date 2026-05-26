@@ -24,10 +24,6 @@
                         <p class="mt-3 text-base text-sienna">{{ $product->category->category_name ?? 'Uncategorized' }}</p>
                     </div>
                     <div>
-                        <p class="text-xs uppercase tracking-widest text-sage font-bold">Inventory Type</p>
-                        <p class="mt-3 text-base text-sienna">{{ $product->inventory_type }}</p>
-                    </div>
-                    <div>
                         <p class="text-xs uppercase tracking-widest text-sage font-bold">Status</p>
                         <span class="mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $product->status === 'Inactive' ? 'bg-red-100 text-red-700' : 'bg-sage bg-opacity-20 text-sage-dark' }}">{{ $product->status }}</span>
                     </div>
@@ -59,6 +55,37 @@
                     <div class="rounded-3xl border border-sienna border-opacity-10 bg-white p-6 shadow-sm">
                         <p class="text-xs uppercase tracking-widest text-sage font-bold">Description</p>
                         <p class="mt-3 text-sm leading-7 text-sienna">{{ $product->description ?: 'No description provided.' }}</p>
+                    </div>
+
+                    <div class="rounded-3xl border border-sienna border-opacity-10 bg-white p-6 shadow-sm">
+                        <p class="text-xs uppercase tracking-widest text-sage font-bold">Recipe Ingredients</p>
+                        @if($product->recipe && $product->recipe->ingredients->isNotEmpty())
+                            <div class="mt-4 overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-sienna border-opacity-10 text-left text-[10px] uppercase tracking-widest text-sage">
+                                            <th class="py-2 pr-4">Raw Material</th>
+                                            <th class="py-2 pr-4">Per Unit</th>
+                                            <th class="py-2">Current Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-sienna divide-opacity-10 text-sienna">
+                                        @foreach($product->recipe->ingredients as $ingredient)
+                                            <tr>
+                                                <td class="py-3 pr-4 font-semibold">{{ $ingredient->rawMaterial?->material_name }}</td>
+                                                <td class="py-3 pr-4">{{ number_format($ingredient->quantity_per_unit) }} {{ $ingredient->rawMaterial?->unit }}</td>
+                                                <td class="py-3">{{ $ingredient->rawMaterial?->quantity ?? 0 }} {{ $ingredient->rawMaterial?->unit }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            @if($product->recipe->notes)
+                                <p class="mt-4 text-sm leading-7 text-sienna">{{ $product->recipe->notes }}</p>
+                            @endif
+                        @else
+                            <p class="mt-3 text-sm leading-7 text-sienna">No recipe configured.</p>
+                        @endif
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

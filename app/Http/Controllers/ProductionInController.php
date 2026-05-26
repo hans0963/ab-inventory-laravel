@@ -75,7 +75,7 @@ class ProductionInController extends Controller
             DB::commit();
 
             SystemNotificationService::notifyRoles(
-                ['manager'],
+                ['admin', 'manager'],
                 'production_in_pending',
                 'Production IN needs approval',
                 "Production IN {$productionIn->production_in_no} was submitted for approval.",

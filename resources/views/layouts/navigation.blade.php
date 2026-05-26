@@ -129,6 +129,9 @@
             <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
                 {{ __('Categories') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('raw-materials.index')" :active="request()->routeIs('raw-materials.*')">
+                {{ __('Raw Materials') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')">
                 {{ __('Orders') }}
             </x-responsive-nav-link>

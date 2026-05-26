@@ -18,7 +18,7 @@ class StoreStockWithdrawalRequest extends FormRequest
             'reason' => 'required|in:Internal Use,Damaged,Expired,Wastage,Other',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer|exists:products,id',
+            'items.*.raw_material_id' => 'required|integer|exists:raw_materials,id',
             'items.*.quantity' => 'required|integer|min:1|max:999999',
             'items.*.unit_price' => 'required|numeric|min:0|max:999999.99',
         ];
@@ -31,7 +31,8 @@ class StoreStockWithdrawalRequest extends FormRequest
             'reason.required' => 'Reason for withdrawal is required.',
             'reason.in' => 'Reason must be one of: Internal Use, Damaged, Expired, Wastage, Other.',
             'items.required' => 'At least one item is required.',
-            'items.*.product_id.exists' => 'Selected product is invalid.',
+            'items.*.raw_material_id.required' => 'Raw material selection is required.',
+            'items.*.raw_material_id.exists' => 'Selected raw material is invalid.',
             'items.*.quantity.required' => 'Quantity is required for all items.',
             'items.*.quantity.min' => 'Quantity must be at least 1.',
         ];

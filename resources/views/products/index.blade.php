@@ -105,8 +105,7 @@
                                             {{ $product->category->category_name ?? 'Uncategorized' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-5 text-right font-black text-terracotta text-base">₱{{ number_format($product->selling_price, 2) }}</td>
-                                    <td class="px-6 py-5 text-right text-sienna font-semibold">₱{{ number_format($product->buying_price, 2) }}</td>
+                                    <td class="px-6 py-5 text-right font-black text-terracotta text-base">PHP {{ number_format($product->selling_price, 2) }}</td>
                                     <td class="px-6 py-5 text-center">
                                         <span class="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 rounded-lg font-black {{ $product->quantity <= $product->stock_alert_threshold ? 'bg-red-100 text-red-600' : 'bg-sage bg-opacity-10 text-sage-dark' }}">
                                             {{ $product->quantity }}
@@ -119,7 +118,11 @@
                                             <a href="{{ route('products.show', $product->id) }}" class="px-3 py-2 rounded-xl bg-sienna bg-opacity-10 text-sienna text-xs uppercase tracking-wider font-semibold">View</a>
                                             @if(auth()->user()->hasRole(['admin', 'manager']))
                                                 <a href="{{ route('products.edit', $product->id) }}" class="px-3 py-2 rounded-xl bg-sage bg-opacity-10 text-sage text-xs uppercase tracking-wider font-semibold">Edit</a>
-                                                <x-alert-delete route="{{ route('products.destroy', $product->id) }}" message="Are you sure you want to delete this product?" />
+                                                <x-alert-delete
+                                                    route="{{ route('products.destroy', $product->id) }}"
+                                                    button-label="Archive"
+                                                    confirm-label="Archive Product"
+                                                    message="This product will be marked as inactive instead of permanently deleted." />
                                             @else
                                                 <span class="text-gray-400 text-xs italic">Read-only</span>
                                             @endif
@@ -128,7 +131,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-6 py-12 text-center text-sage italic font-medium">No products found in the bakery.</td>
+                                    <td colspan="8" class="px-6 py-12 text-center text-sage italic font-medium">No products found in the bakery.</td>
                                 </tr>
                             @endforelse
                         </tbody>

@@ -35,6 +35,11 @@ class UpdateProductRequest extends FormRequest
             'reorder_quantity' => 'nullable|integer|min:0|max:999999',
             'default_supplier_id' => 'nullable|integer|exists:suppliers,id',
             'supplier_unit_price' => 'nullable|numeric|min:0|max:999999.99',
+            'recipe_enabled' => 'nullable|boolean',
+            'recipe_notes' => 'nullable|string|max:1000',
+            'recipe_ingredients' => 'nullable|array',
+            'recipe_ingredients.*.raw_material_id' => 'nullable|integer|exists:raw_materials,id',
+            'recipe_ingredients.*.quantity_per_unit' => 'nullable|numeric|min:0.001|max:999999',
         ];
     }
 

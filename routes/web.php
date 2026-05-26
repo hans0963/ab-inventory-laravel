@@ -127,10 +127,6 @@ Route::get('/sales-orders', [OrderController::class, 'index'])->middleware(['aut
 // Manager Module Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:manager,admin'])->group(function () {
-        Route::get('raw-materials/in', [RawMaterialController::class, 'stockInView'])->name('raw-materials.in');
-        Route::post('raw-materials/in', [RawMaterialController::class, 'processStockIn'])->name('raw-materials.processIn');
-        Route::get('raw-materials/out', [RawMaterialController::class, 'stockOutView'])->name('raw-materials.out');
-        Route::post('raw-materials/out', [RawMaterialController::class, 'processStockOut'])->name('raw-materials.processOut');
         Route::post('raw-materials/{rawMaterial}/adjust', [RawMaterialController::class, 'adjust'])->name('raw-materials.adjust');
         Route::resource('raw-materials', RawMaterialController::class);
         Route::get('production-management', [ProductionManagementController::class, 'index'])->name('production-management.index');

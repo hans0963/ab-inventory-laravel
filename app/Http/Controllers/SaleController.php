@@ -26,12 +26,24 @@ class SaleController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->whereHas('product', function($q) use ($search) {
-                $q->where('product_name', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('receipt_number', 'LIKE', "%{$search}%")
+                    ->orWhereIn('receipt_number', Sale::whereHas('product', function ($productQuery) use ($search) {
+                        $productQuery->where('product_name', 'LIKE', "%{$search}%");
+                    })->select('receipt_number'));
             });
         }
 
+        $query->whereIn('id', Sale::selectRaw('MIN(id)')->groupBy('receipt_number'));
+
         $sales = $query->latest()->paginate(15);
+        $sales->getCollection()->each(function (Sale $sale) {
+            $sale->receiptLines = Sale::with('product')
+                ->where('receipt_number', $sale->receipt_number)
+                ->orderBy('id')
+                ->get();
+        });
+
         return view('sales.index', compact('sales'));
     }
 
@@ -93,24 +105,46 @@ class SaleController extends Controller
         }
 
         return DB::transaction(function () use ($validated) {
-            $product = Product::lockForUpdate()->findOrFail($validated['product_id']);
+            $items = collect($validated['items'])
+                ->groupBy('product_id')
+                ->map(fn ($rows, $productId) => [
+                    'product_id' => (int) $productId,
+                    'sold' => (int) $rows->sum('sold'),
+                ])
+                ->values();
 
-            if (!$product->isAvailableForSale()) {
-                $reason = '';
-                if ($product->status === 'Inactive') {
-                    $reason = 'Product is inactive';
-                } elseif ($product->isExpired()) {
-                    $reason = 'Product has expired';
-                } elseif ($product->isAtReorderLevel()) {
-                    $reason = 'Product reached reorder level and is unavailable';
-                } elseif ($product->isOutOfStock()) {
-                    $reason = 'Product is out of stock';
+            $products = Product::whereIn('id', $items->pluck('product_id'))
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $subtotal = 0;
+            foreach ($items as $item) {
+                $product = $products->get($item['product_id']);
+
+                if (!$product || $product->inventory_type !== 'Finished Product') {
+                    return redirect()->back()->withInput()->with('error', 'Selected product is invalid for sales.');
                 }
-                return redirect()->back()->with('error', 'Cannot process sale: ' . $reason);
-            }
 
-            if ($product->quantity < $validated['sold']) {
-                return redirect()->back()->with('error', "Insufficient stock. Current stock: {$product->quantity}, Requested: {$validated['sold']}. Transaction cannot be completed.");
+                if (!$product->isAvailableForSale()) {
+                    $reason = '';
+                    if ($product->status === 'Inactive') {
+                        $reason = 'Product is inactive';
+                    } elseif ($product->isExpired()) {
+                        $reason = 'Product has expired';
+                    } elseif ($product->isAtReorderLevel()) {
+                        $reason = 'Product reached reorder level and is unavailable';
+                    } elseif ($product->isOutOfStock()) {
+                        $reason = 'Product is out of stock';
+                    }
+                    return redirect()->back()->withInput()->with('error', "Cannot process sale for {$product->product_name}: {$reason}");
+                }
+
+                if ($product->quantity < $item['sold']) {
+                    return redirect()->back()->withInput()->with('error', "Insufficient stock for {$product->product_name}. Current stock: {$product->quantity}, Requested: {$item['sold']}.");
+                }
+
+                $subtotal += (float) $product->selling_price * $item['sold'];
             }
 
             if (!$validated['customer_id']) {
@@ -121,42 +155,48 @@ class SaleController extends Controller
                 $validated['customer_id'] = $walkInCustomer->id;
             }
 
-            $validated['unit_price'] = $product->selling_price;
-            $subtotal = $product->selling_price * $validated['sold'];
+            $discountType = null;
+            $applicableIds = [];
+            $discountableSubtotal = $subtotal;
             if ($validated['discount_type_id'] ?? null) {
                 $discountType = DiscountType::find($validated['discount_type_id']);
                 $applicableIds = $discountType->applicable_ids ?? [];
                 $isInDateRange = (!$discountType->start_date || $discountType->start_date->lte(today()))
                     && (!$discountType->end_date || $discountType->end_date->gte(today()));
-                $isApplicable = $discountType->applicable_to === 'All'
-                    || ($discountType->applicable_to === 'Category' && in_array($product->category_id, $applicableIds))
-                    || ($discountType->applicable_to === 'Product' && in_array($product->id, $applicableIds));
+                $discountableSubtotal = $items->sum(function ($item) use ($products, $discountType, $applicableIds) {
+                    $product = $products->get($item['product_id']);
+                    $isApplicable = $discountType->applicable_to === 'All'
+                        || ($discountType->applicable_to === 'Category' && in_array($product->category_id, $applicableIds))
+                        || ($discountType->applicable_to === 'Product' && in_array($product->id, $applicableIds));
 
-                if ($discountType->status !== 'Active' || !$isInDateRange || !$isApplicable || $subtotal < $discountType->minimum_purchase_amount) {
+                    return $isApplicable ? (float) $product->selling_price * $item['sold'] : 0;
+                });
+
+                if ($discountType->status !== 'Active' || !$isInDateRange || $discountableSubtotal <= 0 || $subtotal < $discountType->minimum_purchase_amount) {
                     return redirect()->back()->with('error', 'Selected discount is not applicable to this sale.');
                 }
 
                 if ($discountType->discount_type === 'Fixed Amount') {
-                    $validated['discount_amount'] = min($subtotal, (float) $discountType->discount_value);
+                    $totalDiscount = min($discountableSubtotal, (float) $discountType->discount_value);
                 } else {
-                    $validated['discount_amount'] = $subtotal * ((float) $discountType->discount_value / 100);
+                    $totalDiscount = $discountableSubtotal * ((float) $discountType->discount_value / 100);
                 }
             } else {
-                $validated['discount_amount'] = 0;
+                $totalDiscount = 0;
             }
 
-            $afterDiscount = $subtotal - $validated['discount_amount'];
+            $afterDiscount = $subtotal - $totalDiscount;
             $validated['vat_type'] = SystemSetting::value('vat_type', 'Inclusive');
             $validated['vat_rate'] = (float) SystemSetting::value('vat_rate', $validated['vat_rate']);
 
             if ($validated['vat_type'] === 'Inclusive' && $validated['vat_rate'] > 0) {
-                $validated['vat_amount'] = $afterDiscount - ($afterDiscount / (1 + ($validated['vat_rate'] / 100)));
-                $validated['subtotal_amount'] = $afterDiscount - $validated['vat_amount'];
-                $validated['total_amount'] = $afterDiscount;
+                $totalVat = $afterDiscount - ($afterDiscount / (1 + ($validated['vat_rate'] / 100)));
+                $totalNetSubtotal = $afterDiscount - $totalVat;
+                $grandTotal = $afterDiscount;
             } else {
-                $validated['subtotal_amount'] = $afterDiscount;
-                $validated['vat_amount'] = $afterDiscount * ($validated['vat_rate'] / 100);
-                $validated['total_amount'] = $afterDiscount + $validated['vat_amount'];
+                $totalNetSubtotal = $afterDiscount;
+                $totalVat = $afterDiscount * ($validated['vat_rate'] / 100);
+                $grandTotal = $afterDiscount + $totalVat;
             }
 
             if ($validated['payment_type'] === 'Credit/Loan') {
@@ -166,44 +206,103 @@ class SaleController extends Controller
                     return redirect()->back()->with('error', 'Selected customer is not marked as a Credit/Loan Customer.');
                 }
 
-                if ($customer->availableCredit() < $validated['total_amount']) {
+                if ($customer->availableCredit() < $grandTotal) {
                     return redirect()->back()->with('error', 'Credit limit exceeded. Available credit: ' . number_format($customer->availableCredit(), 2));
                 }
 
                 $validated['credit_due_date'] = $customer->credit_due_date;
-                $customer->increment('current_balance', $validated['total_amount']);
+                $customer->increment('current_balance', $grandTotal);
             }
 
-            $validated['receipt_number'] = Sale::generateReceiptNumber();
+            $receiptNumber = Sale::generateReceiptNumber();
+            $createdSales = collect();
+            $remainingDiscount = round($totalDiscount, 2);
+            $remainingVat = round($totalVat, 2);
+            $remainingNetSubtotal = round($totalNetSubtotal, 2);
+            $remainingGrandTotal = round($grandTotal, 2);
+            $lastDiscountableIndex = 0;
 
-            $sale = Sale::create($validated);
+            foreach ($items as $index => $item) {
+                $product = $products->get($item['product_id']);
+                $isDiscountable = !$discountType
+                    || $discountType->applicable_to === 'All'
+                    || ($discountType->applicable_to === 'Category' && in_array($product->category_id, $applicableIds))
+                    || ($discountType->applicable_to === 'Product' && in_array($product->id, $applicableIds));
 
-            $quantityBefore = $product->quantity;
-            $product->decrement('quantity', $validated['sold']);
-            StockMovementLogger::record(
-                $product,
-                $quantityBefore,
-                -$validated['sold'],
-                'OUT',
-                'SALE',
-                $sale,
-                $validated['employee_id'],
-                Auth::id()
-            );
+                if ($isDiscountable) {
+                    $lastDiscountableIndex = $index;
+                }
+            }
 
-            $product->refresh();
-            if ($product->isAtReorderLevel()) {
-                SystemNotificationService::notifyRoles(
-                    ['admin', 'manager'],
-                    'low_stock',
-                    'Reorder level reached',
-                    "{$product->product_name} reached reorder level. Current stock: {$product->quantity}.",
-                    route('products.show', $product)
+            foreach ($items as $index => $item) {
+                $product = $products->get($item['product_id']);
+                $lineSubtotal = (float) $product->selling_price * $item['sold'];
+                $isDiscountable = !$discountType
+                    || $discountType->applicable_to === 'All'
+                    || ($discountType->applicable_to === 'Category' && in_array($product->category_id, $applicableIds))
+                    || ($discountType->applicable_to === 'Product' && in_array($product->id, $applicableIds));
+                $discountRatio = $isDiscountable && $discountableSubtotal > 0 ? $lineSubtotal / $discountableSubtotal : 0;
+                $totalRatio = $subtotal > 0 ? $lineSubtotal / $subtotal : 0;
+                $isLast = $index === $items->count() - 1;
+                $isLastDiscountable = $index === $lastDiscountableIndex;
+
+                $lineDiscount = !$isDiscountable ? 0 : ($isLastDiscountable ? $remainingDiscount : round($totalDiscount * $discountRatio, 2));
+                $lineVat = $isLast ? $remainingVat : round($totalVat * $totalRatio, 2);
+                $lineNetSubtotal = $isLast ? $remainingNetSubtotal : round($totalNetSubtotal * $totalRatio, 2);
+                $lineTotal = $isLast ? $remainingGrandTotal : round($grandTotal * $totalRatio, 2);
+
+                $sale = Sale::create([
+                    'product_id' => $product->id,
+                    'employee_id' => $validated['employee_id'],
+                    'customer_id' => $validated['customer_id'],
+                    'date' => $validated['date'],
+                    'sold' => $item['sold'],
+                    'unit_price' => $product->selling_price,
+                    'discount_type_id' => $validated['discount_type_id'] ?? null,
+                    'discount_amount' => $lineDiscount,
+                    'payment_type' => $validated['payment_type'],
+                    'credit_due_date' => $validated['credit_due_date'] ?? null,
+                    'vat_rate' => $validated['vat_rate'],
+                    'vat_type' => $validated['vat_type'],
+                    'vat_amount' => $lineVat,
+                    'subtotal_amount' => $lineNetSubtotal,
+                    'total_amount' => $lineTotal,
+                    'receipt_number' => $receiptNumber,
+                ]);
+
+                $quantityBefore = $product->quantity;
+                $product->decrement('quantity', $item['sold']);
+                StockMovementLogger::record(
+                    $product,
+                    $quantityBefore,
+                    -$item['sold'],
+                    'OUT',
+                    'SALE',
+                    $sale,
+                    $validated['employee_id'],
+                    Auth::id()
                 );
+
+                $product->refresh();
+                if ($product->isAtReorderLevel()) {
+                    SystemNotificationService::notifyRoles(
+                        ['admin', 'manager'],
+                        'low_stock',
+                        'Reorder level reached',
+                        "{$product->product_name} reached reorder level. Current stock: {$product->quantity}.",
+                        route('products.show', $product)
+                    );
+                }
+
+                $remainingDiscount -= $lineDiscount;
+                $remainingVat -= $lineVat;
+                $remainingNetSubtotal -= $lineNetSubtotal;
+                $remainingGrandTotal -= $lineTotal;
+                $createdSales->push($sale);
             }
 
-            return redirect()->route('sales.show', $sale->id)
-                ->with('success', 'Sale recorded successfully. Receipt: ' . $validated['receipt_number']);
+            return redirect()->route('sales.show', $createdSales->first()->id)
+                ->with('success', 'Sale recorded successfully. Receipt: ' . $receiptNumber);
         });
     }
 
@@ -213,7 +312,12 @@ class SaleController extends Controller
     public function show(Sale $sale)
     {
         $sale->load(['product', 'employee', 'customer', 'discountType']);
-        return view('sales.show', compact('sale'));
+        $receiptLines = Sale::with(['product.category', 'employee', 'customer', 'discountType'])
+            ->where('receipt_number', $sale->receipt_number)
+            ->orderBy('id')
+            ->get();
+
+        return view('sales.show', compact('sale', 'receiptLines'));
     }
 
     /**
@@ -222,7 +326,12 @@ class SaleController extends Controller
     public function printReceipt(Sale $sale)
     {
         $sale->load(['product', 'employee', 'customer', 'discountType']);
-        return view('sales.receipt', compact('sale'));
+        $receiptLines = Sale::with(['product', 'employee', 'customer', 'discountType'])
+            ->where('receipt_number', $sale->receipt_number)
+            ->orderBy('id')
+            ->get();
+
+        return view('sales.receipt', compact('sale', 'receiptLines'));
     }
 
     public function requestVoid(Request $request, Sale $sale)
@@ -233,7 +342,7 @@ class SaleController extends Controller
             return redirect()->back()->with('error', 'This sale already has a void action.');
         }
 
-        $sale->update([
+        Sale::where('receipt_number', $sale->receipt_number)->update([
             'void_status' => 'Pending',
             'void_reason' => $request->void_reason,
             'void_requested_by' => Auth::id(),
@@ -261,26 +370,33 @@ class SaleController extends Controller
         }
 
         DB::transaction(function () use ($sale) {
-            $product = Product::lockForUpdate()->findOrFail($sale->product_id);
-            $quantityBefore = $product->quantity;
-            $product->increment('quantity', $sale->sold);
+            $receiptLines = Sale::where('receipt_number', $sale->receipt_number)
+                ->lockForUpdate()
+                ->get();
 
-            StockMovementLogger::record(
-                $product,
-                $quantityBefore,
-                $sale->sold,
-                'IN',
-                'SALE VOID',
-                $sale,
-                $sale->employee_id,
-                Auth::id()
-            );
+            foreach ($receiptLines as $line) {
+                $product = Product::lockForUpdate()->findOrFail($line->product_id);
+                $quantityBefore = $product->quantity;
+                $product->increment('quantity', $line->sold);
 
-            if ($sale->payment_type === 'Credit/Loan' && $sale->customer) {
-                $sale->customer->decrement('current_balance', min((float) $sale->customer->current_balance, (float) $sale->total_amount));
+                StockMovementLogger::record(
+                    $product,
+                    $quantityBefore,
+                    $line->sold,
+                    'IN',
+                    'SALE VOID',
+                    $line,
+                    $line->employee_id,
+                    Auth::id()
+                );
             }
 
-            $sale->update([
+            if ($sale->payment_type === 'Credit/Loan' && $sale->customer) {
+                $totalAmount = (float) $receiptLines->sum('total_amount');
+                $sale->customer->decrement('current_balance', min((float) $sale->customer->current_balance, $totalAmount));
+            }
+
+            Sale::where('receipt_number', $sale->receipt_number)->update([
                 'void_status' => 'Voided',
                 'void_approved_by' => Auth::id(),
                 'voided_at' => now(),

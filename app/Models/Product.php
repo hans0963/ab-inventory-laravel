@@ -51,6 +51,11 @@ class Product extends Model {
         return $this->hasMany(ProductSupplierPrice::class);
     }
 
+    public function recipe()
+    {
+        return $this->hasOne(ProductRecipe::class);
+    }
+
     // Check if product is available for sale
     public function isAvailableForSale(): bool
     {

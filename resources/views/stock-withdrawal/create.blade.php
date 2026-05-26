@@ -45,11 +45,11 @@
                     <div class="item card-rustic bg-cream bg-opacity-30 border-sage p-4 relative">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <x-input-label value="Product" class="text-[10px] uppercase tracking-widest text-sage" />
-                                <select name="items[0][product_id]" required class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm">
-                                    <option value="">Select Product</option>
-                                    @foreach($products as $product)
-                                        <option value="{{ $product->id }}">{{ $product->product_name }} (Available: {{ $product->quantity }})</option>
+                                <x-input-label value="Raw Material" class="text-[10px] uppercase tracking-widest text-sage" />
+                                <select name="items[0][raw_material_id]" required class="mt-1 block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm">
+                                    <option value="">Select Raw Material</option>
+                                    @foreach($rawMaterials as $material)
+                                        <option value="{{ $material->id }}">{{ $material->material_name }} (Available: {{ $material->quantity }} {{ $material->unit }})</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -94,23 +94,24 @@
     @push('scripts')
     <script>
         let itemIndex = 1;
-        const products = {!! json_encode($products) !!};
+        const rawMaterials = {!! json_encode($rawMaterials) !!};
 
         document.getElementById('add-item').addEventListener('click', function() {
             const container = document.getElementById('items-container');
             const newItem = document.createElement('div');
             newItem.className = 'item card-rustic bg-cream bg-opacity-30 border-sage p-4 relative';
             
-            let options = '<option value="">Select Product</option>';
-            products.forEach(p => {
-                options += `<option value="${p.id}">${p.product_name} (Available: ${p.quantity})</option>`;
+            let options = '<option value="">Select Raw Material</option>';
+            rawMaterials.forEach(material => {
+                const unit = material.unit ? ` ${material.unit}` : '';
+                options += `<option value="${material.id}">${material.material_name} (Available: ${material.quantity}${unit})</option>`;
             });
 
             newItem.innerHTML = `
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black text-sage uppercase tracking-widest mb-1">Product</label>
-                        <select name="items[${itemIndex}][product_id]" required class="block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm">
+                        <label class="block text-[10px] font-black text-sage uppercase tracking-widest mb-1">Raw Material</label>
+                        <select name="items[${itemIndex}][raw_material_id]" required class="block w-full border-sienna border-opacity-20 rounded-md shadow-sm focus:border-sienna focus:ring focus:ring-sienna focus:ring-opacity-50 text-sm">
                             ${options}
                         </select>
                     </div>

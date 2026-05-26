@@ -16,10 +16,16 @@ class RawMaterial extends Model
 
     protected $fillable = [
         'material_name',
+        'category_id',
+        'type',
         'quantity',
         'unit',
+        'expiration_date',
+        'expiry_alert_days',
         'status',
-        'expiration_date'
+        'stock_alert_threshold',
+        'reorder_level',
+        'reorder_quantity',
     ];
 
     protected $casts = [
@@ -31,6 +37,11 @@ class RawMaterial extends Model
     public function movements()
     {
         return $this->hasMany(RawMaterialMovement::class);
+    }
+
+    public function recipeIngredients()
+    {
+        return $this->hasMany(ProductRecipeIngredient::class);
     }
 
     // Check if raw material is expired
